@@ -47,9 +47,12 @@ def decode_jwt(
     public_key: str = settings.auth_jwt.public_key_path,
     algorithm: str = settings.auth_jwt.algorithm
 ):
+    with public_key.open("rb") as key_file:
+        key = serialization.load_pem_public_key(key_file.read())
+
     decoded = jwt.decode(
         token,
-        public_key,
+        key,
         algorithm)
 
     return decoded

@@ -319,9 +319,11 @@ def check_user_answers_from_db(
 
     # 5. Группируем ответы пользователя по вопросам
     answers_by_question = {}
+
     for answer in user_answers:
         if answer.question.id not in answers_by_question:
             answers_by_question[answer.question.id] = []
+
         answers_by_question[answer.question.id].append(answer.answer_option.id_in_question)
 
     # 6. Проверяем правильность ответов
@@ -334,12 +336,14 @@ def check_user_answers_from_db(
         if question.question_type == "single_choice":
             is_correct = (len(user_selected) == 1 and
                           user_selected[0] in correct_options)
+
         else:  # multiple_choice
             is_correct = (set(user_selected) == set(correct_options))
 
         # Обновляем результаты
         if user_selected:
             results["answered_questions"] += 1
+
             if is_correct:
                 results["correct_answers"] += 1
 
