@@ -1,0 +1,144 @@
+@use './mixins' as *;
+
+
+
+#main-nav {
+  display: flex;
+  align-items: center;
+  height: var(--top-menu-height);
+  position: relative;
+  top: 0;
+  left: 0;  
+}
+
+a {
+  text-decoration: none;
+  color: black;
+  display: none;
+}
+
+body {
+  width: 100dvw;
+  height: 100dvh;
+  &::after,&::before {
+    @include pseudoelement;
+    z-index: -1;
+    transition: opacity .4s;
+    ;
+  }
+  &::before {
+    opacity: var(--is-theme-dark);
+    background-image: var(--backdrop-dark);
+  }
+  &::after {
+    opacity: var(--is-theme-light) ;
+    background-image: var(--backdrop-light) ;
+  }
+
+}
+.input {
+  caret-color: #9c108e;
+  @include size;
+  margin: 15px;
+  border-radius: 15px;
+  border: none;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: x-large;
+  font-weight: 550;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: all .7s;
+  transition: box-shadow 0.3s, transform 0.5s;
+
+  &::placeholder {
+    color: var(--placeholder-color);
+  }
+
+  
+  &:focus {
+    outline: none;
+    transform: scale(1.05);
+  }
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.main_button {
+  @include size;
+  height: 40px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: 700;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: larger;
+  position: relative;
+  transition: all 0.4s ease;
+  scale: 1;
+
+  &::before, &::after {
+    @include pseudoelement;
+    border-radius: 20px;
+    transition: .4s;
+    clip-path:view-box;
+  }
+
+  &::before {
+    background: linear-gradient(90deg, #ff0000, #0000ff);
+    filter: blur(15px);
+    opacity: 1;;
+  }
+
+  &::after {
+    background: linear-gradient(90deg, #4ecdc4, orange);
+    opacity: 0;
+  }
+
+  &:hover{
+
+    transform:scale(1.08);
+
+    &::before {
+      opacity: 0;
+    }
+
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+.studentpage {
+  width: 100dvw; height: 100dvh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  position: absolute; 
+}
+
+aside {
+  display: flex;
+  margin-left: auto;
+  margin-top: 0;
+  margin-right: 30px;
+}
+
+#icon {
+  margin-top: 5px;
+  z-index: 10;
+  margin-left: 10px;
+}
+
+html {
+  background: fixed;
+  position: fixed;
+}
+
+#root {
+  height: 100%;
+}

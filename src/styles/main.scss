@@ -1,0 +1,9 @@
+@use './Base/root';
+@use './Base/base';
+
+@use './Components/Autorize/autorize';
+@use './Components/ThemeSwitcher/switcher';
+@use './Components/Registration/registration';
+@use './Components/ShowForm/showForm';
+@use './Components/TeacherLout/teachLout';
+@use './Components/UserProfile/userProfile';

@@ -1,5 +1,5 @@
 import { BrowserRouter, redirect, Route, Routes } from "react-router-dom";
-import FormLayout from "../Layouts/FormLOUT";
+import FormLayout from "../Layouts/StudentLOUT";
 import MainLOUT from "../Layouts/MainLOUT";
 import Autorize from "../Components/Autorize";
 import Regisration from "../Components/Registration";

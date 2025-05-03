@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client' 
-import './styles/index.css'
+import './styles/main.css'
 import RoutePaths from './Static/Routes'
 
 createRoot(document.getElementById('root')).render(

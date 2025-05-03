@@ -1,0 +1,497 @@
+@charset "UTF-8";
+/* """ main css file """ */
+:root {
+  --main-width: 250px;
+  --main-height: 290px;
+  --top-menu-height: 60px;
+  --is-theme-dark: 0;
+  --is-theme-light: 1;
+  --bg-color-light-1: #2e9aff;
+  --bg-color-light-2: #f498ad;
+  --bg-color-dark-1: rgb(41, 32, 112);
+  --bg-color-dark-2: black;
+  --backdrop-light: linear-gradient(235deg, var(--bg-color-light-1), var(--bg-color-light-2));
+  --backdrop-dark: linear-gradient(235deg, var(--bg-color-dark-1), var(--bg-color-dark-2) );
+  --button-color-1: #4305ed;
+  --button-color-2: #9c108e;
+  --placeholder-color: gray;
+}
+
+.theme-dark {
+  --button-color-1: #4ecdc4;
+  --button-color-2: orange;
+  --input-shadow-color: #5b444c;
+  --input-shadow-width: 50px ;
+  --is-theme-dark: 1;
+  --is-theme-light: 0;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  box-sizing: border-box;
+}
+
+#main-nav {
+  display: flex;
+  align-items: center;
+  height: var(--top-menu-height);
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+  display: none;
+}
+
+body {
+  width: 100dvw;
+  height: 100dvh;
+}
+body::after, body::before {
+  content: "";
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  z-index: -1;
+  transition: opacity 0.4s;
+}
+body::before {
+  opacity: var(--is-theme-dark);
+  background-image: var(--backdrop-dark);
+}
+body::after {
+  opacity: var(--is-theme-light);
+  background-image: var(--backdrop-light);
+}
+
+.input {
+  caret-color: #9c108e;
+  height: 7.5dvh;
+  width: 23.4375dvw;
+  margin: 15px;
+  border-radius: 15px;
+  border: none;
+  font-family: "Courier New", Courier, monospace;
+  font-size: x-large;
+  font-weight: 550;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: all 0.7s;
+  transition: box-shadow 0.3s, transform 0.5s;
+}
+.input::-moz-placeholder {
+  color: var(--placeholder-color);
+}
+.input::placeholder {
+  color: var(--placeholder-color);
+}
+.input:focus {
+  outline: none;
+  transform: scale(1.05);
+}
+.input:hover {
+  transform: scale(1.05);
+}
+
+.main_button {
+  height: 7.5dvh;
+  width: 23.4375dvw;
+  height: 40px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: 700;
+  font-family: "Courier New", Courier, monospace;
+  font-size: larger;
+  position: relative;
+  transition: all 0.4s ease;
+  scale: 1;
+}
+.main_button::before, .main_button::after {
+  content: "";
+  top: 0px;
+  left: 0px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  border-radius: 20px;
+  transition: 0.4s;
+  -webkit-clip-path: view-box;
+          clip-path: view-box;
+}
+.main_button::before {
+  background: linear-gradient(90deg, #ff0000, #0000ff);
+  filter: blur(15px);
+  opacity: 1;
+}
+.main_button::after {
+  background: linear-gradient(90deg, #4ecdc4, orange);
+  opacity: 0;
+}
+.main_button:hover {
+  transform: scale(1.08);
+}
+.main_button:hover::before {
+  opacity: 0;
+}
+.main_button:hover::after {
+  opacity: 1;
+}
+
+.studentpage {
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  position: absolute;
+}
+
+aside {
+  display: flex;
+  margin-left: auto;
+  margin-top: 0;
+  margin-right: 30px;
+}
+
+#icon {
+  margin-top: 5px;
+  z-index: 10;
+  margin-left: 10px;
+}
+
+html {
+  background: fixed;
+  position: fixed;
+}
+
+#root {
+  height: 100%;
+}
+
+.auth-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  flex-direction: column;
+}
+.auth-container > h2 {
+  margin-bottom: 20px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
+  color: white;
+  transition: color 0.5s;
+}
+
+#auth-form {
+  padding-bottom: 15px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: -moz-fit-content;
+  height: fit-content;
+}
+#auth-form #reg-link {
+  cursor: pointer;
+  margin-top: 10px;
+  text-align: center;
+  color: white;
+  -webkit-text-decoration: dotted;
+          text-decoration: dotted;
+  transition: all 0.2s;
+}
+#auth-form #reg-link > span {
+  font-weight: 1000;
+  color: wheat;
+  font-family: "Courier New", Courier, monospace;
+}
+#auth-form #reg-link:hover {
+  transform: scale(1.03);
+}
+#auth-form > input {
+  margin: 15px;
+}
+#auth-form > div > input[type=checkbox] {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  border-color: white;
+}
+#auth-form > div > input[type=checkbox]:checked {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+}
+#auth-form > div > input[type=checkbox]:checked::before {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#auth-form > #checkbox-container {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+#auth-form > #checkbox-container > input[type=checkbox] {
+  transition: transform 0.3s;
+}
+#auth-form > #checkbox-container > input[type=checkbox]:hover {
+  transform: scale(1.09);
+}
+#auth-form > #checkbox-container > label {
+  transition: color 0.7s;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 800;
+}
+
+.switcher {
+  position: relative;
+  display: flex;
+  width: 90px;
+  height: 40px;
+  border-radius: 20px;
+  align-items: center;
+  justify-content: space-evenly;
+  transition: 0.7s;
+  z-index: 1;
+}
+.switcher::after, .switcher::before {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: 20px;
+  transition: opacity 0.5s;
+}
+.switcher::before {
+  opacity: 1;
+  background-image: url("/public/Night.jpg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.switcher::after {
+  opacity: 0;
+  background-image: url("/public/Day.jpeg");
+  background-repeat: no-repeat;
+  background-size: 100% 110%;
+  background-position-y: -4px;
+}
+
+.switcher-circle {
+  transition: 0.7s;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  position: relative;
+  left: 0;
+}
+
+.circle {
+  background-color: rgb(45, 38, 56);
+  z-index: 2;
+}
+
+.switcher-on > div.circle {
+  left: 45%;
+  background-color: #f5d5b0;
+}
+
+.switcher-on::after {
+  opacity: 1;
+}
+.switcher-on::before {
+  opacity: 0;
+}
+
+.registration-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 100dvw;
+  height: 100dvh;
+  flex-direction: column;
+}
+.registration-container h2 {
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
+}
+.registration-container #registration-form {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  align-items: center;
+}
+.registration-container #registration-form .input:nth-last-child(2), .registration-container #registration-form :nth-last-child(3) {
+  height: 40px;
+  margin: 10px 0;
+}
+.registration-container #registration-form .input:nth-last-child(2)::-moz-placeholder, .registration-container #registration-form :nth-last-child(3)::-moz-placeholder {
+  font-size: large;
+}
+.registration-container #registration-form .input:nth-last-child(2)::placeholder, .registration-container #registration-form :nth-last-child(3)::placeholder {
+  font-size: large;
+}
+.registration-container #registration-form button {
+  margin-top: 8%;
+  width: 280px;
+}
+
+.show-form-container {
+  display: flex;
+  flex-direction: column;
+}
+.show-form-container > * {
+  background-color: rgba(0, 0, 0, 0.468);
+}
+
+.teacher-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.teacher-container form {
+  display: flex;
+  flex-direction: column;
+}
+.teacher-container form button {
+  margin: 10px;
+  height: 50px;
+  border-radius: 25px;
+}
+
+.profile-container {
+  width: 150px;
+  height: 40px;
+  margin-right: 10px;
+  position: relative;
+}
+.profile-container .user-shower {
+  z-index: 2;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding: 20px;
+  gap: 10px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.profile-container .user-shower::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #ff0000, #0000ff);
+  filter: blur(15px);
+  z-index: -1;
+}
+.profile-container .user-shower label {
+  width: 60%;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+  font-size: large;
+  text-align: center;
+}
+.profile-container .user-shower .arrow-element {
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  background-color: beige;
+  position: relative;
+  transition: all 0.3s;
+}
+.profile-container .user-shower .arrow-element::after, .profile-container .user-shower .arrow-element::before {
+  position: absolute;
+  content: "";
+  height: 1.5px;
+  width: 12px;
+  background-color: black;
+  transform: rotate(45deg);
+  top: 15px;
+  left: 5px;
+}
+.profile-container .user-shower .arrow-element::before {
+  transform: rotate(135deg);
+  left: 13px;
+}
+.profile-container .user-menu {
+  position: absolute;
+  height: 0px;
+  width: 100px;
+  left: calc(100% - 100px);
+  padding: 10px;
+  transition: transform 0.3s;
+}
+.profile-container .user-menu button {
+  background: white;
+  border: none;
+  outline: none;
+  border-radius: 12px;
+  height: 28px;
+  width: 70px;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+  font-size: medium;
+}
+.profile-container .active ~ .user-menu {
+  opacity: 1;
+  z-index: 1;
+  transform: translateY(40px);
+  position: absolute;
+}
+.profile-container .active .arrow-element {
+  transform: rotate(-180deg);
+}
+.profile-container input {
+  position: relative;
+}/*# sourceMappingURL=main.css.map */

@@ -1,0 +1,29 @@
+@mixin pseudoelement {
+    content: '';
+    top: 0px;
+    left: 0px;
+    margin: 0;
+    padding: 0;
+    // border: none
+    position: absolute;
+    width: calc(100%);
+    height: calc(100%);
+    // border: none;
+    z-index: -1;
+}
+
+@function pxh($pxs) {
+    @return ($pxs / 12) * 1dvh;
+}
+
+@function pxw($pxs) {
+    @return ($pxs / 19.2) * 1dvw;
+}
+
+@mixin size {
+    height: pxh(90);
+    width: pxw(450);
+}
+
+
+

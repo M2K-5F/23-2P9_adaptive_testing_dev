@@ -4,7 +4,7 @@ To start react :
       V
 
 2) paste in terminal: 
-    **npm install react vite react-router-dom zustand**
+    **npm install react vite react-router-dom zustand sass-embedded**
       |
       V
 

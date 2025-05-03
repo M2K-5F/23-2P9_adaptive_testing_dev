@@ -1,7 +1,0 @@
-.show-form-container {
-  display: flex;
-  flex-direction: column;
-}
-.show-form-container > * {
-  background-color: rgba(0, 0, 0, 0.468);
-}/*# sourceMappingURL=showForm.css.map */

@@ -1,0 +1,46 @@
+/* """ main css file """ */
+@use './_mixins' as *;
+
+
+
+:root {
+  --main-width: 250px;
+  --main-height: 290px;
+  --top-menu-height: 60px;
+  --is-theme-dark: 0;
+  --is-theme-light: 1;
+  
+  --bg-color-light-1: #2e9aff;
+  --bg-color-light-2: #f498ad;
+  --bg-color-dark-1: rgb(41, 32, 112);
+  --bg-color-dark-2: black;
+  
+  --backdrop-light: linear-gradient(235deg, var(--bg-color-light-1), var(--bg-color-light-2));
+  --backdrop-dark: linear-gradient(235deg, var(--bg-color-dark-1), var(--bg-color-dark-2) );
+  --button-color-1: #4305ed;
+  --button-color-2: #9c108e;
+  --placeholder-color: gray;
+
+}
+
+.theme-dark {
+  --button-color-1: #4ecdc4;
+  --button-color-2: orange;
+  --input-shadow-color: #5b444c;
+  --input-shadow-width: 50px ;
+  --is-theme-dark: 1;
+  --is-theme-light: 0;
+}
+
+*{  
+  padding: 0;
+  margin: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  box-sizing: border-box;
+}
+
+
+
+
