@@ -123,7 +123,7 @@ async def create_full_poll(
 @router.get("/polls")
 async def get_polls(current_user: Annotated[UserOut, Depends(get_current_active_user)]
 ) -> list[Poll]:
-    if current_user.role == "teacher":
+    if current_user.role == "Role.TEACHER":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only studens can see polls"

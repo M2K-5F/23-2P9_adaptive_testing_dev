@@ -26,6 +26,7 @@ class User(BaseModel):
 
 
 class Poll(BaseModel):
+    id = AutoField(primary_key=True)
     title = CharField(unique=True)
     description = TextField(null=True)
     created_by = ForeignKeyField(User, field=User.username, backref='polls')
@@ -69,7 +70,7 @@ class AnswerOption(BaseModel):
 
 class UserAnswer(BaseModel):
     user = ForeignKeyField(User, field=User.username, backref='answers')
-    question = ForeignKeyField(Question, backref='user_answers')
+    question = ForeignKeyField(Question.id_in_poll, backref='user_answers')
     answer_option = ForeignKeyField(AnswerOption, backref='selected_by')
     answered_at = DateTimeField(default=datetime.now)
 
