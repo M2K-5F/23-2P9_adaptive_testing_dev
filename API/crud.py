@@ -94,7 +94,9 @@ async def find_polls():
 @database.atomic()
 async def find_questions(poll_id):
     # Проверяем, что опрос существует и активен
-    poll = Poll.get_or_none((Poll.id == poll_id) & (Poll.is_active is True))
+    poll = Poll.get_or_none((Poll.id == poll_id) &
+                            (bool(Poll.is_active) is True))
+
     if not poll:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -151,7 +153,8 @@ def submit_poll_answers(
         HTTPException: В случае ошибок валидации
     """
     # Проверяем существование и активность опроса
-    poll = Poll.get_or_none((Poll.id == poll_id) & (Poll.is_active is True))
+    poll = Poll.get_or_none((Poll.id == poll_id) &
+                            (bool(Poll.is_active) is True))
     if not poll:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -184,12 +187,13 @@ def submit_poll_answers(
         seen_questions.add(answer.question_id)
 
     saved_answers = []
+    number_questions = []
 
     # Обрабатываем каждый ответ
     for answer in answers_data.answers:
         # Получаем вопрос и проверяем его принадлежность к опросу
         question = Question.get_or_none(
-            (Question.id == answer.question_id) &
+            (Question.id_in_poll == answer.question_id) &
             (Question.poll == poll_id)
         )
 
@@ -213,6 +217,8 @@ def submit_poll_answers(
                 detail=f"Вопрос {question.id} допускает только один вариант ответа"
             )
 
+        answers = []
+
         # Обрабатываем каждый выбранный вариант
         for option_id in option_ids:
             option = AnswerOption.get_or_none(
@@ -226,7 +232,10 @@ def submit_poll_answers(
                     detail="Вариант ответа не найден"
                 )
 
-            saved_answers.append(option)
+            answers.append(str(option.id_in_question))
+
+        saved_answers.append(",".join(answers))   # добавление списка ответов
+        number_questions.append(str(question))  # добавление номеров вопросов
 
     # Проверяем что ответили на все вопросы
     if len(saved_answers) != question_count:
@@ -236,10 +245,10 @@ def submit_poll_answers(
         )
 
     # Сохраняем ответы в базу данных
-    for option in saved_answers:
+    for quest_number, option in enumerate(saved_answers):
         UserAnswer.create(
             user=current_user.username,
-            question=question,
+            question=number_questions[quest_number],
             answer_option=option
         )
 
@@ -275,7 +284,8 @@ def check_user_answers_from_db(
         HTTPException: Если данные не найдены
     """
     # 1. Проверяем существование опроса
-    poll = Poll.get_or_none((Poll.id == poll_id) & (Poll.is_active is True))
+    poll = Poll.get_or_none((Poll.id == poll_id) &
+                            (bool(Poll.is_active) is True))
     if not poll:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -319,9 +329,11 @@ def check_user_answers_from_db(
 
     # 5. Группируем ответы пользователя по вопросам
     answers_by_question = {}
+
     for answer in user_answers:
         if answer.question.id not in answers_by_question:
             answers_by_question[answer.question.id] = []
+
         answers_by_question[answer.question.id].append(answer.answer_option.id_in_question)
 
     # 6. Проверяем правильность ответов
@@ -334,12 +346,14 @@ def check_user_answers_from_db(
         if question.question_type == "single_choice":
             is_correct = (len(user_selected) == 1 and
                           user_selected[0] in correct_options)
+
         else:  # multiple_choice
             is_correct = (set(user_selected) == set(correct_options))
 
         # Обновляем результаты
         if user_selected:
             results["answered_questions"] += 1
+
             if is_correct:
                 results["correct_answers"] += 1
 

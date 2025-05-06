@@ -20,7 +20,6 @@ from utils import verify_password, encode_jwt, decode_jwt
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -68,8 +67,10 @@ async def get_current_active_user(
     username: str = Depends(get_current_user)
 ) -> UserOut:
     user = await find_user(username)
+
     if user["is_active"]:
         return UserOut(**user)
+
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="user inactive"
@@ -92,12 +93,14 @@ async def login_for_access_token(
         "username": user.username
     }
     token = encode_jwt(jwt_payload)
+
     return Token(access_token=token, token_type="bearer")
 
 
 @router.post("/register")
 async def register(user: UserCreate) -> str:
     user_data = await create_user(user)
+
     return user_data
 
 
@@ -106,7 +109,7 @@ async def create_full_poll(
     poll_data: PollCreate,
     current_user: Annotated[UserOut, Depends(get_current_active_user)]
 ):
-    if current_user.role != "student":
+    if current_user.role == "Role.TEACHER":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only teachers can create polls"
@@ -120,7 +123,7 @@ async def create_full_poll(
 @router.get("/polls")
 async def get_polls(current_user: Annotated[UserOut, Depends(get_current_active_user)]
 ) -> list[Poll]:
-    if current_user.role == "teacher":
+    if current_user.role == "Role.TEACHER":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only studens can see polls"
@@ -130,43 +133,40 @@ async def get_polls(current_user: Annotated[UserOut, Depends(get_current_active_
     return polls
 
 
-# from fastapi import HTTPException, status
+@router.get("/polls/{poll_id}/questions/", response_model=PollWithQuestions)
+async def get_poll_questions(
+    poll_id: int,
+    current_user: UserOut = Depends(get_current_active_user)
+):
+    if current_user.role == "teacher":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only studens can see questions"
+        )
+    return await find_questions(poll_id)
 
 
-# @router.get("/polls/{poll_id}/questions/", response_model=PollWithQuestions)
-# async def get_poll_questions(
-#     poll_id: int,
-#     current_user: UserOut = Depends(get_current_active_user)
-# ):
-#     if current_user.role == "teacher":
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="Only studens can see questions"
-#         )
-#     return await find_questions(poll_id)
+@router.post("/polls/{poll_id}/submit-answers/")
+async def submit_answers(
+    poll_id: int,
+    answers_data: PollAnswersSubmit,
+    current_user: UserOut = Depends(get_current_active_user)
+):
+    # Проверяем, что пользователь - студент
+    if current_user.role == "teacher":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only students can submit answers"
+        )
+
+    return submit_poll_answers(poll_id, answers_data, current_user)
 
 
-# @router.post("/polls/{poll_id}/submit-answers/")
-# async def submit_answers(
-#     poll_id: int,
-#     answers_data: PollAnswersSubmit,
-#     current_user: UserOut = Depends(get_current_active_user)
-# ):
-#     # Проверяем, что пользователь - студент
-#     if current_user.role == "teacher":
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="Only students can submit answers"
-#         )
+@router.get("/polls/{poll_id}/submit-answers/username")
+async def check_answers(
+    poll_id: int,
+    username: str,
+    current_user: UserOut = Depends(get_current_active_user)
+):
 
-#     return submit_poll_answers(poll_id, answers_data, current_user)
-
-
-# @router.get("/polls/{poll_id}/submit-answers/username")
-# async def check_answers(
-#     poll_id: int,
-#     username: str,
-#     current_user: UserOut = Depends(get_current_active_user)
-# ):
-
-#     return check_user_answers_from_db(poll_id, username)
+    return check_user_answers_from_db(poll_id, username)

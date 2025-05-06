@@ -18,27 +18,19 @@ def encode_jwt(
 ):
     with open(private_key, "r") as f:
         private_key = f.read()
+
     to_encode = payload.copy()
     now = datetime.utcnow()
+
     if expire_timedelta:
         expire = now + expire_timedelta
 
     else:
         expire = now + timedelta(minutes=expire_munites)
 
-    with private_key.open("rb") as key_file:
-        key = serialization.load_pem_private_key(key_file.read(),
-                                                 password=None)
-
-    key = key.private_bytes(
-                    encoding=serialization.Encoding.PEM,
-                    format=serialization.PrivateFormat.PKCS8,
-                    encryption_algorithm=serialization.NoEncryption()
-                ).decode("utf-8")
-
     encoded = jwt.encode(
                     to_encode,
-                    key,
+                    private_key,
                     algorithm)
 
     return encoded
@@ -51,6 +43,7 @@ def decode_jwt(
 ):
     with open(public_key, "r") as f:
         public_key = f.read()
+
     decoded = jwt.decode(
         token,
         public_key,
