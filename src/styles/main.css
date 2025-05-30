@@ -1,30 +1,52 @@
 @charset "UTF-8";
 /* """ main css file """ */
+@property --bg-color-start {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2e9aff;
+}
+@property --bg-color-stop {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff8aa5;
+}
+@property --button-color-start {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: orange;
+}
+@property --button-color-stop {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #14dcb0;
+}
+@property --button-hover-start {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff3eec;
+}
+@property --button-hover-stop {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4400ff;
+}
+@property --main-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: black;
+}
 :root {
   --top-menu-height: 60px;
-  --is-theme-dark: 0;
-  --is-theme-light: 1;
-  --bg-color-light-1: #2e9aff;
-  --bg-color-light-2: #f498ad;
-  --bg-color-dark-1: rgb(41, 32, 112);
-  --bg-color-dark-2: black;
-  --backdrop-light: linear-gradient(235deg, var(--bg-color-light-1), var(--bg-color-light-2));
-  --backdrop-dark: linear-gradient(235deg, var(--bg-color-dark-1), var(--bg-color-dark-2) );
-  --button-color-dark-1: #4400ff;
-  --button-color-dark-2: #ff00e6;
-  --button-color-light-1: #4ecdc4;
-  --button-color-light-2: orange;
-  --button-background: linear-gradient(90deg, var(--button-color-light-2), var(--button-color-light-1));
-  --button-hover-ground: linear-gradient(90deg, var(--button-color-dark-2), var(--button-color-dark-1));
-  --main-color: black;
 }
 
 .theme-dark {
-  --is-theme-dark: 1;
-  --is-theme-light: 0;
-  --button-background: linear-gradient(90deg, var(--button-color-dark-2), var(--button-color-dark-1));
-  --button-hover-ground: linear-gradient(90deg, var(--button-color-light-1), var(--button-color-light-2));
-  --main-color:white;
+  --bg-color-start: rgb(41, 32, 112);
+  --bg-color-stop:black;
+  --button-color-start: #ff00e6;
+  --button-color-stop: #4400ff;
+  --button-hover-start:#19eec0;
+  --button-hover-stop: #ffa500;
+  --main-color: #ff1fce;
 }
 
 * {
@@ -33,21 +55,42 @@
   left: 0;
   right: 0;
   top: 0;
+  outline: none;
+  border: none;
   box-sizing: border-box;
+}
+*:hover, *:focus, *:active {
+  outline: none;
 }
 
 html {
-  background: fixed;
-  position: fixed;
+  min-height: 100%;
+  overflow-y: scroll;
+}
+html::-webkit-scrollbar {
+  display: none;
 }
 
 #root {
-  height: 100%;
+  min-height: 100%;
+}
+
+label {
+  display: block;
+}
+
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-image: linear-gradient(235deg, var(--bg-color-start), var(--bg-color-stop));
+  transition: --bg-color-start 0.4s, --bg-color-stop 0.4s;
 }
 
 #main-nav {
   display: flex;
   align-items: center;
+  overflow: visible;
   height: var(--top-menu-height);
   position: relative;
   top: 0;
@@ -60,38 +103,13 @@ a {
   display: none;
 }
 
-body {
-  width: 100dvw;
-  height: 100dvh;
-}
-body::after, body::before {
-  content: "";
-  top: 0px;
-  left: 0px;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  z-index: -1;
-  transition: opacity 0.4s;
-}
-body::before {
-  opacity: var(--is-theme-dark);
-  background-image: var(--backdrop-dark);
-}
-body::after {
-  opacity: var(--is-theme-light);
-  background-image: var(--backdrop-light);
-}
-
-.input {
+.main_input {
   caret-color: #9c108e;
   height: 7.5dvh;
   width: 23.4375dvw;
-  border-radius: 15px;
-  border: none;
+  border-radius: 10px;
+  border: 2px gray solid;
+  height: 50px;
   font-family: "Courier New", Courier, monospace;
   font-size: x-large;
   font-weight: 550;
@@ -102,51 +120,113 @@ body::after {
   position: relative;
   transition: box-shadow 0.3s, transform 0.5s;
 }
-.input + label {
+.main_input + label {
   visibility: hidden;
   height: 20px;
   margin-bottom: 5px;
   font-family: "Courier New", Courier, monospace;
   font-weight: 700;
 }
-.input.invalid + label {
+.main_input.invalid + label {
   visibility: visible;
   animation: shake 0.5s;
   color: red;
 }
-.input:invalid, .input.invalid {
-  border: red solid;
+.main_input:invalid, .main_input.invalid {
+  border: 2px red solid;
 }
-.input::-moz-placeholder {
+.main_input::-moz-placeholder {
   color: gray;
 }
-.input::placeholder {
+.main_input::placeholder {
   color: gray;
 }
-.input:focus {
+.main_input:focus {
   outline: none;
   transform: scale(1.05);
 }
-.input:hover {
+.main_input:hover {
   transform: scale(1.05);
+}
+
+.pretty_input {
+  caret-color: #9c108e;
+  height: 7.5dvh;
+  width: 23.4375dvw;
+  border-radius: 10px;
+  border: 3px black solid;
+  height: 50px;
+  font-family: monospace;
+  font-size: x-large;
+  font-weight: 550;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: all 0.7s;
+  position: relative;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.pretty_input + label {
+  visibility: hidden;
+  height: 20px;
+  margin-bottom: 5px;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 700;
+}
+.pretty_input.invalid + label {
+  visibility: visible;
+  animation: shake 0.5s;
+  color: red;
+}
+.pretty_input:user-invalid, .pretty_input.invalid {
+  border: 2px red solid;
+}
+.pretty_input::-moz-placeholder {
+  font-size: large;
+  font-weight: 500;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: gray;
+  -moz-transition: transform 0.3s;
+  transition: transform 0.3s;
+}
+.pretty_input::placeholder {
+  font-size: large;
+  font-weight: 500;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: gray;
+  transition: transform 0.3s;
+}
+.pretty_input:focus, .pretty_input:hover {
+  outline: none;
+  transform: translate(-3px, -3px);
+  box-shadow: 3px 3px 0 black;
+}
+.pretty_input:focus::-moz-placeholder, .pretty_input:hover::-moz-placeholder {
+  transform: translate(4px) scale(1.05);
+}
+.pretty_input:focus::placeholder, .pretty_input:hover::placeholder {
+  transform: translate(4px) scale(1.05);
+}
+.pretty_input:invalid:focus, .pretty_input:invalid:hover {
+  --main-color: red;
 }
 
 .main_button {
   height: 7.5dvh;
   width: 23.4375dvw;
   height: 40px;
-  border: solid 1px wheat;
+  border: solid 2px wheat;
   border-radius: 20px;
   color: white;
   font-weight: 700;
   font-family: "Courier New", Courier, monospace;
   font-size: larger;
   position: relative;
-  background-color: rgba(255, 255, 255, 0.185);
+  background-color: rgb(197, 172, 172);
   transition: all 0.4s ease;
   scale: 1;
+  transition: scale 0.4s, --button-color-start 0.4s, --button-color-stop 0.4s;
 }
-.main_button::before, .main_button::after {
+.main_button::before {
   content: "";
   top: 0px;
   left: 0px;
@@ -156,29 +236,57 @@ body::after {
   width: 100%;
   height: 100%;
   z-index: -1;
+  background-image: linear-gradient(90deg, var(--button-color-start), var(--button-color-stop));
   border-radius: 20px;
-  transition: 0.4s;
-  filter: blur(3px);
-}
-.main_button::before {
-  background: var(--button-background);
   -webkit-clip-path: view-box;
           clip-path: view-box;
-  opacity: 1;
-}
-.main_button::after {
-  background: var(--button-hover-ground);
-  opacity: 0;
 }
 .main_button:hover {
-  transform: scale(1.08);
-  border-color: rgba(255, 255, 255, 0);
+  scale: 1.05;
+  --button-color-start: var(--button-hover-start);
+  --button-color-stop: var(--button-hover-stop);
 }
-.main_button:hover::before {
-  opacity: 0;
+
+.pretty_button {
+  outline: 0;
+  grid-gap: 8px;
+  align-items: center;
+  background-image: linear-gradient(90deg, var(--button-color-start), var(--button-color-stop));
+  color: white;
+  border: 2px solid black;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI";
+  gap: 8px;
+  justify-content: center;
+  line-height: 1.5;
+  overflow: hidden;
+  padding: 10px 16px;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.14s, --button-color-start 0.2s, --button-color-stop 0.2s;
 }
-.main_button:hover::after {
-  opacity: 1;
+.pretty_button:focus {
+  box-shadow: 2px 2px 0 #000;
+  transform: translate(-2px, -2px);
+}
+.pretty_button:hover {
+  box-shadow: 4px 4px 0 #000;
+  transform: translate(-4px, -4px);
+  --button-color-start: var(--button-hover-start);
+  --button-color-stop: var(--button-hover-stop);
+}
+.pretty_button:hover:active {
+  box-shadow: 2px 2px 0 #000;
+  transform: translate(-2px, -2px);
+}
+.pretty_button :focus-visible {
+  outline-offset: 1px;
 }
 
 .studentpage {
@@ -218,10 +326,6 @@ aside > svg:hover {
   margin-left: 10px;
 }
 
-.main_radio {
-  scale: 1.5;
-}
-
 @keyframes shake {
   0%, 100% {
     transform: translateX(0);
@@ -233,94 +337,162 @@ aside > svg:hover {
     transform: translateX(5px);
   }
 }
-.auth-container {
-  position: absolute;
+.WaitModal[open] {
+  justify-self: center;
+  align-self: center;
+  opacity: 1;
+  outline: 0;
+  border: none;
+  background: none;
+  color: black;
+  height: 100dvh;
+  align-content: center;
+}
+.WaitModal[open] .WaitModal__container {
+  justify-self: center;
+  align-self: center;
   display: flex;
   align-items: center;
-  height: 100%;
-  width: 100%;
   justify-content: center;
-  flex-direction: column;
 }
-.auth-container > h2 {
-  margin-bottom: 20px;
-  font-family: "Courier New", Courier, monospace;
-  font-size: xx-large;
-  font-weight: 600;
-  color: white;
-  transition: color 0.5s;
+.WaitModal[open] .WaitModal__container #circle1 {
+  height: 200px;
+  width: 200px;
+  border-radius: 50%;
+  position: relative;
+  left: 185px;
+  border-top: 5px solid darksalmon;
+  animation: rotate 2s infinite ease;
+}
+.WaitModal[open] .WaitModal__container #circle2 {
+  height: 170px;
+  width: 170px;
+  border-radius: 50%;
+  border-top: 5px solid red;
+  animation: rotate 1.75s ease infinite reverse;
+}
+.WaitModal[open] .WaitModal__container #circle3 {
+  height: 140px;
+  width: 140px;
+  border-radius: 50%;
+  border-top: 5px solid aqua;
+  left: -155px;
+  position: relative;
+  animation: rotate 1.5s ease infinite;
+}
+.WaitModal[open] .WaitModal__container #square {
+  height: 50px;
+  width: 50px;
+  background-color: bisque;
+  animation: rotate 1s linear infinite;
+  border-radius: 10px;
+  position: relative;
+  left: -250px;
+}
+@keyframes rotate {
+  to {
+    rotate: 360deg;
+  }
+}
+.WaitModal[open]::backdrop {
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
 }
 
-#auth-form {
-  padding-bottom: 15px;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: -moz-fit-content;
-  height: fit-content;
-}
-#auth-form #reg-link {
-  cursor: pointer;
-  margin-top: 10px;
-  text-align: center;
-  color: white;
-  -webkit-text-decoration: dotted;
-          text-decoration: dotted;
-  transition: all 0.2s;
-}
-#auth-form #reg-link > span {
-  font-weight: 1000;
-  color: wheat;
-  font-family: "Courier New", Courier, monospace;
-}
-#auth-form #reg-link:hover {
-  transform: scale(1.03);
-}
-#auth-form > div > input[type=checkbox] {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #555;
-  border-radius: 4px;
-  cursor: pointer;
+.profile-container {
+  width: 150px;
+  height: 40px;
+  margin-right: 10px;
   position: relative;
-  border-color: white;
 }
-#auth-form > div > input[type=checkbox]:checked {
-  background-color: #4CAF50;
-  border-color: #4CAF50;
-}
-#auth-form > div > input[type=checkbox]:checked::before {
-  content: "✓";
-  color: white;
-  font-size: 14px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-#auth-form > #checkbox-container {
+.profile-container .user-shower {
+  z-index: 2;
+  position: relative;
+  height: 100%;
+  width: 100%;
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-around;
   padding: 10px;
-  margin-bottom: 10px;
-  gap: 10px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
 }
-#auth-form > #checkbox-container > input[type=checkbox] {
+.profile-container .user-shower::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #ff0000, #0000ff);
+  filter: blur(15px);
+  z-index: -1;
+}
+.profile-container .user-shower span {
+  width: 90px;
+  margin-right: 5px;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: large;
+  text-align: center;
+}
+.profile-container .user-shower .arrow-element {
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  background-color: beige;
+  position: relative;
+  transition: all 0.3s;
+}
+.profile-container .user-shower .arrow-element::after, .profile-container .user-shower .arrow-element::before {
+  position: absolute;
+  content: "";
+  height: 1.5px;
+  width: 12px;
+  background-color: black;
+  transform: rotate(45deg);
+  top: 15px;
+  left: 5px;
+}
+.profile-container .user-shower .arrow-element::before {
+  transform: rotate(135deg);
+  left: 13px;
+}
+.profile-container .user-menu {
+  position: absolute;
+  height: 0px;
+  width: 100px;
+  left: calc(100% - 100px);
+  padding: 10px;
   transition: transform 0.3s;
 }
-#auth-form > #checkbox-container > input[type=checkbox]:hover {
-  transform: scale(1.09);
-}
-#auth-form > #checkbox-container > label {
-  transition: color 0.7s;
-  color: white;
+.profile-container .user-menu button {
+  background: white;
+  border: none;
+  outline: none;
+  border-radius: 12px;
+  height: 28px;
+  width: 70px;
   font-family: "Courier New", Courier, monospace;
-  font-weight: 800;
+  font-weight: 600;
+  font-size: medium;
+}
+.profile-container .active ~ .user-menu {
+  opacity: 1;
+  z-index: 1;
+  transform: translateY(40px);
+  position: absolute;
+}
+.profile-container .active .arrow-element {
+  transform: rotate(-180deg);
+}
+.profile-container input {
+  position: relative;
 }
 
 .switcher {
@@ -383,7 +555,7 @@ aside > svg:hover {
   opacity: 0;
 }
 
-.registration-container {
+main.registration-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -391,37 +563,6 @@ aside > svg:hover {
   width: 100dvw;
   height: 100dvh;
   flex-direction: column;
-}
-.registration-container dialog.SuccessfulModal[open] {
-  justify-self: center;
-  align-self: center;
-  margin: auto;
-  opacity: 1;
-  border: none;
-  background: none;
-  color: black;
-  outline: none;
-}
-.registration-container dialog.SuccessfulModal[open] * {
-  outline: none;
-}
-.registration-container dialog.SuccessfulModal[open] p {
-  font-size: x-large;
-  color: white;
-  font-family: "Courier New", Courier, monospace;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 10px;
-  animation: show 0.6s;
-}
-.registration-container dialog.SuccessfulModal[open] button {
-  width: 100%;
-  opacity: 0;
-  animation: show 0.6s forwards;
-  animation-delay: 0.1s;
-}
-.registration-container dialog.SuccessfulModal[open] button:hover {
-  transform: scale(1);
 }
 @keyframes show {
   from {
@@ -431,131 +572,158 @@ aside > svg:hover {
     opacity: 1;
   }
 }
-.registration-container dialog.WaitModal[open] {
-  justify-self: center;
-  align-self: center;
-  opacity: 1;
-  outline: 0;
-  border: none;
-  background: none;
-  color: black;
-  height: 100dvh;
-  align-content: center;
-}
-.registration-container dialog.WaitModal[open] .WaitModal__container {
-  justify-self: center;
-  align-self: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.registration-container dialog.WaitModal[open] .WaitModal__container #circle1 {
-  height: 200px;
-  width: 200px;
-  border-radius: 50%;
-  position: relative;
-  left: 185px;
-  border-top: 5px solid darksalmon;
-  animation: rotate 2s infinite ease;
-}
-.registration-container dialog.WaitModal[open] .WaitModal__container #circle2 {
-  height: 170px;
-  width: 170px;
-  border-radius: 50%;
-  border-top: 5px solid red;
-  animation: rotate 1.75s ease infinite;
-}
-.registration-container dialog.WaitModal[open] .WaitModal__container #circle3 {
-  height: 140px;
-  width: 140px;
-  border-radius: 50%;
-  border-top: 5px solid aqua;
-  left: -155px;
-  position: relative;
-  animation: rotate 1.5s ease infinite;
-}
-.registration-container dialog.WaitModal[open] .WaitModal__container #square {
-  height: 50px;
-  width: 50px;
-  background-color: bisque;
-  animation: rotate 1s linear infinite;
-  border-radius: 10px;
-  position: relative;
-  left: -250px;
-}
-@keyframes rotate {
-  to {
-    rotate: 360deg;
-  }
-}
-.registration-container dialog::backdrop {
-  -webkit-backdrop-filter: blur(5px);
-          backdrop-filter: blur(5px);
-}
-.registration-container #registration-form {
+main.registration-container #registration-form {
+  width: 90dvw;
   display: flex;
   flex-direction: column;
-  height: -moz-min-content;
-  height: min-content;
+  height: 650px;
   align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 500px;
+  padding: 10px;
+  background: url(/bg-01.jpg);
+  border-radius: 20px;
+  border: 2px black solid;
+  box-shadow: 5px 5px 0 var(--main-color);
+  transition: --main-color 0.4s 0.2s;
 }
-.registration-container #registration-form > legend {
-  margin-bottom: 10px;
+main.registration-container #registration-form > legend {
+  margin-bottom: 20px;
+  text-align: center;
+  width: 55%;
+  border-bottom: 3px black dashed;
 }
-.registration-container #registration-form > .input {
+main.registration-container #registration-form > .pretty_input, main.registration-container #registration-form > fieldset {
   text-overflow: ellipsis;
+  width: 70%;
 }
-.registration-container #registration-form legend {
+main.registration-container #registration-form > .input[name=password], main.registration-container #registration-form > .input[name=repeat] {
+  width: 20.8333333333dvw;
+  height: 40px;
+}
+main.registration-container #registration-form legend {
   color: white;
   font-family: "Courier New", Courier, monospace;
   font-size: xx-large;
   font-weight: 600;
 }
-.registration-container #registration-form fieldset {
+main.registration-container #registration-form fieldset {
+  border: 3px black solid;
   display: flex;
-  align-items: center;
   background: white;
-  width: 90%;
   margin-bottom: 20px;
   margin-top: 5px;
-  border: none;
   border-radius: 10px;
+  height: 40px;
   justify-content: center;
+  align-content: center;
+  align-items: center;
 }
-.registration-container #registration-form fieldset legend {
-  color: wheat;
-  width: 154px;
-  height: 20px;
-  font-size: large;
-  position: relative;
-  top: -10px;
-}
-.registration-container #registration-form fieldset div {
+main.registration-container #registration-form fieldset div {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 70%;
-  position: relative;
-  top: -5px;
+  margin-top: 10px;
 }
-.registration-container #registration-form fieldset div input {
-  height: 40px;
-}
-.registration-container #registration-form fieldset div label {
+main.registration-container #registration-form fieldset div label {
   font-family: "Courier New", Courier, monospace;
   font-weight: 600;
 }
-.registration-container #registration-form button {
-  margin-top: 8%;
+main.registration-container #registration-form button {
+  margin-top: 15px;
   width: 280px;
 }
 
-.show-form-container {
+dialog.SuccessfulModal[open] {
+  justify-self: center;
+  align-self: center;
+  justify-items: center;
+  align-items: center;
+  width: 50dvw;
+  height: -moz-fit-content;
+  height: fit-content;
+  padding: 10px;
+  opacity: 1;
+  border: none;
+  background: none;
+  color: black;
+  outline: none;
+}
+dialog.SuccessfulModal[open]::backdrop {
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+}
+dialog.SuccessfulModal[open] * {
+  outline: none;
+}
+dialog.SuccessfulModal[open] a {
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  font-size: large;
+  color: white;
+  border-bottom: 2px dotted;
+  margin-bottom: 10px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+dialog.SuccessfulModal[open] label {
+  width: 50%;
+  font-size: xx-large;
+  color: white;
+  font-family: monospace;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 10px;
+  height: 30px;
+  animation: show 0.6s;
+}
+dialog.SuccessfulModal[open] button {
+  margin-top: 5px;
+  opacity: 0;
+  animation: show 0.6s forwards;
+  animation-delay: 0.1s;
+}
+
+main.studentnavigator__container {
+  position: absolute;
   display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
   flex-direction: column;
 }
-.show-form-container > * {
-  background-color: rgba(0, 0, 0, 0.468);
+main.studentnavigator__container #studentnavigator__form {
+  display: flex;
+  flex-direction: column;
+  height: 510px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 500px;
+  padding: 10px;
+  background: url(/bg-01.jpg);
+  border-radius: 20px;
+  border: 2px black solid;
+  box-shadow: 5px 5px 0 var(--main-color);
+  transition: --main-color 0.4s 0.15s;
+  height: 300px;
+}
+main.studentnavigator__container #studentnavigator__form > legend {
+  margin-bottom: 40px;
+  text-align: center;
+  width: 55%;
+  border-bottom: 3px black dashed;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
+}
+main.studentnavigator__container #studentnavigator__form legend {
+  margin-bottom: 40px;
 }
 
 .teacher-container {
@@ -576,96 +744,708 @@ aside > svg:hover {
   border-radius: 25px;
 }
 
-.profile-container {
-  width: 150px;
+main.auth-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  flex-direction: column;
+}
+main.auth-container form#auth-form {
+  display: flex;
+  flex-direction: column;
+  height: 510px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 500px;
+  padding: 10px;
+  background: url(/bg-01.jpg);
+  border-radius: 20px;
+  border: 2px black solid;
+  box-shadow: 5px 5px 0 var(--main-color);
+  transition: --main-color 0.4s 0.15s;
+}
+main.auth-container form#auth-form > legend {
+  margin-bottom: 40px;
+  text-align: center;
+  width: 55%;
+  border-bottom: 3px black dashed;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
+}
+main.auth-container form#auth-form > .pretty_input {
+  text-overflow: ellipsis;
+  width: 70%;
+}
+main.auth-container form#auth-form > button {
+  margin-top: 15px;
+  width: 280px;
+}
+main.auth-container form#auth-form > #checkbox-container {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+main.auth-container form#auth-form > #checkbox-container > label {
+  transition: color 0.7s;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 800;
+}
+main.auth-container form#auth-form > #checkbox-container > input[type=checkbox] {
+  transition: transform 0.3s;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  border-color: white;
+}
+main.auth-container form#auth-form > #checkbox-container > input[type=checkbox]:checked {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+}
+main.auth-container form#auth-form > #checkbox-container > input[type=checkbox]:checked::before {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+main.auth-container form#auth-form > #checkbox-container > input[type=checkbox]:hover {
+  transform: scale(1.09);
+}
+main.auth-container #reg-link {
+  cursor: pointer;
+  margin-top: 30px;
+  text-align: center;
+  padding: 5px;
+  color: white;
+  -webkit-text-decoration: dotted;
+          text-decoration: dotted;
+  transition: all 0.2s;
+  border-top: 2px dashed black;
+  border-bottom: 2px dashed black;
+}
+main.auth-container #reg-link > span {
+  font-weight: 1000;
+  color: wheat;
+  font-family: "Courier New", Courier, monospace;
+}
+main.auth-container #reg-link:hover {
+  transform: scale(1.03);
+}
+
+main.showform__container {
+  width: 100dvw;
+  height: calc(100dvh - var(--top-menu-height));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+main.showform__container header {
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 700;
+  color: white;
+  font-size: x-large;
+  position: sticky;
+}
+main.showform__container form {
+  width: 100dvw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  padding-top: 10px;
+  align-items: center;
+}
+main.showform__container form h4 {
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: large;
+  border-radius: 5px;
+  padding: 7px;
+  border: white 2px dashed;
+  margin-bottom: 20px;
+}
+main.showform__container form button {
+  width: 175px;
+}
+main.showform__container form section {
+  border-bottom: dashed white 2px;
+  border-top: dashed white 2px;
+  width: 650px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  height: 600px;
+}
+main.showform__container form section::-webkit-scrollbar {
+  display: none;
+}
+main.showform__container form section > article {
+  display: flex;
+  flex-direction: column;
+  height: 510px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 500px;
+  padding: 10px;
+  background: url(/bg-01.jpg);
+  border-radius: 20px;
+  border: 2px black solid;
+  box-shadow: 5px 5px 0 var(--main-color);
+  transition: --main-color 0.4s 0.15s;
+  height: -moz-fit-content;
+  height: fit-content;
+  align-items: baseline;
+  padding-left: 30px;
+  margin-bottom: 10px;
+}
+main.showform__container form section > article > legend {
+  margin-bottom: 40px;
+  text-align: center;
+  width: 55%;
+  border-bottom: 3px black dashed;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
+}
+main.showform__container form section > article fieldset {
+  display: flex;
+  flex-direction: column;
+  outline: none;
+  border: none;
+  width: 90%;
+  gap: 10px;
+}
+main.showform__container form section > article fieldset article.answer__container {
   height: 40px;
-  margin-right: 10px;
+  width: 100%;
   position: relative;
 }
-.profile-container .user-shower {
-  z-index: 2;
-  position: relative;
+main.showform__container form section > article fieldset article.answer__container label.answer__label {
+  border: 2px black solid;
   height: 100%;
+  width: 100%;
+  text-align: center;
+  align-content: center;
+  outline: none;
+  background-color: white;
+  border-radius: 15px;
+  transition: all 0.3s, --main-color 0.4s 0.2s;
+  color: black;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+}
+main.showform__container form section > article fieldset article.answer__container label.answer__label:hover {
+  box-shadow: 3px 3px 0 #000;
+  transform: translate(-3px, -3px);
+}
+main.showform__container form section > article fieldset article.answer__container label.answer__label:active {
+  box-shadow: 1px 1px 0 #000;
+  transform: translate(-1px, -1px);
+}
+main.showform__container form section > article fieldset article.answer__container input.answer__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  left: 50%;
+  top: 50%;
+  color: transparent;
+  background: transparent;
+  z-index: -10;
+}
+main.showform__container form section > article fieldset article.answer__container input.answer__input:checked ~ label.answer__label {
+  background-color: rgb(80, 251, 80);
+  scale: 1.02;
+}
+
+main.createform__container {
+  overflow-y: scroll;
+  min-height: calc(100dvh - var(--top-menu-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+}
+main.createform__container::-webkit-scrollbar {
+  display: none;
+}
+main.createform__container form.createform__form {
+  width: 100dvw;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+main.createform__container form.createform__form section.buttons__section {
+  display: flex;
+  gap: 10px;
+}
+main.createform__container form.createform__form header.createform__header {
+  text-align: center;
+  min-width: 300px;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 700;
+  color: white;
+  font-size: x-large;
+  position: sticky;
+  height: 90px;
+}
+main.createform__container form.createform__form header.createform__header label.createform__title__label {
+  font-weight: 700;
+  color: white;
+  font-size: large;
+  font-family: "Courier New", Courier, monospace;
+  text-align: left;
+}
+main.createform__container form.createform__form header.createform__header input {
+  width: 100%;
+  align-content: center;
+  font-family: monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+main.createform__container form.createform__form header.createform__header input + label {
+  font-size: large;
+}
+main.createform__container form.createform__form label.createform__description__label {
+  font-weight: 700;
+  color: white;
+  font-size: large;
+  text-align: left;
+  width: 100%;
+  max-width: 450px;
+  font-family: "Courier New", Courier, monospace;
+}
+main.createform__container form.createform__form textarea.createform__description__textarea {
+  width: 100%;
+  max-width: 450px;
+  overflow-y: hidden;
+  min-height: 60px;
+  max-height: 200px;
+  scroll-behavior: auto;
+  padding: 5px;
+  border-radius: 10px;
+  border: 3px solid black;
+  font-family: monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  resize: none;
+  transition: all 0.3s, --main-color 0.4s 0.2s;
+  margin-bottom: 20px;
+  align-content: center;
+}
+main.createform__container form.createform__form textarea.createform__description__textarea:hover {
+  box-shadow: 3px 3px 0 #000;
+  transform: translate(-3px, -3px);
+}
+main.createform__container form.createform__form textarea.createform__description__textarea:active {
+  box-shadow: 1px 1px 0 #000;
+  transform: translate(-1px, -1px);
+}
+main.createform__container form.createform__form textarea.createform__description__textarea::-moz-placeholder {
+  font-weight: 700;
+}
+main.createform__container form.createform__form textarea.createform__description__textarea::placeholder {
+  font-weight: 700;
+}
+main.createform__container form.createform__form section.createform__questions__container {
+  border-top: dashed white 2px;
+  border-bottom: dashed white 2px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+  min-height: 450px;
+  max-height: 55dvh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+main.createform__container form.createform__form section.createform__questions__container::-webkit-scrollbar {
+  display: none;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container {
+  display: flex;
+  flex-direction: column;
+  height: 510px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 500px;
+  padding: 10px;
+  background: url(/bg-01.jpg);
+  border-radius: 20px;
+  border: 2px black solid;
+  box-shadow: 5px 5px 0 var(--main-color);
+  transition: --main-color 0.4s 0.15s;
+  height: -moz-fit-content;
+  height: fit-content;
+  align-items: baseline;
+  padding-left: 30px;
+  margin-bottom: 10px;
+  width: 90%;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container > legend {
+  margin-bottom: 40px;
+  text-align: center;
+  width: 55%;
+  border-bottom: 3px black dashed;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container label.question__text__label,
+main.createform__container form.createform__form section.createform__questions__container > article.question__container label.question__answers__label {
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container label.question__answers__label {
+  border-top: 2px white dashed;
+  margin-top: 5px;
+  width: 100%;
+  font-family: monospace;
+  font-size: larger;
+  text-align: center;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container textarea.question__text__input {
+  width: 90%;
+  align-content: center;
+  overflow-y: hidden;
+  min-height: 50px;
+  max-height: 80px;
+  scroll-behavior: auto;
+  padding: 5px;
+  border-radius: 10px;
+  border: 3px solid black;
+  font-family: monospace;
+  font-size: 1rem;
+  resize: none;
+  transition: all 0.3s, --main-color 0.4s 0.2s;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container textarea.question__text__input:hover {
+  box-shadow: 3px 3px 0 #000;
+  transform: translate(-3px, -3px);
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container textarea.question__text__input:active {
+  box-shadow: 1px 1px 0 #000;
+  transform: translate(-1px, -1px);
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: auto;
+  outline: none;
+  border: none;
+  width: 90%;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container button.question__addanswer__button {
+  height: 30px;
+  width: 90%;
+  margin-left: 5%;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container {
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-around;
-  padding: 20px;
+  align-items: center;
   gap: 10px;
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
 }
-.profile-container .user-shower::before {
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container div {
+  padding: 5px;
+  width: 85%;
+  border: 2px white solid;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.167);
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container div label {
+  color: whitesmoke;
+  font-size: 15px;
+  font-family: monospace;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container div textarea.answer__text__input {
+  width: 100%;
+  align-content: center;
+  overflow-y: hidden;
+  min-height: 40px;
+  max-height: 70px;
+  scroll-behavior: auto;
+  caret-color: #4CAF50;
+  background: transparent;
+  font-family: monospace;
+  color: white;
+  border-left: 3px transparent solid;
+  border-top: transparent 3px solid;
+  border-bottom: black 3px solid;
+  font-size: 1rem;
+  resize: none;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container input.answer__text__radio {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container input.answer__text__radio {
+  transition: transform 0.3s;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  border-color: white;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container input.answer__text__radio::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, #ff0000, #0000ff);
-  filter: blur(15px);
-  z-index: -1;
+  color: white;
+  border-radius: 0px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
-.profile-container .user-shower label {
-  width: 60%;
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container input.answer__text__radio:checked {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container input.answer__text__radio:checked::before {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+main.createform__container form.createform__form section.createform__questions__container > article.question__container fieldset.question__answers__container article.answer__container input.answer__text__radio:hover {
+  transform: scale(1.09);
+}
+main.createform__container form.createform__form > button {
+  margin-bottom: 10px;
+}
+
+textarea:user-invalid {
+  border: red solid 3px !important;
+}
+
+main.stats-container {
+  width: 100dvw;
+  height: calc(100dvh - var(--top-menu-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
   color: white;
   font-family: "Courier New", Courier, monospace;
-  font-weight: 600;
-  font-size: large;
-  text-align: center;
+  overflow-y: auto;
 }
-.profile-container .user-shower .arrow-element {
-  border-radius: 50%;
-  height: 30px;
-  width: 30px;
-  background-color: beige;
+main.stats-container header.stats-header {
+  text-align: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+main.stats-container header.stats-header h1 {
+  font-size: xx-large;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: white;
+}
+main.stats-container header.stats-header p {
+  font-size: large;
+  color: rgba(255, 255, 255, 0.8);
+}
+main.stats-container section.polls-stats {
+  width: 80%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+main.stats-container section.polls-stats article.poll-card {
+  display: flex;
+  flex-direction: column;
+  height: 510px;
+  align-items: center;
+  justify-content: center;
   position: relative;
+  width: 500px;
+  padding: 10px;
+  background: url(/bg-01.jpg);
+  border-radius: 20px;
+  border: 2px black solid;
+  box-shadow: 5px 5px 0 var(--main-color);
+  transition: --main-color 0.4s 0.15s;
+  padding: 15px;
+  height: -moz-fit-content;
+  height: fit-content;
+  cursor: pointer;
   transition: all 0.3s;
 }
-.profile-container .user-shower .arrow-element::after, .profile-container .user-shower .arrow-element::before {
-  position: absolute;
-  content: "";
-  height: 1.5px;
-  width: 12px;
-  background-color: black;
-  transform: rotate(45deg);
-  top: 15px;
-  left: 5px;
+main.stats-container section.polls-stats article.poll-card > legend {
+  margin-bottom: 40px;
+  text-align: center;
+  width: 55%;
+  border-bottom: 3px black dashed;
+  color: white;
+  font-family: "Courier New", Courier, monospace;
+  font-size: xx-large;
+  font-weight: 600;
 }
-.profile-container .user-shower .arrow-element::before {
-  transform: rotate(135deg);
-  left: 13px;
+main.stats-container section.polls-stats article.poll-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 5px 5px 0 var(--main-color);
 }
-.profile-container .user-menu {
-  position: absolute;
-  height: 0px;
-  width: 100px;
-  left: calc(100% - 100px);
-  padding: 10px;
+main.stats-container section.polls-stats article.poll-card div.poll-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-summary h3 {
+  font-size: x-large;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  margin-right: 10px;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-summary div.poll-meta {
+  border-left: 2px white dashed;
+  padding-left: 5px;
+  display: flex;
+  gap: 20px;
+  font-size: medium;
+  color: rgba(255, 255, 255, 0.8);
+}
+main.stats-container section.polls-stats article.poll-card div.poll-summary div.expand-icon {
+  margin-left: 15px;
   transition: transform 0.3s;
 }
-.profile-container .user-menu button {
+main.stats-container section.polls-stats article.poll-card div.poll-summary div.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed white;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details p.no-answers {
+  text-align: center;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: black;
   background: white;
-  border: none;
-  outline: none;
-  border-radius: 12px;
-  height: 28px;
-  width: 70px;
-  font-family: "Courier New", Courier, monospace;
-  font-weight: 600;
-  font-size: medium;
+  border-radius: 10px;
+  overflow: hidden;
 }
-.profile-container .active ~ .user-menu {
-  opacity: 1;
-  z-index: 1;
-  transform: translateY(40px);
-  position: absolute;
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table th, main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table td {
+  border-right: 1px black solid;
+  font-family: monospace;
+  font-size: large;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
-.profile-container .active .arrow-element {
-  transform: rotate(-180deg);
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table td:nth-last-child(1) {
+  border-right: none;
 }
-.profile-container input {
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table th {
+  background-color: var(--main-color);
+  color: white;
+  font-weight: 700;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table tr:hover {
+  background-color: #e6e6e6;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table div.score-bar {
   position: relative;
+  height: 24px;
+  background: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table div.score-bar div.score-fill {
+  height: 100%;
+  transition: width 0.5s ease-out;
+}
+main.stats-container section.polls-stats article.poll-card div.poll-details table.results-table div.score-bar span {
+  position: absolute;
+  top: 50%;
+  font-family: monospace;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+  color: black;
+}
+main.stats-container button.stats-back-button {
+  margin-top: 20px;
+  width: 200px;
+}
+
+dialog.stats-modal {
+  background: white;
+  color: black;
+  border-radius: 10px;
+  border: none;
+  padding: 20px;
+  max-width: 600px;
+}
+dialog.stats-modal::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+div.stats-loading {
+  width: 100dvw;
+  height: calc(100dvh - var(--top-menu-height));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Courier New", Courier, monospace;
+  font-size: x-large;
+  color: white;
 }/*# sourceMappingURL=main.css.map */

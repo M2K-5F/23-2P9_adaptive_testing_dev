@@ -1,0 +1,185 @@
+@use '../../Base/mixins' as *;
+
+main.stats-container {
+    width: 100dvw;
+    height: calc(100dvh - var(--top-menu-height));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    overflow-y: auto;
+
+    header.stats-header {
+        text-align: center;
+        margin-bottom: 30px;
+        width: 100%;
+
+        h1 {
+            font-size: xx-large;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        p {
+            font-size: large;
+            color: rgba(white, 0.8);
+        }
+    }
+
+    section.polls-stats {
+        width: 80%;
+        max-width: 800px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-bottom: 30px;
+
+        article.poll-card {
+            @include formbg;
+            padding: 15px;
+            height: fit-content;
+            cursor: pointer;
+            transition: all 0.3s;
+
+            &:hover {
+                transform: translateY(-3px);
+                box-shadow: 5px 5px 0 var(--main-color);
+            }
+
+            div.poll-summary {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                h3 {
+                    font-size: x-large;
+                    font-weight: 600;
+                    margin: 0;
+                    flex: 1;
+                    margin-right: 10px;
+                }
+
+                div.poll-meta {
+                    border-left: 2px white dashed;
+                    padding-left: 5px;
+                    display: flex;
+                    gap: 20px;
+                    font-size: medium;
+                    color: rgba(white, 0.8);
+                }
+
+                div.expand-icon {
+                    margin-left: 15px;
+                    transition: transform 0.3s;
+
+                    &.expanded {
+                        transform: rotate(180deg);
+                    }
+                }
+            }
+
+            div.poll-details {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px dashed white;
+
+                p.no-answers {
+                    text-align: center;
+                    font-style: italic;
+                    color: rgba(white, 0.6);
+                }
+
+                table.results-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    color: black;
+                    background: white;
+                    border-radius: 10px;
+                    overflow: hidden;
+
+                    th, td {
+                        border-right: 1px black solid;
+                        font-family: monospace;
+                        font-size: large;
+                        padding: 12px 15px;
+                        text-align: left;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    
+                    td:nth-last-child(1) {
+                        border-right: none;
+                    }
+
+                    th {
+                        background-color: var(--main-color);
+                        color: white;
+                        font-weight: 700;
+                    }
+
+                    tr:nth-child(even) {
+                        background-color: #f2f2f2;
+                    }
+
+                    tr:hover {
+                        background-color: #e6e6e6;
+                    }
+
+                    div.score-bar {
+                        position: relative;
+                        height: 24px;
+                        background: #e0e0e0;
+                        border-radius: 12px;
+                        overflow: hidden;
+
+                        div.score-fill {
+                            height: 100%;
+                            transition: width 0.5s ease-out;
+                        }
+
+                        span {
+                            position: absolute;
+                            top: 50%;
+                            font-family: monospace;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            font-weight: 600;
+                            color: black;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    button.stats-back-button {
+        margin-top: 20px;
+        width: 200px;
+    }
+}
+
+dialog.stats-modal {
+    background: white;
+    color: black;
+    border-radius: 10px;
+    border: none;
+    padding: 20px;
+    max-width: 600px;
+
+    &::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+    }
+}
+
+div.stats-loading {
+    width: 100dvw;
+    height: calc(100dvh - var(--top-menu-height));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: x-large;
+    color: white;
+}

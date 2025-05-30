@@ -9,7 +9,7 @@ export const userStore = create<userStoreShema>( set => ({
     status: JSON.parse(
                 (localStorage.getItem('userdata')
                 ?? sessionStorage.getItem('userdata')) 
-                ?? '{"status": null}' 
+                ?? '{"status": "student"}' 
             ).status,
 
     nick : JSON.parse(
@@ -17,12 +17,10 @@ export const userStore = create<userStoreShema>( set => ({
             ?? sessionStorage.getItem('userdata')) 
             ?? `{"nick": null}`
         ).nick,
-    token: null,
     RegUser: (data: Partial<userShema>, isRemember: boolean) => {
         set({
             nick : data.nick,
             status : data.status,
-            token : data.token,
         }),
         isRemember 
         ? localStorage.setItem('userdata', JSON.stringify(data))
@@ -31,8 +29,7 @@ export const userStore = create<userStoreShema>( set => ({
     DelUser: () => {
         set({
             nick: undefined,
-            status: 'Student',
-            token: undefined
+            status: 'student',
         }),
         localStorage.removeItem('userdata')
         sessionStorage.removeItem('userdata')
@@ -66,29 +63,17 @@ export const themeStore = create(set => ({
 
 export const showFormStore = create<ShowFormShema>( set => ({
     form: {
-        title: 'some title',
-        description : 'some description',
+        title: 'title',
+        description : 'desctiption',
         questions: [
             {
-                header: 'question 1 label',
-                answers : [
+                id: 1,
+                text: 'question',
+                answer_options: [
                     {
-                        label : 'answer 1 for question 1',
+                        id: 1,
+                        text : 'answer',
                     },
-                    {
-                        label : 'answer 2 for question 1'
-                    }
-                ]
-            },
-            {
-                header: 'question 2 label',
-                answers : [
-                    {
-                        label : 'answer 1 for question 2',
-                    },
-                    {
-                        label : 'answer 2 for question 2'
-                    }
                 ]
             }
         ]
@@ -104,14 +89,20 @@ export const showFormStore = create<ShowFormShema>( set => ({
 }))
 
 
-export const useUrl = create<{URL: Partial<URL>}>(() => ({
+export const useURL = create<{URL: Partial<URL>}>(() => ({
     URL: {
         hostname: "http://127.0.0.1:8001"
     }
 }))
 
-export const ThrowStore = create<{ThrowMsg: (name: string, formElement: HTMLFormElement) => void}>( () => ({
-    ThrowMsg: function( name: string, formElement: HTMLFormElement ) {
+export const ThrowStore = create<{ThrowMsg: (name: string, formElement: HTMLFormElement, forName?: boolean ) => void}>( () => ({
+    ThrowMsg: function( name: string, formElement: HTMLFormElement, showAlready?: boolean) {
+        if (name === 'username') {
+            showAlready
+                ? formElement.querySelector(`input[name=${name}] + label`)!.innerHTML = 'Пользователь с данным именем уже существует'
+                : formElement.querySelector(`input[name=${name}] + label`)!.innerHTML = 'Некорректное имя пользователя'
+        }
+        
         const element: HTMLInputElement = formElement.querySelector(`[name=${name}]`)!
         element?.classList.remove('invalid')
         element?.offsetWidth

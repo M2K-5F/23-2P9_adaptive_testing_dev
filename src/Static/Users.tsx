@@ -1,7 +1,7 @@
 import { use } from "react"
 import { userShema } from "./interfaces"
 
-type Status = 'Student' | 'Teacher'
+type Status = 'student' | 'teacher'
 type login = string
 
 
@@ -20,14 +20,14 @@ interface Auth {
 
 const Users:User[] = [
     {
-        name: "1",
-        password: '1',
-        status: 'Student'
+        name: "111",
+        password: '111',
+        status: 'student'
     },
     {
         name: 'janpol',
         password:'12345',
-        status: "Teacher"
+        status: "teacher"
     }
 ]
 

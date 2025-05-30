@@ -1,6 +1,11 @@
-import React, { RefObject } from "react";
+import  { RefObject, useEffect, useRef } from "react";
 
-export const WaitModal = (props: {ref: RefObject<HTMLDialogElement | null>}) => {
+export function WaitModal (props: {ref: RefObject<HTMLDialogElement | null>, isOpen?: boolean} ) {
+    useEffect( () => {
+        if (props.isOpen) {  
+            props.ref.current?.showModal()
+        }
+    }, [])
     return(
         <dialog ref={props.ref} className="WaitModal" >
             <div className="WaitModal__container">

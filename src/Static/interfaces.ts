@@ -1,10 +1,9 @@
-import { Form } from 'react-router-dom'
+
 import { Status} from './types'
 
 interface userStoreShema {
     nick: string | undefined,
-    status: Status,
-    token: string | null,
+    status: 'teacher' | 'student',
     RegUser: (data:userShema, isRemember: boolean) => void,
     DelUser: Function
 }
@@ -20,17 +19,20 @@ export interface RegistrationForm {
 
 interface userShema {
     nick: string | undefined,
-    status: Status,
-    token?: string | null
+    status: 'teacher' | 'student',
 }
 
-interface Answer {
-    label: string
+export interface Answer {
+    id?: number
+    text: string
+    is_correct? : boolean
 }
 
-interface Question {
-    header: string,
-    answers: Answer[]
+export interface Question {
+    id?: number
+    question_type: 'single_choice'
+    text: string,
+    answer_options: Answer[]
 }
 
 interface Form {
@@ -43,6 +45,8 @@ interface ShowFormShema {
     form: Form,
     setForm: (_:Form) => void
 }
+
+export interface FormCreate extends Partial<Form>{}
 
 export {userShema, userStoreShema, ShowFormShema, Form}
 

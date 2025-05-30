@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 from peewee import SqliteDatabase, CharField, DateTimeField, BooleanField, \
-                   TextField, ForeignKeyField, AutoField, IntegerField, Model, fn
+                    TextField, ForeignKeyField, AutoField, IntegerField, Model, fn
 
 database = SqliteDatabase('my_database.db')
 
@@ -17,7 +17,7 @@ class User(BaseModel):
     name = CharField()
     telegram_link = CharField()
     password_hash = CharField()
-    role = CharField()  # 'student' или 'teacher'
+    role = CharField()
     created_at = DateTimeField(default=datetime.now)
     is_active = BooleanField(default=True)
 
@@ -26,12 +26,12 @@ class User(BaseModel):
 
 
 class Poll(BaseModel):
+    id = AutoField(primary_key=True)
     title = CharField(unique=True)
     description = TextField(null=True)
     created_by = ForeignKeyField(User, field=User.username, backref='polls')
     created_at = DateTimeField(default=datetime.now)
     is_active = BooleanField(default=True)
-
 
 class Question(BaseModel):
     id = AutoField(primary_key=True)

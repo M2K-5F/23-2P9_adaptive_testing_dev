@@ -2,9 +2,10 @@
 from typing import Dict
 from db import database, User, Poll, Question, AnswerOption, UserAnswer
 from utils import get_password_hash
-from shemas import UserCreate, PollCreate, PollAnswersSubmit, UserOut
+from shemas import UserCreate, PollCreate, PollAnswersSubmit, UserOut, PollWithQuestions
 
 from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
 
 
 @database.atomic()
@@ -14,7 +15,7 @@ async def create_user(user: UserCreate):
             username=user.username,
             name=user.name,
             telegram_link=user.telegram_link,
-            password_hash=get_password_hash(user.password_hash),
+            password_hash=get_password_hash(user.password),
             role=user.role)
 
     except:
@@ -24,16 +25,23 @@ async def create_user(user: UserCreate):
 
 
 @database.atomic()
-async def find_user(username):
+async def find_user(username) :
     user = User.select().where(User.username == username)
 
     for i in user:
-        return {"id": i.id,
-                "username": i.username,
-                "name": i.name,
-                "telegram_link": i.telegram_link,
-                "is_active": i.is_active,
-                "role": i.role}
+        return {
+            "id": i.id,
+            "username": i.username,
+            "name": i.name,
+            "telegram_link": i.telegram_link,
+            "is_active": i.is_active,
+            "role": i.role
+        }
+
+    raise HTTPException(
+        detail='user not finded',
+        status_code=404
+    )
 
 
 @database.atomic()
@@ -45,7 +53,7 @@ async def find_password(username):
 
 
 @database.atomic()
-async def create_poll(poll: PollCreate, user: UserCreate):
+async def create_poll(poll: PollCreate, user: UserOut):
     try:
         db_poll = Poll.create(
             title=poll.title,
@@ -92,34 +100,47 @@ async def find_polls():
 
 
 @database.atomic()
+async def find_poll(poll_id):
+    if not Poll.get_or_none(Poll.id == poll_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Poll not found or inactive")
+    else:
+        return JSONResponse(status_code=200, content='Poll finded')
+
+
+@database.atomic()
 async def find_questions(poll_id):
     # Проверяем, что опрос существует и активен
-    poll = Poll.get_or_none((Poll.id == poll_id) & (Poll.is_active is True))
+    poll = Poll.get_or_none(Poll.id == poll_id)
     if not poll:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Poll not found or inactive")
 
     # Получаем все вопросы с вариантами ответов
-    questions = (Question
-                 .select()
-                 .where(Question.poll == poll_id)
-                 .prefetch(AnswerOption))
+    questions = (
+        Question
+            .select()
+            .where(Question.poll == poll_id)
+            .prefetch(AnswerOption)
+    )
 
     response = {
-        "id": poll.id,
+        'id': poll.id,
         "title": poll.title,
         "description": poll.description,
         "questions": [],
     }
+    
     for question in questions:
         q_data = {
-            "id": question.id_in_poll,
+            'id': question.id,
             "text": question.text,
             "question_type": question.question_type,
             "answer_options": [
                 {
-                    "id": option.id_in_question,
+                    'id': option.id,
                     "text": option.text
                 }
                 for option in question.answer_options
@@ -151,7 +172,7 @@ def submit_poll_answers(
         HTTPException: В случае ошибок валидации
     """
     # Проверяем существование и активность опроса
-    poll = Poll.get_or_none((Poll.id == poll_id) & (Poll.is_active is True))
+    poll = Poll.get_or_none(Poll.id == poll_id)
     if not poll:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -166,7 +187,7 @@ def submit_poll_answers(
 
     if existing_answers:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,    
             detail="Вы уже проходили этот опрос"
         )
 
@@ -216,14 +237,14 @@ def submit_poll_answers(
         # Обрабатываем каждый выбранный вариант
         for option_id in option_ids:
             option = AnswerOption.get_or_none(
-                (AnswerOption.id_in_question == option_id) &
+                (AnswerOption.id == option_id) &
                 (AnswerOption.question == question)
             )
 
             if not option:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Вариант ответа не найден"
+                    detail=f"Вариант ответа не найден{option_id}"
                 )
 
             saved_answers.append(option)
@@ -247,119 +268,95 @@ def submit_poll_answers(
 
 
 @database.atomic()
-def check_user_answers_from_db(
-    poll_id: int,
-    username: str
-) -> Dict:
+def check_user_answers_from_db(username: str) -> Dict:
     """
     Проверяет ответы пользователя из базы данных на правильность
 
     Args:
-        poll_id: ID опроса
-        username: Имя пользователя
+        username: Имя пользователя (учителя)
 
     Returns:
-        Словарь с результатами:
+        Словарь с результатами по всем опросам пользователя:
         {
-            "username": str,
-            "poll_id": int,
-            "poll_title": str,
-            "total_questions": int,
-            "answered_questions": int,
-            "correct_answers": int,
-            "score": float,
-            "details": List[Dict]
+            "teacher": str,
+            "polls": [
+                {
+                    "poll_id": int,
+                    "poll_title": str,
+                    "total_questions": int,
+                    "answered_questions": int,
+                    "correct_answers": int,
+                    "score": float,
+                    "details": List[Dict]
+                },
+                ...
+            ]
         }
 
     Raises:
         HTTPException: Если данные не найдены
     """
-    # 1. Проверяем существование опроса
-    poll = Poll.get_or_none((Poll.id == poll_id) & (Poll.is_active is True))
-    if not poll:
+    try:
+        # Получаем все опросы, созданные этим учителем
+        teacher_polls = (Poll
+                        .select()
+                        .where((Poll.created_by == username) & (Poll.is_active == True))
+                        .order_by(Poll.created_at.desc()))
+        
+        result = {
+            "teacher": username,
+            "polls": []
+        }
+
+        for poll in teacher_polls:
+            # Получаем все вопросы для этого опроса
+            questions = (Question
+                        .select()
+                        .where(Question.poll == poll)
+                        .count())
+            
+            # Получаем все ответы студентов на этот опрос
+            user_answers = (UserAnswer
+                          .select()
+                          .join(Question)
+                          .where(Question.poll == poll))
+            
+            # Группируем ответы по пользователям
+            answers_by_user = {}
+            for answer in user_answers:
+                if answer.user.username not in answers_by_user:
+                    answers_by_user[answer.user.username] = []
+                answers_by_user[answer.user.username].append(answer)
+            
+            # Собираем статистику по опросу
+            poll_stats = {
+                "poll_id": poll.id,
+                "poll_title": poll.title,
+                "total_questions": questions,
+                "answered_users": len(answers_by_user),
+                "user_stats": []
+            }
+
+            for student, answers in answers_by_user.items():
+                correct = sum(1 for a in answers if a.answer_option.is_correct)
+                total = len(answers)
+                
+                poll_stats["user_stats"].append({
+                    "student": student,
+                    "answered_questions": total,
+                    "correct_answers": correct,
+                    "score": round(correct / questions * 100, 2) if questions > 0 else 0
+                })
+
+            result["polls"].append(poll_stats)
+
+        return result
+
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Poll not found or inactive"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching user answers: {str(e)}"
         )
-
-    # 2. Получаем все вопросы опроса с правильными ответами
-    questions = (Question
-                 .select()
-                 .where(Question.poll == poll_id)
-                 .order_by(Question.id_in_poll)
-                 .prefetch(AnswerOption))
-
-    # 3. Получаем ответы пользователя для этого опроса
-    user_answers = (UserAnswer
-                    .select()
-                    .join(Question)
-                    .where(
-                        (UserAnswer.user == username) &
-                        (Question.poll == poll_id)
-                    )
-                    .prefetch(AnswerOption))
-
-    if not user_answers:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User answers not found for this poll"
-        )
-
-    # 4. Подготавливаем структуру для результатов
-    results = {
-        "username": username,
-        "poll_id": poll_id,
-        "poll_title": poll.title,
-        "total_questions": len(questions),
-        "answered_questions": 0,
-        "correct_answers": 0,
-        "score": 0.0,
-        "details": []
-    }
-
-    # 5. Группируем ответы пользователя по вопросам
-    answers_by_question = {}
-    for answer in user_answers:
-        if answer.question.id not in answers_by_question:
-            answers_by_question[answer.question.id] = []
-        answers_by_question[answer.question.id].append(answer.answer_option.id_in_question)
-
-    # 6. Проверяем правильность ответов
-    for question in questions:
-        user_selected = answers_by_question.get(question.id, [])
-        correct_options = [opt.id_in_question for opt in question.answer_options if opt.is_correct]
-
-        # Определяем правильность ответа
-        is_correct = False
-        if question.question_type == "single_choice":
-            is_correct = (len(user_selected) == 1 and
-                          user_selected[0] in correct_options)
-        else:  # multiple_choice
-            is_correct = (set(user_selected) == set(correct_options))
-
-        # Обновляем результаты
-        if user_selected:
-            results["answered_questions"] += 1
-            if is_correct:
-                results["correct_answers"] += 1
-
-        results["details"].append({
-            "question_id": question.id_in_poll,
-            "question_text": question.text,
-            "question_type": question.question_type,
-            "user_answers": user_selected,
-            "correct_answers": correct_options,
-            "is_correct": is_correct
-        })
-
-    # 7. Рассчитываем процент правильных ответов
-    if results["answered_questions"] > 0:
-        results["score"] = round(
-            results["correct_answers"] / results["answered_questions"] * 100,
-            2
-        )
-
-    return results
 
 
 if __name__ == "__main__":

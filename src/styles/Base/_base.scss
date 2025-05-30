@@ -5,11 +5,12 @@
 #main-nav {
   display: flex;
   align-items: center;
+  overflow: visible;
   height: var(--top-menu-height);
   position: relative;
   top: 0;
   left: 0;  
-}
+} 
 
 a {
   text-decoration: none;
@@ -17,31 +18,12 @@ a {
   display: none;
 }
 
-body {
-  width: 100dvw;
-  height: 100dvh;
-  &::after,&::before {
-    @include pseudoelement;
-    z-index: -1;
-    transition: opacity .4s;
-    ;
-  }
-  &::before {
-    opacity: var(--is-theme-dark);
-    background-image: var(--backdrop-dark);
-  }
-  &::after {
-    opacity: var(--is-theme-light) ;
-    background-image: var(--backdrop-light) ;
-  }
-
-}
-.input {
+.main_input {
   caret-color: #9c108e;
   @include size;
-  // margin: 15px;
-  border-radius: 15px;
-  border: none;
+  border-radius: 10px;
+  border: 2px gray solid;
+  height: 50px;
   font-family: 'Courier New', Courier, monospace;
   font-size: x-large;
   font-weight: 550;
@@ -63,12 +45,12 @@ body {
   &.invalid + label {
     visibility:visible;
     animation: shake .5s ;
-    color: red;
+    color: red; 
   }
   
 
   &:invalid, &.invalid {
-    border: red solid;
+    border: 2px red solid;
   }
 
   &::placeholder {
@@ -86,50 +68,152 @@ body {
   }
 }
 
+.pretty_input {
+  caret-color: #9c108e;
+  @include size;
+  border-radius: 10px;
+  border: 3px black solid;
+  height: 50px;
+  font-family: monospace;
+  font-size: x-large;
+  font-weight: 550;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: all .7s;
+  position: relative;
+  transition: box-shadow 0.3s, transform 0.3s;
+
+  & + label {
+    visibility: hidden;
+    height: 20px;
+    margin-bottom: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+  }
+
+  &.invalid + label {
+    visibility:visible;
+    animation: shake .5s ;
+    color: red; 
+  }
+  
+
+  &:user-invalid, &.invalid {
+    border: 2px red solid;
+  }
+
+  &::placeholder {
+    font-size: large;
+    font-weight: 500;
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: gray ;
+    transition: transform .3s;
+  }
+
+  &:focus, &:hover {
+
+    &::placeholder {
+      transform: translate(4px) scale(1.05);
+    }
+
+    outline: none;
+    transform: translate(-3px, -3px);
+    box-shadow: 3px 3px 0 black;
+  }
+  &:invalid {
+    &:focus, &:hover {
+      --main-color: red;
+    }
+  }
+}
+
 .main_button {
   @include size;
   height: 40px;
-  border: solid 1px wheat ;
+  border: solid 2px wheat ;
   border-radius: 20px;
   color: white;
   font-weight: 700;
   font-family: 'Courier New', Courier, monospace;
   font-size: larger;
   position: relative;
-  background-color: rgba(255, 255, 255, 0.185);
+  background-color: rgb(197, 172, 172);
   transition: all 0.4s ease;
   scale: 1;
 
-  &::before, &::after {
-    @include pseudoelement;
-    border-radius: 20px;
-    transition: .4s;
-    filter: blur(3px);
-  }
-
   &::before {
-    background: var(--button-background);
+    @include pseudoelement;
+    background-image: linear-gradient(
+    90deg, 
+    var(--button-color-start), 
+    var(--button-color-stop)
+    );
+    border-radius: 20px;
+    // filter: blur(10px);
     clip-path: view-box;
-    opacity: 1;;
   }
 
-  &::after {
-    background: var(--button-hover-ground);
-    opacity: 0;
-  }
+  transition: 
+    scale .4s,
+    --button-color-start .4s,
+    --button-color-stop .4s;
 
   &:hover{
+    scale: 1.05;
+    --button-color-start: var(--button-hover-start);
+    --button-color-stop: var(--button-hover-stop);
+  }
+}
 
-    transform:scale(1.08);
-    border-color: rgba(255, 255, 255, 0);
+.pretty_button{
+  outline: 0;
+  grid-gap: 8px;
+  align-items: center;
+    background-image: linear-gradient(
+    90deg, 
+    var(--button-color-start), 
+    var(--button-color-stop)
+    );
+  color: white;
+  border: 2px solid black;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI';
+  gap: 8px;
+  justify-content: center;
+  line-height: 1.5;
+  overflow: hidden;
+  padding: 10px 16px;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    all .14s,
+    --button-color-start .2s,
+    --button-color-stop .2s;
 
-    &::before {
-      opacity: 0;
-    }
+  &:focus {
+      box-shadow: 2px 2px 0 #000;
+      transform: translate(-2px,-2px);
+  }
 
-    &::after {
-      opacity: 1;
-    }
+  &:hover {
+      box-shadow: 4px 4px 0 #000;
+      transform: translate(-4px,-4px);
+      --button-color-start: var(--button-hover-start);
+      --button-color-stop: var(--button-hover-stop);
+      &:active {
+        box-shadow: 2px 2px 0 #000;
+        transform: translate(-2px,-2px);
+      }
+  }
+
+  :focus-visible{
+      outline-offset: 1px;
   }
 }
 
@@ -171,12 +255,54 @@ aside {
   margin-left: 10px;
 }
 
-.main_radio {
-  scale: 1.5;
-}
+
+// input[type="radio"] {
+//   /* Add if not using autoprefixer */
+//   -webkit-appearance: none;
+//   /* Remove most all native input styles */
+//   appearance: none;
+//   /* For iOS < 15 */
+//   background-color: var(--form-background);
+//   /* Not removed via appearance */
+//   margin: 0;
+
+//   font: inherit;
+//   color: currentColor;
+//   width: 1.15em;
+//   height: 1.15em;
+//   border: 0.15em solid currentColor;
+//   border-radius: 50%;
+//   transform: translateY(-0.075em);
+
+//   display: grid;
+//   place-content: center;
+// }
+
+// input[type="radio"]::before {
+//   content: "";
+//   width: 0.65em;
+//   height: 0.65em;
+//   border-radius: 50%;
+//   transform: scale(0);
+//   transition: 120ms transform ease-in-out;
+//   box-shadow: inset 1em 1em var(--form-control-color);
+//   /* Windows High Contrast Mode */
+//   background-color: CanvasText;
+// }
+
+// input[type="radio"]:checked::before {
+//   transform: scale(1);
+// }
+
+// input[type="radio"]:focus {
+//   outline: max(2px, 0.15em) solid currentColor;
+//   outline-offset: max(2px, 0.15em);
+// }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-5px); }
   40%, 80% { transform: translateX(5px); }
 }
+
+

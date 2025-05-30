@@ -3,7 +3,7 @@ import ThemeSwitcher from "../Components/ThemeSwither"
 import UserProfile from "../Components/UserMenu"
 import logo from '../assets/logo.svg'
 import { userStore } from "../Static/store"
-import { useEffect } from "react"
+import React ,{ useEffect } from "react"
 
 export default function MainLOUT () {
     const nav = useNavigate()
@@ -12,7 +12,7 @@ export default function MainLOUT () {
     useEffect(() => {
         window.location.pathname === '/' && nick 
         ? [ 
-            status === 'Student' 
+            status === 'student' 
             ? nav('/forstudent')
             : nav('/forteacher')
         ] 
@@ -23,9 +23,11 @@ export default function MainLOUT () {
         <>
             <nav id="main-nav">
                 <img id="icon" src={logo} onClick={() => {
-                    status === 'Student' 
+                    sessionStorage.removeItem('formdata')
+                    status === 'student'
                     ? nav('/forstudent')
-                    : nav('/forteacher')}} /> 
+                    : nav('/forteacher')
+                }} /> 
                 <nav className="top-nav">
                 </nav>
                 <aside>

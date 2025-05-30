@@ -1,0 +1,62 @@
+.WaitModal[open]
+        justify-self: center
+        align-self: center
+        opacity: 1
+        outline: 0
+        border: none
+        background: none
+        color: black
+        height: 100dvh
+        align-content: center
+        .WaitModal__container 
+            justify-self: center
+            align-self: center
+            display: flex
+            align-items: center
+            justify-content: center
+
+            #circle1 
+                height: 200px
+                width: 200px
+                border-radius: 50%
+                position: relative
+                left: 185px
+                border-top: 5px solid darksalmon
+                animation: rotate 2s infinite ease
+        
+
+            #circle2 
+                height: 170px
+                width: 170px
+                border-radius: 50%
+                border-top: 5px solid red
+                animation: rotate 1.75s ease infinite reverse
+            
+
+            #circle3 
+                height: 140px
+                width: 140px
+                border-radius: 50%
+                border-top: 5px solid aqua
+                left: -155px
+                position: relative
+                animation: rotate 1.5s ease infinite
+            
+
+            #square 
+                height: 50px
+                width: 50px
+                background-color: bisque
+                animation: rotate 1s linear infinite
+                border-radius: 10px
+                position: relative
+                left: -250px
+            
+            @keyframes rotate 
+                from
+
+                to 
+                    rotate: 360deg
+
+        &::backdrop
+            backdrop-filter: blur(20px)

@@ -25,7 +25,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password_hash: str = "your_password"
+    password: str = "your_password"
 
 
 class UserOut(UserBase):
@@ -46,8 +46,8 @@ class AnswerOptionCreate(BaseModel):
     selected_option_ids: list[int]
     question_id: int
 
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
 
 class AnswerOptionOut(BaseModel):
@@ -105,8 +105,8 @@ class PollWithQuestions(BaseModel):
     description: str
     questions: list[Question]
 
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
 
 class UserAnswerBase(BaseModel):

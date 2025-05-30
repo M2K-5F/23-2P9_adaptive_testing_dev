@@ -13,8 +13,7 @@
         flex-direction: row;
         align-items: center;
         justify-content:space-around ;
-        padding: 20px;
-        gap: 10px;
+        padding: 10px;
         background: white;
         border-radius: 20px;
         overflow: hidden;
@@ -31,18 +30,22 @@
             z-index: -1;
         }
 
-        label {
-            width: 60%;
+        span {
+            width: 90px;
+            margin-right: 5px;
             color: white;
             font-family: 'Courier New', Courier, monospace;
             font-weight:600 ;
+            text-overflow: ellipsis;
+            overflow:hidden;
             font-size: large;
             text-align: center;
         }
 
         .arrow-element {
             border-radius: 50%;
-            height: 30px; width: 30px;
+            height: 30px; 
+            width: 30px;
             background-color: beige;
             position: relative;
             transition: all .3s;

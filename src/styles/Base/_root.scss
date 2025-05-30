@@ -1,38 +1,60 @@
 /* """ main css file """ */
 @use './_mixins' as *;
 
+@property --bg-color-start {
+syntax: '<color>';
+inherits: true;
+initial-value: #2e9aff;
+}
 
+@property --bg-color-stop {
+syntax: '<color>';
+inherits: true;
+initial-value: #ff8aa5;
+}
+
+@property --button-color-start {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: orange;
+}
+
+@property --button-color-stop {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #14dcb0;
+}
+
+@property --button-hover-start {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ff3eec;
+}
+
+@property --button-hover-stop {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #4400ff;
+}
+
+@property --main-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: black;
+}
 
 :root {
   --top-menu-height: 60px;
-  --is-theme-dark: 0;
-  --is-theme-light: 1;
-  
-  --bg-color-light-1: #2e9aff;
-  --bg-color-light-2: #f498ad;
-  --bg-color-dark-1: rgb(41, 32, 112);
-  --bg-color-dark-2: black;
-  
-  --backdrop-light: linear-gradient(235deg, var(--bg-color-light-1), var(--bg-color-light-2));
-  --backdrop-dark: linear-gradient(235deg, var(--bg-color-dark-1), var(--bg-color-dark-2) );
-
-  --button-color-dark-1: #4400ff;
-  --button-color-dark-2: #ff00e6;
-  --button-color-light-1: #4ecdc4;
-  --button-color-light-2: orange;
-
-  --button-background: linear-gradient(90deg, var(--button-color-light-2), var(--button-color-light-1));
-  --button-hover-ground: linear-gradient(90deg, var(--button-color-dark-2), var(--button-color-dark-1));
-  --main-color: black;
 }
 
 .theme-dark {
-  --is-theme-dark: 1;
-  --is-theme-light: 0;
-
-  --button-background: linear-gradient(90deg, var(--button-color-dark-2), var(--button-color-dark-1));
-  --button-hover-ground: linear-gradient(90deg, var(--button-color-light-1), var(--button-color-light-2));
-  --main-color:white;
+  --bg-color-start: rgb(41, 32, 112);
+  --bg-color-stop:black;  
+  --button-color-start: #ff00e6;
+  --button-color-stop: #4400ff;
+  --button-hover-start:#19eec0; 
+  --button-hover-stop: #ffa500;
+  --main-color: #ff1fce;
 }
 
 *{  
@@ -41,17 +63,45 @@
   left: 0;
   right: 0;
   top: 0;
+  outline: none;
+  border: none;
   box-sizing: border-box;
+
+  &:hover, &:focus, &:active {
+    outline: none;
+  }
 }
 
-html {
-  background: fixed;
-  position: fixed;
+html {  
+  min-height: 100%;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 #root {
-  height: 100%;
+  min-height: 100%;
 }
+
+label {
+  display: block;
+}
+
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-image: linear-gradient(
+    235deg, 
+    var(--bg-color-start),
+    var(--bg-color-stop)
+  );
+  transition: 
+      --bg-color-start .4s,
+      --bg-color-stop .4s;
+}
+
 
 
 

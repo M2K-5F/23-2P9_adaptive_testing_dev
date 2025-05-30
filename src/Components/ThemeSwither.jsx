@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { themeStore } from "../Static/store";
 
 export default function ThemeSwitcher () {

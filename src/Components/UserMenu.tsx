@@ -14,9 +14,8 @@ export default function UserProfile () {
     return(
         <div  className="profile-container">
             <div onClick={(event) => handleClick(event)} className="user-shower">
-                <label inert >{ nick ? nick : 'войти' } </label>
-                <div className="arrow-element" >
-                </div>
+                <span >{ nick ?? 'Войти'}</span>
+                { window.location.pathname !== '/users/registration' && <div className="arrow-element" />}
             </div>
             <div className="user-menu">
                 <button onClick={() => { document.querySelector('.active')?.classList.remove('active'), DelUser(), navigate('/')}}>Выйти</button>

@@ -1,6 +1,6 @@
 import React from "react"
 import { FormEvent, RefObject, useRef, useState } from "react"
-import { ThrowStore, useUrl } from "../Static/store"
+import { ThrowStore, useURL } from "../Static/store"
 import { data, Form, useNavigate } from "react-router-dom"
 import { RegistrationForm } from "../Static/interfaces"
 import { Input } from "../Components/Input"
@@ -10,7 +10,7 @@ export default function Regisration () {
     const SuccessfulModal: RefObject<HTMLDialogElement | null> = useRef(null)
     const WaitingModal: RefObject<HTMLDialogElement | null> = useRef(null)
     const user: RefObject<{login: string, password: string}> = useRef({login:'',password:''})
-    const {URL} = useUrl()
+    const {URL} = useURL()
     const {ThrowMsg} = ThrowStore()
 
     
@@ -79,16 +79,16 @@ export default function Regisration () {
                     ? data.detail[0].loc[1] === 'telegram_link'
                         ? ThrowMsg('telegram_link', form)
                         : null
-                    : ThrowMsg('username', form)
+                    : ThrowMsg('username', form, true)
                 })
                 
         }
     }
 
 
-    return(
+        return(
         <>
-            <section className="registration-container">
+            <main className="registration-container">
                 <Modal ref={SuccessfulModal} user={user} />
                 <WaitModal ref={WaitingModal} /> 
 
@@ -104,24 +104,27 @@ export default function Regisration () {
                     <legend>Регистрация</legend>
 
                     <Input 
+                    isPretty
                     name='username' 
                     onChange={(event) => {
                         user.current.login = event.currentTarget.value
                     }} invalidMessage="Некорректный логин" />
 
                     <Input 
+                    isPretty
                     name='name' 
                     onChange={undefined}
                     invalidMessage="Некорректное имя пользователя" /> 
 
                     <Input 
+                    isPretty
                     name="telegram_link" 
                     onChange={undefined}
                     defaultValue="https://t.me/example-user.com" 
                     invalidMessage="Неправильная ссылка"/> 
 
                     <fieldset>
-                        <legend>Выберите роль:</legend>
+                        {/* <legend>Выберите роль:</legend>   */}
 
                         <div>
                             <input type="radio" checked
@@ -147,20 +150,22 @@ export default function Regisration () {
                     </fieldset>
 
                     <Input 
+                    isPretty
                     name='password' 
                     onChange={(event) => {
                         user.current.password = event.currentTarget.value
                     }}
                     invalidMessage="Пароль слишком короткий"/> 
 
-                    <Input 
+                    <Input
+                    isPretty
                     name='repeat' 
                     onChange={undefined}
                     invalidMessage="Пароли не совпадают" /> 
 
-                    <button type='submit' className="main_button">Зарегистрироваться</button>
+                    <button type='submit' className="pretty_button">Зарегистрироваться</button>
                 </form>
-            </section>
+            </main>
         </>
     )
 }
@@ -170,7 +175,7 @@ const Modal = ({ref, user}) => {
 
     return(
         <>
-            <dialog className="SuccessfulModal" ref={ref}>
+            <dialog className="SuccessfulModal"  ref={ref}>
                 <p>Вы зарегистрированы!</p>
                 <button className="main_button" onClick={() => { nav(`/users/autorize?login=${user.current.login}&password=${user.current.password}`)}} >Авторизоваться</button>
             </dialog>

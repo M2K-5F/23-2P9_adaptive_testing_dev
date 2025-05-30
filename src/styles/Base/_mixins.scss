@@ -25,5 +25,44 @@
     width: pxw(450);
 }
 
+@mixin formbg {
+        display: flex;
+        flex-direction: column;
+        height: 510px;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 500px;
+        padding: 10px;
+        // background-image: linear-gradient(930deg,  var(--button-hover-start), var(--bg-color-start))
+        // transition: --button-hover-start 0.4s, --bg-color-start .1s
+        background: url(/bg-01.jpg);
+        border-radius: 20px;
+        border: 2px black solid;
+        box-shadow: 5px 5px 0 var(--main-color);
+        transition: --main-color .4s .15s;
+        
+        & > legend {
+            margin-bottom: 40px;
+            text-align: center;
+            width: 55%;
+            border-bottom: 3px black dashed;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: xx-large;
+            font-weight: 600;
+        }
+}
 
+@mixin pretty_hover{
+    transition:all .3s, --main-color .4s .2s;
 
+    &:hover {
+        box-shadow: 3px 3px 0 #000;
+        transform: translate(-3px, -3px);
+    }
+    &:active {
+        box-shadow: 1px 1px 0 #000;
+        transform: translate(-1px, -1px);
+    }
+}
