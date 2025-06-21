@@ -1,6 +1,6 @@
 """database discription"""
 from datetime import datetime
-from peewee import SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField
+from peewee import SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
 
 from shemas import Roles
 from utils import get_password_hash
@@ -35,18 +35,49 @@ class UserRole(Table):
     )
 
 
-class UserCourse(Table):
+class TeacherCourse(Table):
     title = CharField(max_length=30)
-    created_by = ForeignKeyField(User, field=User.username)
+    created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
 
 
-class UserTheme(Table):
-    by_course = ForeignKeyField(UserCourse)
-    created_by = ForeignKeyField(User, field=User.username)
+class TeacherTopic(Table):
+    by_course = ForeignKeyField(TeacherCourse)
+    created_by = ForeignKeyField(User, field=User.username, backref="created_topics")
     title = CharField(max_length=60)
     description = CharField(max_length=120)
     is_active = BooleanField(default=True)
+
+
+class TeacherQuestion(Table):
+    text = CharField(max_length=30)
+    by_topic = ForeignKeyField(TeacherTopic, backref='created_questions')
+    question_type = CharField(default='single')
+    is_active = BooleanField(default=True)
+
+
+class TeacherAnswer(Table):
+    text = CharField(max_length=30)
+    is_correct = BooleanField()
+    by_question = ForeignKeyField(TeacherQuestion, backref="created_answers")
+
+
+class UserCourse(Table):
+    user = ForeignKeyField(User, field=User.username, backref="user_courses")
+    course = ForeignKeyField(TeacherCourse, backref="user_courses")
+    course_progress = FloatField()
+
+
+class UserTopic(Table):
+    user = ForeignKeyField(User, field=User.username, backref="user_topics")
+    topic = ForeignKeyField(TeacherTopic)
+    topic_progress = FloatField()
+
+class UserQuestion(Table):
+    user = ForeignKeyField(User, field=User.username, backref="user_questions")
+    question = ForeignKeyField(TeacherQuestion)
+    question_score = FloatField()
+
 
 
 # class Poll(Table):
@@ -79,7 +110,7 @@ class UserTheme(Table):
 
 if __name__ == "__main__":
     database.connect()
-    database.create_tables([User, Role, UserRole, UserCourse, UserTheme])
+    database.create_tables([User, Role, UserRole, TeacherCourse, TeacherTopic, TeacherQuestion, TeacherAnswer, UserCourse, UserQuestion, UserTopic])
     database.close()
 
     Role.get_or_create(status=Roles.STUDENT)

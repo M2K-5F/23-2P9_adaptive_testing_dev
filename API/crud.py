@@ -2,9 +2,12 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 
-from db import database, User, UserRole, Role, UserCourse
+from db import (database, User, UserRole, Role, 
+    TeacherCourse, TeacherAnswer, TeacherQuestion,
+    TeacherTopic, UserCourse, UserQuestion, UserTopic
+)
 from utils import get_password_hash
-from shemas import UserCreate, Roles, UserOut, Course
+from shemas import UserCreate, Roles, UserOut, Course, QuestionBase, AnswerOptionBase
 
 
 @database.atomic()
@@ -339,13 +342,13 @@ def find_password(username):
 @database.atomic()
 def course_create(course: Course, user: UserOut):
 
-    if UserCourse.get_or_none(UserCourse.title == course.title, UserCourse.created_by == User.get_or_none(User.username == user.username)):
+    if TeacherCourse.get_or_none(TeacherCourse.title == course.title, TeacherCourse.created_by == User.get_or_none(User.username == user.username)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="course already created"
         )
     try:
-        data: UserCourse = UserCourse.create(
+        data: TeacherCourse = TeacherCourse.create(
             title = course.title,
             created_by = user.username,
         )
@@ -355,6 +358,7 @@ def course_create(course: Course, user: UserOut):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Some exc"
         )
+
     return JSONResponse(
         content={
             "title": data.title,
@@ -364,7 +368,7 @@ def course_create(course: Course, user: UserOut):
 
 @database.atomic()
 def change_activity_of_course(title: str, user: UserOut):
-    current_course = UserCourse.get_or_none(UserCourse.title == title, UserCourse.created_by == User.get_or_none(User.username == user.username))
+    current_course = TeacherCourse.get_or_none(TeacherCourse.title == title, TeacherCourse.created_by == User.get_or_none(User.username == user.username))
     if not current_course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -384,7 +388,7 @@ def change_activity_of_course(title: str, user: UserOut):
 @database.atomic()
 def get_courses_list(user: UserOut):
     try:
-        courses = UserCourse.select().where(UserCourse.created_by == User.get_or_none(User.username == user.username))
+        courses = TeacherCourse.select().where(TeacherCourse.created_by == User.get_or_none(User.username == user.username))
         to_return = []
         for course in courses:
             to_return.append(course.__data__)
@@ -395,3 +399,179 @@ def get_courses_list(user: UserOut):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST
         )
+
+
+@database.atomic()
+def create_topic(user: UserOut, title: str, description: str, course_title: str):
+    current_user = User.get_or_none(User.username == user.username)
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="user not found"
+        )
+    
+    current_course = TeacherCourse.get_or_none(TeacherCourse.title == course_title, TeacherCourse.created_by == user.username)
+    if not current_course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="course not found"
+        )
+
+    if TeacherTopic.get_or_none(TeacherTopic.created_by == user.username, TeacherTopic.title == title, TeacherTopic.by_course == current_course):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="topic with this title already created"
+        )
+        
+    # try:
+    current_topic: TeacherTopic = TeacherTopic.create(
+        by_course = current_course,
+        created_by = user.username,
+        title = title,
+        description = description,
+    )
+    try:
+        return JSONResponse(
+            content={
+                "topic_title": current_topic.title,
+                "is_active": current_topic.is_active,
+                "course_title": current_topic.by_course.title,
+
+            }
+        )
+
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+
+@database.atomic()
+def get_teacher_topics_by_course(user: UserOut, course_title: str):
+    topics = TeacherTopic.select().where(TeacherTopic.created_by == user.username, TeacherTopic.by_course == TeacherCourse.get_or_none(TeacherCourse.title == course_title))
+    if not topics:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+
+    to_return = []
+    for topic in topics:
+        to_return.append(topic.__data__)
+
+    return JSONResponse(to_return)
+
+
+@database.atomic()
+def change_activity_of_topic(user: UserOut, course_title: str, topic_title: str):   
+    current_topic: TeacherTopic = TeacherTopic.get_or_none(
+        TeacherTopic.title == topic_title, 
+        TeacherTopic.by_course == TeacherCourse.get_or_none(
+            TeacherCourse.title == course_title
+        ), 
+        TeacherTopic.created_by == user.username
+    )
+    current_topic.is_active = not current_topic.is_active
+    current_topic.save()
+    return JSONResponse(current_topic.__data__)
+
+
+@database.atomic()
+def create_question(user: UserOut, course_title: str, topic_title: str, question: QuestionBase ):
+    current_topic = TeacherTopic.get_or_none(
+        TeacherTopic.title == topic_title,
+        TeacherTopic.created_by == user.username,
+        TeacherTopic.by_course == TeacherCourse.get_or_none(
+            TeacherCourse.title == course_title,
+            TeacherCourse.created_by == user.username
+        )
+    )
+    if not current_topic:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="topic or course not found"
+        )
+    
+    if TeacherQuestion.get_or_none(
+        TeacherQuestion.text == question.text,
+        TeacherQuestion.by_topic == current_topic
+    ):
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+    created_question = TeacherQuestion.create(
+        text = question.text,
+        by_topic = current_topic,
+        question_type = "single"
+    )
+
+    for answer_option in question.answer_options:
+        TeacherAnswer.create(
+            text = answer_option.text,
+            is_correct = answer_option.is_correct,
+            by_question = created_question
+        )
+    
+    return JSONResponse(
+        content=created_question.__data__
+    )
+
+
+@database.atomic()
+def get_question_list(user: UserOut, course_title: str, topic_title: str):
+    current_topic = TeacherTopic.get_or_none(
+        TeacherTopic.title == topic_title,
+        TeacherTopic.created_by == user.username,
+        TeacherTopic.by_course == TeacherCourse.get_or_none(
+            TeacherCourse.title == course_title,
+            TeacherCourse.created_by == user.username
+        )
+    )
+    if not current_topic:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="topic or course not found"
+        )
+    
+    questions = TeacherQuestion.select().where(
+        TeacherQuestion.by_topic == current_topic
+    )
+    if not questions:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="user not found"
+        )
+    
+    to_return = []
+    for question in questions:
+        db_answers = TeacherAnswer.select().where(
+            TeacherAnswer.by_question == question
+        )
+        answers = []
+        for answer in db_answers:
+            answers.append(answer.__data__)
+
+        to_return.append({**question.__data__, "answer_options": answers})
+
+    return JSONResponse(
+        content=to_return
+    )
+
+
+@database.atomic()
+def arch_question(user: UserOut, course_title: str, topic_title: str, question_text: str ):
+    current_question = TeacherQuestion.get_or_none(
+        TeacherQuestion.text == question_text,
+        TeacherQuestion.by_topic == TeacherTopic.get_or_none(
+            TeacherTopic.title == topic_title, 
+            TeacherTopic.created_by == user.username,
+            TeacherTopic.by_course == TeacherCourse.get_or_none(
+                TeacherCourse.title == course_title,
+                TeacherCourse.created_by == user.username
+            )
+        )
+    )
+
+    current_question.is_active = not current_question.is_active
+    current_question.save()
+    return JSONResponse(current_question.__data__)

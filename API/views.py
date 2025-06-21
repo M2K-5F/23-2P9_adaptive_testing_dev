@@ -5,13 +5,25 @@ from fastapi.security import OAuth2PasswordBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from typing import Union
 
-from shemas import (UserCreate, UserOut, Course, Roles)
-from crud import find_user, create_user, find_password, compare_role, course_create, change_activity_of_course, get_courses_list
+from shemas import (
+    UserCreate, UserOut, Course, Roles,
+    QuestionBase, AnswerOptionBase
+)
+from crud import (
+    find_user, create_user, find_password, 
+    compare_role, course_create, change_activity_of_course, 
+    get_courses_list, create_topic, get_teacher_topics_by_course,
+    change_activity_of_topic, create_question, get_question_list,
+    arch_question
+)
 from utils import verify_password, encode_jwt, decode_jwt
 from db import User, UserRole, Role, UserCourse
 
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+auth_router = APIRouter(prefix="/auth", tags=["Auth"])
+course_router = APIRouter(prefix='/course', tags=["Courses"])
+topic_router = APIRouter(prefix="/topic", tags=["Topics"])
+question_router = APIRouter(prefix="/quetion", tags=["Questions"])
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login", 
@@ -82,7 +94,7 @@ async def get_current_active_user(
     return user
 
 
-@router.post("/login")
+@auth_router.post("/login")
 async def login_for_access_token(
     user: UserOut = Depends(validate_auth_user)
 ) -> JSONResponse:
@@ -111,7 +123,7 @@ async def login_for_access_token(
     return response
 
 
-@router.get('/users/me')
+@auth_router.get('/users/me')
 async def users_me(
     user = Depends(get_current_active_user)
 ) -> JSONResponse: 
@@ -122,7 +134,7 @@ async def users_me(
         }
     )
 
-@router.post('/logout')
+@auth_router.post('/logout')
 async def logout():
     response = JSONResponse(
         'logout: true'
@@ -136,7 +148,7 @@ async def logout():
     return response
 
 
-@router.post("/register")
+@auth_router.post("/register")
 async def register(user: UserCreate) -> str:
     user_data = create_user(user)
     return user_data
@@ -213,7 +225,7 @@ async def register(user: UserCreate) -> str:
 #     return check_user_answers_from_db(current_user.username)
 
 
-@router.post('/course/create')
+@course_router.post('/create')
 async def create_course(
     course: Course = Body(),
     current_user: UserOut = Depends(get_current_active_user)
@@ -227,8 +239,21 @@ async def create_course(
     return course_create(course=course, user=current_user)
 
 
-@router.put('/course/course')
-async def change_activity_course(
+@course_router.get('/get')
+async def get_teacher_courses(
+    current_user = Depends(get_current_active_user)
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create polls"
+        )
+    
+    return get_courses_list(current_user)
+
+
+@course_router.put('/arch')
+async def arch_course(
     title = Query(),
     current_user: UserOut = Depends(get_current_active_user)
 ) -> JSONResponse:
@@ -241,14 +266,94 @@ async def change_activity_course(
     return change_activity_of_course(title=title, user=current_user)
 
 
-@router.get('/course/get')
-async def get_courses(
-    current_user = Depends(get_current_active_user)
+
+@topic_router.post('/create')
+def create_teacher_topic(
+    current_user: UserOut = Depends(get_current_active_user),
+    title = Query(),
+    description = Query(),
+    course_title = Query()
 ) -> JSONResponse:
     if compare_role(current_user.username, Roles.STUDENT):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only teachers can create polls"
+            detail="Only teachers can create topics"
+        )
+
+    return create_topic(current_user, title, description, course_title)
+
+
+@topic_router.get("/get")
+def get_teacher_topics(
+    current_user: UserOut = Depends(get_current_active_user),
+    course_title: str = Query()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+
+    return get_teacher_topics_by_course(current_user, course_title)
+
+
+@topic_router.put('/arch')
+def arch_topic(
+    current_user = Depends(get_current_active_user),
+    course_title: str = Query(),
+    topic_title: str = Query()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
         )
     
-    return get_courses_list(current_user)
+    return change_activity_of_topic(current_user, course_title, topic_title)
+
+
+@question_router.post('/create')
+def create_teacher_question(
+    current_user = Depends(get_current_active_user),
+    course_title = Query(),
+    topic_title = Query(),
+    question: QuestionBase = Body()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return create_question(current_user, course_title, topic_title, question)
+
+
+@question_router.get('/get')
+def get_questions(
+    current_user = Depends(get_current_active_user),
+    course_title = Query(),
+    topic_title = Query(),
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return get_question_list(current_user, course_title, topic_title)
+
+
+@question_router.put('/acrh')
+def arch_teacher_question(
+    current_user = Depends(get_current_active_user),
+    course_title = Query(),
+    topic_title = Query(),
+    question_text = Query()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return arch_question(current_user, course_title, topic_title, question_text)

@@ -1,6 +1,7 @@
 """API templates"""
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field, field_validator
+from typing import List
 
 
 class Roles(str, Enum):
@@ -34,14 +35,9 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
-# class AnswerOptionBase(BaseModel):
-#     text: str
-#     is_correct: bool = False
-
-
-# class AnswerOptionCreate(BaseModel):
-#     selected_option_ids: list[int]
-#     question_id: int
+class AnswerOptionBase(BaseModel):
+    text: str
+    is_correct: bool = False
 
 
 # class AnswerOptionOut(BaseModel):
@@ -52,19 +48,10 @@ class Token(BaseModel):
 #         from_attributes = True
 
 
-# class QuestionBase(BaseModel):
-#     text: str = Field(..., min_length=3, max_length=500)
-#     question_type: str = "single_choice"
-#     answer_options: list[AnswerOptionBase]
-
-
-# class QuestionCreate(QuestionBase):
-#     poll_id: int
-
-
-# class Question(QuestionBase):
-#     id: int
-#     answer_options: list[AnswerOptionOut]
+class QuestionBase(BaseModel):
+    text: str = Field(..., min_length=3, max_length=500)
+    question_type: str = "single_choice"
+    answer_options: List[AnswerOptionBase]
 
 
 # class PollBase(BaseModel):
