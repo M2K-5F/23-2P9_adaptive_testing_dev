@@ -2,7 +2,8 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { Form } from '../types/interfaces'
+import { Form, Question } from '../types/interfaces'
+import axios from 'axios'
 
 class ApiServiceClass {
     private navigate: ReturnType<typeof useNavigate> | null = null
@@ -15,8 +16,11 @@ class ApiServiceClass {
         this.navigate ? this.navigate(path, {replace: replace}) : console.log('еще не инициализирован')
     }
 
-    requestToServer = (URL: apiUrl, init?: RequestInit, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false) => {
-        return fetch(URL, init)
+    requestToServer = (URL: apiUrl, init?: RequestInit,queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false) => {
+        const params = {}
+        return fetch(`${URL}?${queries && Object.entries(queries).map((query => {
+            return `${query[0]}=${query[1]}&`
+        }))}`, init)
         .catch(() => {
             userStore.setState( state => ({...state, status: "serverunavailable"}))
             throw Error('503')
@@ -54,16 +58,6 @@ export const logoutUser = async () => {
 }
 
 
-export const pingPoll = (pollID: number) => {
-    return ApiService.requestToServer(
-        APIUrls.pingPollURL(pollID),
-        {
-            credentials: 'include'
-        }
-    )
-}
-
-
 export const loginUser = (body: string) => {
     return  ApiService.requestToServer(
         APIUrls.logInURL,
@@ -76,6 +70,7 @@ export const loginUser = (body: string) => {
             },
             body: body
         },
+        undefined,
         true
     )
 }
@@ -94,48 +89,204 @@ export const registerUser = async (body: string) => {
     )
 }
 
-export const createPoll = (poll: string) => {
+
+export const createCourse = (title: string) => {
     return ApiService.requestToServer(
-        APIUrls.createPollURL,
+        APIUrls.createCourseURL,
         {
             credentials: 'include',
             method: 'post',
-            headers: {
-                'Content-Type': "application/json"
-            },
-            body: poll
-        }
-    )
-}
-
-export const getPoll = (pollID: number) => {
-    return ApiService.requestToServer(
-        APIUrls.getPollURL(pollID),
+        },
         {
-            credentials: 'include'
+            "course_title": title
         }
     )
 }
 
-export const submitAnswers = (pollID: number, body: ReturnType<typeof JSON.stringify>) => {
+
+export const getCourses = () => {
     return ApiService.requestToServer(
-        APIUrls.submitAnswersURL(pollID),
+        APIUrls.getCoursesURL,
+        {
+            credentials: 'include',
+        },
+    )
+}
+
+
+export const getFollowedCourses = () => {
+    return ApiService.requestToServer(
+        APIUrls.getFollowedCoursesURL,
+        {
+            credentials: 'include',
+        }
+    )
+}
+
+
+export const archCourse = (course_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.archCourseURL,
+        {
+            credentials: 'include',
+            method: 'put',
+        },
+        {
+            "course_id": course_id
+        }
+    )
+}
+
+
+export const followCourse = (course_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.followCourseURL,
+        {
+            credentials: 'include',
+            method: 'post'
+        },
+        {
+            "course_id": course_id
+        }
+    )
+}
+
+
+export const unfollowCourse = (course_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.unfollowCourseURL,
+        {
+            credentials: 'include',
+            method: 'delete',
+        },
+        {
+            "course_id": course_id,
+        }
+    )
+}
+
+
+export const createTopic = (topic_title: string, description: string, course_id: string) => {
+    return ApiService.requestToServer(
+        APIUrls.createTopicURL,
         {
             credentials: 'include',
             method: 'post',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: body
+        },
+        {
+            "topic_title": topic_title,
+            "description": description,
+            "course_id": course_id,
         }
     )
 }
 
-export const getStats = () => {
+
+export const getTopics = (course_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.checkPollURL,
+        APIUrls.getTopicsURL,
         {
-            credentials: 'include'
+            credentials: 'include',
+        },
+        {
+            "course_id": course_id,
+        }
+    )
+}
+
+
+export const getFollowedTopics = (course_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.getFollowedTopicsURL,
+        {
+            credentials: 'include',
+        },
+        {
+            "course_id": course_id,
+        }
+    )
+}
+
+
+export const archTopic = (topic_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.archTopicURL,
+        {
+            credentials: 'include',
+            method: 'put',
+        },
+        {
+            "topic_id": topic_id
+        }
+    )
+}
+
+
+export const followTopic = (topic_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.followTopicURL,
+        {
+            credentials: 'include',
+            method: 'post',
+        },
+        {
+            "topic_id": topic_id,
+        }
+    )
+}
+
+
+export const unfollowTopic = (topic_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.unfollowTopicURL,
+        {
+            credentials: 'include',
+            method: 'delete',
+        },
+        {
+            "topic_id": topic_id
+        }
+    )
+}
+
+
+export const createQuestion = (topic_id: number, question: Question) => {
+    return ApiService.requestToServer(
+        APIUrls.createQuestionURL,
+        {
+            credentials: 'include',
+            method: "post",
+            body: JSON.stringify(question),
+        },
+        {   
+            "topic_id": topic_id,
+        }
+    )
+}
+
+
+export const getQuestions = (topic_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.getQuestionsURL,
+        {
+            credentials: 'include',
+        },
+        {
+            "topic_id": topic_id
+        }
+    )
+}
+
+
+export const archQuestion = (question_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.archQuestionURL,
+        {
+            credentials: 'include',
+            method: "put",
+        },
+        {
+            "question_id": question_id
         }
     )
 }

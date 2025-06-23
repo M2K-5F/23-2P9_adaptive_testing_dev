@@ -5,7 +5,7 @@ import { URL } from "../config/api.constants";
 import { useRedirect } from "../hooks/useRedirect";
 import { WaitModal } from "../Components/WaitModal";
 import { SuccessfulModal } from "../Components/SuccessfulModal";
-import { getPoll, submitAnswers } from "../services/api.service";
+// import { getPoll, submitAnswers } from "../services/api.service";
 
 export default function ShowForm () {
     const params = new URLSearchParams(window.location.search)

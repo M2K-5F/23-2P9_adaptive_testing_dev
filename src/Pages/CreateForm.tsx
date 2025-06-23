@@ -6,7 +6,7 @@ import { Button } from "../Components/Button";
 import { useImmer } from "use-immer";
 import { WaitModal } from "../Components/WaitModal";
 import { SuccessfulModal } from "../Components/SuccessfulModal";
-import { createPoll } from "../services/api.service";
+// import { createPoll } from "../services/api.service";
 import { ThrowMsg } from "../utils/form.utils";
 import { useNavigate } from "react-router-dom";
 

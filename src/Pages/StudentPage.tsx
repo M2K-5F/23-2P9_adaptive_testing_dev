@@ -7,7 +7,7 @@ import { WaitModal } from '../Components/WaitModal'
 import { URL } from "../config/api.constants"
 import {useRedirect} from '../hooks/useRedirect'
 import { ThrowMsg } from "../utils/form.utils"
-import { pingPoll } from "../services/api.service"
+// import { pingPoll } from "../services/api.service"
 
 export default function StudentNavigator () {
     const navigate = useNavigate()

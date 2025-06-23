@@ -1,6 +1,6 @@
 """database discription"""
 from datetime import datetime
-from peewee import SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
+from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
 
 from shemas import Roles
 from utils import get_password_hash
@@ -9,6 +9,7 @@ database = SqliteDatabase('my_database.db')
 
 
 class Table(Model):
+    id = AutoField()
     class Meta:
         database = database
 
@@ -35,48 +36,50 @@ class UserRole(Table):
     )
 
 
-class TeacherCourse(Table):
+class Course(Table):
     title = CharField(max_length=30)
     created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
 
 
-class TeacherTopic(Table):
-    by_course = ForeignKeyField(TeacherCourse)
+class Topic(Table):
+    by_course = ForeignKeyField(Course)
     created_by = ForeignKeyField(User, field=User.username, backref="created_topics")
     title = CharField(max_length=60)
     description = CharField(max_length=120)
     is_active = BooleanField(default=True)
 
 
-class TeacherQuestion(Table):
+class Question(Table):
     text = CharField(max_length=30)
-    by_topic = ForeignKeyField(TeacherTopic, backref='created_questions')
+    by_topic = ForeignKeyField(Topic, backref='created_questions')
     question_type = CharField(default='single')
     is_active = BooleanField(default=True)
 
 
-class TeacherAnswer(Table):
+class Answer(Table):
     text = CharField(max_length=30)
     is_correct = BooleanField()
-    by_question = ForeignKeyField(TeacherQuestion, backref="created_answers")
+    by_question = ForeignKeyField(Question, backref="created_answers")
 
 
 class UserCourse(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_courses")
-    course = ForeignKeyField(TeacherCourse, backref="user_courses")
-    course_progress = FloatField()
+    course = ForeignKeyField(Course, backref="user_courses")
+    course_progress = FloatField(default=0)
 
 
 class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_topics")
-    topic = ForeignKeyField(TeacherTopic)
-    topic_progress = FloatField()
+    topic = ForeignKeyField(Topic)
+    # by_course = ForeignKeyField(Course)
+    topic_progress = FloatField(default=0)
 
 class UserQuestion(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_questions")
-    question = ForeignKeyField(TeacherQuestion)
-    question_score = FloatField()
+    question = ForeignKeyField(Question)
+    # by_topic = ForeignKeyField(Topic)
+    question_score = FloatField(default=0)
 
 
 
@@ -110,7 +113,7 @@ class UserQuestion(Table):
 
 if __name__ == "__main__":
     database.connect()
-    database.create_tables([User, Role, UserRole, TeacherCourse, TeacherTopic, TeacherQuestion, TeacherAnswer, UserCourse, UserQuestion, UserTopic])
+    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
     database.close()
 
     Role.get_or_create(status=Roles.STUDENT)

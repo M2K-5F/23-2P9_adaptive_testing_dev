@@ -16,8 +16,8 @@ app.add_middleware(
 
 
 app.include_router(router=auth_router)
-app.include_router(topic_router)
 app.include_router(course_router)
+app.include_router(topic_router)
 app.include_router(question_router)
 
 

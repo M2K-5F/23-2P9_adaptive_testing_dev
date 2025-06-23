@@ -4,7 +4,7 @@ import { useRedirect } from "../hooks/useRedirect";
 import { Button } from "../Components/Button";
 import { data, useNavigate } from "react-router-dom";
 import {WaitModal} from '../Components/WaitModal'
-import { getStats } from "../services/api.service";
+// import { getStats } from "../services/api.service";
 
 interface PollStats {
   poll_id: number
