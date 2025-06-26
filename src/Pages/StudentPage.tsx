@@ -9,7 +9,7 @@ import {useRedirect} from '../hooks/useRedirect'
 import { ThrowMsg } from "../utils/form.utils"
 // import { pingPoll } from "../services/api.service"
 
-export default function StudentNavigator () {
+export default function StudentPortal () {
     const navigate = useNavigate()
     const waitmodal: RefObject<null | HTMLDialogElement> = useRef(null)
 

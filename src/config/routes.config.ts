@@ -2,7 +2,7 @@ import { status } from "../types/interfaces"
 
 export const Paths = {
     'student': ['/forstudent', '/showform'],
-    'teacher': ['/forteacher', '/createform', '/forteacher/results'],
+    'teacher': ['/forteacher', '/createform', '/forteacher/results', `/course`, '/edit/course'],
     'forbidden': ['/403', '/users/autorize', '/users/registration'],
     'unautorized': ['/401', '/users/autorize', '/users/registration'],
     'undefined': ['/users/autorize', '/users/registration', '/forstudent', '/showform', '/forteacher', '/createform', '/forteacher/results'],

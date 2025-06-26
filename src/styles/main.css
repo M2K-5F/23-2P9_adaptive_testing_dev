@@ -399,6 +399,57 @@ aside > svg:hover {
           backdrop-filter: blur(20px);
 }
 
+section.WaitModal__container {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+section.WaitModal__container #circle1 {
+  height: 200px;
+  width: 200px;
+  border-radius: 50%;
+  position: relative;
+  left: 185px;
+  border-top: 5px solid darksalmon;
+  animation: rotate 2s infinite ease;
+}
+section.WaitModal__container #circle2 {
+  height: 170px;
+  width: 170px;
+  border-radius: 50%;
+  border-top: 5px solid red;
+  animation: rotate 1.75s ease infinite reverse;
+}
+section.WaitModal__container #circle3 {
+  height: 140px;
+  width: 140px;
+  border-radius: 50%;
+  border-top: 5px solid aqua;
+  left: -155px;
+  position: relative;
+  animation: rotate 1.5s ease infinite;
+}
+section.WaitModal__container #square {
+  height: 50px;
+  width: 50px;
+  background-color: bisque;
+  animation: rotate 1s linear infinite;
+  border-radius: 10px;
+  position: relative;
+  left: -250px;
+}
+@keyframes rotate {
+  to {
+    rotate: 360deg;
+  }
+}
+section.WaitModal__container::backdrop {
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+}
+
 .profile-container {
   width: 150px;
   height: 40px;
@@ -718,22 +769,203 @@ main.studentnavigator__container #studentnavigator__form legend {
   margin-bottom: 40px;
 }
 
-.teacher-container {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+.teacher-portal {
+  justify-items: center;
+  margin: 0 auto;
+  padding: 20px;
+}
+.teacher-portal * {
+  font-family: monospace;
+}
+
+.portal-header {
+  width: 90%;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid white;
+  padding-bottom: 5px;
 }
-.teacher-container form {
+
+.theme-dark .portal-header > h1 {
+  color: white;
+}
+
+.create-course-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.courses-flex {
+  margin-bottom: 30px;
   display: flex;
-  flex-direction: column;
+  gap: 20px;
+  width: 95dvw;
+  flex-wrap: wrap;
 }
-.teacher-container form button {
-  margin: 10px;
-  height: 50px;
-  border-radius: 25px;
+
+.course-card {
+  background-color: rgb(239, 255, 219);
+  width: 45dvw;
+  min-width: 400px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+
+.course-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.course-card.archived {
+  border: brown 2px solid;
+  opacity: 0.7;
+  background-color: #f5f5f5;
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.course-header h3 {
+  margin: 0;
+  cursor: pointer;
+  color: #2196F3;
+}
+
+.archive-btn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 5px;
+  background-color: #9E9E9E;
+  border-radius: 5px;
+}
+
+.course-status .active {
+  color: #4CAF50;
+}
+
+.course-status .archived {
+  color: #9E9E9E;
+}
+
+.course-actions {
+  margin-top: 15px;
+}
+.course-actions .locked {
+  color: red;
+  font-weight: 700;
+}
+
+.no-courses-message {
+  padding: 20px;
+  text-align: center;
+  font-size: x-large;
+  color: #ffffff;
+  font-family: monospace;
+  margin: 20px 0;
+}
+
+.course-actions button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.courses-search-container {
+  margin: 0 auto 30px;
+  max-width: 600px;
+  width: 100%;
+}
+
+search {
+  position: relative;
+}
+
+section.search-variants-section {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  margin-top: 5px;
+}
+
+section.search-variants-section > span {
+  display: block;
+  width: 100%;
+  align-content: center;
+  text-align: center;
+  font-weight: 600;
+  height: 20px;
+}
+
+input.create-course-input {
+  height: 100%;
+  width: 100%;
+}
+
+div.search-list-param {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  cursor: pointer;
+  display: flex;
+  height: 30px;
+  padding: 5px;
+  align-items: center;
+  border-radius: 5px;
+}
+div.search-list-param:hover {
+  background-color: rgba(158, 158, 158, 0.568627451);
+}
+div.search-list-param span {
+  font-family: "Roboto", "Arial", sans-serif;
+  font-size: 0.9rem;
+  margin-left: 3px;
+}
+
+.courses-search-input {
+  width: 100%;
+  position: relative;
+  padding: 12px 20px 12px 45px;
+  border: 2px solid #ddd;
+  border-radius: 30px;
+  font-family: monospace;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.courses-search-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  width: -moz-fit-content;
+  width: fit-content;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 1.2rem;
 }
 
 main.auth-container {
