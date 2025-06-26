@@ -16,3 +16,9 @@
 ### Запуск
 
 - `py main.py`
+
+### Фронтенд
+
+ - `npm i vite@6.3.5`
+ - `npm i react react-router-dom zustand sass-embedded react-toastify`
+ - `npx vite`
