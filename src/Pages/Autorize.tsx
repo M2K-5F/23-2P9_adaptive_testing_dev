@@ -1,46 +1,43 @@
-import { useNavigate } from "react-router-dom"
+import { isRouteErrorResponse, useNavigate } from "react-router-dom"
 import React, { FormEvent, RefObject, useEffect, useRef } from "react"
-import { Authentification, Identification, Auth } from "../Static/Users"
-import { ThrowStore, userStore, useURL } from "../Static/store"
+import { userStore } from "../stores/userStore"
 import { Input } from "../Components/Input"
 import {WaitModal} from '../Components/WaitModal'
-import { useRedirect } from "../Static/utils"
+import { ThrowMsg } from "../utils/form.utils"
+import { URL } from "../config/api.constants";
+import { loginUser } from "../services/api.service"
 
 export default function Autorize () {
     const nav = useNavigate()
-    const {URL} = useURL()
-    const {DelUser, RegUser} = userStore()
+    const {RegUser} = userStore()
     const queryParams = new URLSearchParams(window.location.search)
-    const {ThrowMsg} = ThrowStore()
     const waitmodal: RefObject<HTMLDialogElement | null> = useRef(null)
 
 
     function handleAuth (event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         waitmodal.current!.showModal()
-        const request = fetch(`http://localhost:8001/auth/login`, {
-            method: 'POST',
-            credentials: "include",
-            headers: {
-                'accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify( Object.fromEntries( new FormData(event.currentTarget)))
-        })
-        
-        request.then( response => {
-            if (response.ok) {
-                waitmodal.current?.close()
-                return response.json()
-            } else {
-                waitmodal.current?.close()
-                alert('что то не так')
+        loginUser(
+            JSON.stringify(
+                Object.fromEntries( 
+                    new FormData(event.currentTarget)
+                )
+            )
+        )
+        .then( data => {
+            waitmodal.current?.close()
+            RegUser({nick: data.username!, status: data.role!})
+        })    
+        .catch( error => {
+            waitmodal.current?.close()
+            
+            switch (Number(error.message)) {
+                case 401:
+                    ThrowMsg('password', "Логин или пароль неверны")
+                    break
             }
-        }).then(data => {
-            RegUser({nick: data.username!, status: data.role!},true)
-            nav('/')
         })
-    }
+    }   
 
 
     return(

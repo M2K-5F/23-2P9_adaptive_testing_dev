@@ -1,18 +1,33 @@
 import { ChangeEvent, Dispatch, FormEvent, memo, RefObject, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
-import { showFormStore } from "../Static/store";
-import { Question, Form } from "../Static/interfaces";
+import { Question, Form } from "../types/interfaces";
 import { useNavigate, useParams } from "react-router-dom";
-import { useRedirect } from "../Static/utils";
+import { URL } from "../config/api.constants";
+import { useRedirect } from "../hooks/useRedirect";
 import { WaitModal } from "../Components/WaitModal";
-import {Button} from '../Components/Button'
 import { SuccessfulModal } from "../Components/SuccessfulModal";
+// import { getPoll, submitAnswers } from "../services/api.service";
 
 export default function ShowForm () {
-    useRedirect()
     const params = new URLSearchParams(window.location.search)
     const waitmodal: RefObject<HTMLDialogElement | null> = useRef(null)
     const successfulmodal: RefObject<null| HTMLDialogElement> = useRef(null)
-    const subform = showFormStore().form
+    const subform = {
+        title: 'title',
+        description : 'desctiption',
+        questions: [
+            {
+                id: 1,
+                text: 'question',
+                answer_options: [
+                    {
+                        id: 1,
+                        text : 'answer',
+                    },
+                ]
+            }
+        ]
+    }
+    
     const [form, setForm]: [Form, any] = useState(
         sessionStorage.getItem(`formdata#?id=${params.get('id')}`) 
         ? JSON.parse(sessionStorage.getItem(`formdata#?id=${params.get('id')}`)!) 
@@ -20,18 +35,21 @@ export default function ShowForm () {
     )
 
     if (!sessionStorage.getItem(`formdata#?id=${params.get('id')}`)) {
-        const request = fetch(`http://localhost:8001/auth/get_poll/${params.get('id')}`, {
-            credentials: "include"
-        })
-
-        request
-        .then( (response) => {
-            return response.json()
-        })
-        .then( data => {
+        getPoll(Number(params.get("id")))
+        .then( (data) => {
             sessionStorage.setItem(`formdata#?id=${params.get('id')}`, JSON.stringify(data))
             setForm(data)
         })
+        .catch( error => {
+            waitmodal.current?.close()
+            switch (Number(error.message)) {
+                case 404:
+                    setForm({
+                        title: 'Форма недоступна',
+                        description: "Попробуйте запросить позже"
+                    })
+            }
+        })  
     } else {
         waitmodal.current?.close()
     }
@@ -49,23 +67,17 @@ export default function ShowForm () {
         Object.entries(data).forEach( ([queid, answid]) => {
             requestBody.push({'question_id': Number(queid), 'selected_option_ids': [Number(answid)]})
         })
-        console.log({'answers': requestBody})
-        const request = fetch(`http://localhost:8001/auth/polls/${params.get('id')}/submit-answers`, {
-            credentials: 'include', 
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({answers: requestBody})
+        waitmodal.current?.showModal()
+        submitAnswers(Number(params.get("id")), JSON.stringify({answers: requestBody}))
+        .then( request => {
+            waitmodal.current?.close()
+            successfulmodal.current?.showModal()
         })
-
-        request.then(request => {
-            if (request.ok) {
-                successfulmodal.current?.showModal()
-            } else {
-                if (request.status == 400) {
-                    alert('Вы уже отправляти эту форму')
-                }
+        .catch( error => {
+            waitmodal.current?.close()
+            switch (Number(error.message)) {
+                case 400:
+                    alert('Вы уже отправляли эту форму')
             }
         })
     }

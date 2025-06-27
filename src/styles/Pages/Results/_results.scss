@@ -109,7 +109,7 @@ main.stats-container {
                         border-bottom: 1px solid #ddd;
                     }
                     
-                    td:nth-last-child(1) {
+                    td:nth-last-child(1), th:nth-last-child(1) {
                         border-right: none;
                     }
 

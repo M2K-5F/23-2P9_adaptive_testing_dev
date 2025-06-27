@@ -10,6 +10,7 @@ main.auth-container {
     flex-direction: column;
 
     form#auth-form {
+        min-height: 510px;
         @include formbg;
 
         & > .pretty_input {

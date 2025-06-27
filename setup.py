@@ -1,0 +1,31 @@
+from setuptools import setup
+
+setup(
+    name="adaptive_testing",
+    version="0.1.0",
+    python_requires="==3.8.10",
+    install_requires=[
+        "annotated-types==0.7.0",
+        "anyio==4.6.2",
+        "bcrypt==3.2.0",
+        "cffi==1.17.1",
+        "click==8.1.8",
+        "colorama==0.4.6",
+        "cryptography==44.0.2",
+        "fastapi==0.115.11",
+        "h11==0.14.0",
+        "idna==3.10",
+        "pyjwt",
+        "passlib==1.7.4",
+        "peewee==3.17.9",
+        "pycparser==2.22",
+        "pydantic==2.10.6",
+        "pydantic_core==2.27.2",
+        "pydantic_settings==2.1.0",
+        "python-multipart==0.0.20",
+        "sniffio==1.3.1",
+        "starlette==0.44.0",
+        "typing_extensions==4.12.2",
+        "uvicorn==0.33.0",
+    ],
+)

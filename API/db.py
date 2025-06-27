@@ -1,81 +1,132 @@
 """database discription"""
-from datetime import datetime, timedelta
+from datetime import datetime
+from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
 
-from peewee import SqliteDatabase, CharField, DateTimeField, BooleanField, \
-                    TextField, ForeignKeyField, AutoField, IntegerField, Model, fn
+from shemas import Roles
+from utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
 
-class BaseModel(Model):
+class Table(Model):
+    id = AutoField()
     class Meta:
         database = database
 
 
-class User(BaseModel):
+class User(Table):
     username = CharField(unique=True)
     name = CharField()
     telegram_link = CharField()
     password_hash = CharField()
-    role = CharField()
     created_at = DateTimeField(default=datetime.now)
     is_active = BooleanField(default=True)
 
-    def is_teacher(self):
-        return self.role == 'teacher'
+
+class Role(Table):
+    status=CharField()
 
 
-class Poll(BaseModel):
-    id = AutoField(primary_key=True)
-    title = CharField(unique=True)
-    description = TextField(null=True)
-    created_by = ForeignKeyField(User, field=User.username, backref='polls')
-    created_at = DateTimeField(default=datetime.now)
+class UserRole(Table):
+    user = ForeignKeyField(
+        User, backref="user_role", on_update="CASCADE", on_delete="CASCADE"
+    )
+    role = ForeignKeyField(
+        Role, backref="user_role", on_update="CASCADE", on_delete="CASCADE"
+    )
+
+
+class Course(Table):
+    title = CharField(max_length=30)
+    created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
 
-class Question(BaseModel):
-    id = AutoField(primary_key=True)
-    id_in_poll = IntegerField()
-    poll = ForeignKeyField(Poll, backref='questions')
-    text = TextField()
-    question_type = CharField(default='single_choice')
 
-    def save(self, *args, **kwargs):
-        if not self.id:  # Только для новых записей
-            # Находим максимальный id_in_question для этого вопроса
-            max_id = Question.select(fn.MAX(Question.id_in_poll)).where(
-                Question.poll == self.poll
-            ).scalar() or 0
-            self.id_in_poll = max_id + 1
-        return super().save(*args, **kwargs)
+class Topic(Table):
+    by_course = ForeignKeyField(Course)
+    created_by = ForeignKeyField(User, field=User.username, backref="created_topics")
+    title = CharField(max_length=60)
+    description = CharField(max_length=120)
+    is_active = BooleanField(default=True)
 
 
-class AnswerOption(BaseModel):
-    id = AutoField(primary_key=True)
-    id_in_question = IntegerField()
-    question = ForeignKeyField(Question, backref='answer_options')
-    text = TextField()
-    is_correct = BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-        if not self.id:  # Только для новых записей
-            # Находим максимальный id_in_question для этого вопроса
-            max_id = AnswerOption.select(fn.MAX(AnswerOption.id_in_question)).where(
-                AnswerOption.question == self.question
-            ).scalar() or 0
-            self.id_in_question = max_id + 1
-        return super().save(*args, **kwargs)
+class Question(Table):
+    text = CharField(max_length=30)
+    by_topic = ForeignKeyField(Topic, backref='created_questions')
+    question_type = CharField(default='single')
+    is_active = BooleanField(default=True)
 
 
-class UserAnswer(BaseModel):
-    user = ForeignKeyField(User, field=User.username, backref='answers')
-    question = ForeignKeyField(Question, backref='user_answers')
-    answer_option = ForeignKeyField(AnswerOption, backref='selected_by')
-    answered_at = DateTimeField(default=datetime.now)
+class Answer(Table):
+    text = CharField(max_length=30)
+    is_correct = BooleanField()
+    by_question = ForeignKeyField(Question, backref="created_answers")
+
+
+class UserCourse(Table):
+    user = ForeignKeyField(User, field=User.username, backref="user_courses")
+    course = ForeignKeyField(Course, backref="user_courses")
+    course_progress = FloatField(default=0)
+
+
+class UserTopic(Table):
+    user = ForeignKeyField(User, field=User.username, backref="user_topics")
+    topic = ForeignKeyField(Topic)
+    # by_course = ForeignKeyField(Course)
+    topic_progress = FloatField(default=0)
+
+class UserQuestion(Table):
+    user = ForeignKeyField(User, field=User.username, backref="user_questions")
+    question = ForeignKeyField(Question)
+    # by_topic = ForeignKeyField(Topic)
+    question_score = FloatField(default=0)
+
+
+
+# class Poll(Table):
+#     title = CharField(unique=True)
+#     description = TextField(null=True)
+#     created_by = ForeignKeyField(User, field=User.username, backref='polls')
+#     created_at = DateTimeField(default=datetime.now)
+#     is_active = BooleanField(default=True)
+
+# class Question(Table):
+#     number = IntegerField()
+#     poll = ForeignKeyField(Poll, backref='questions')
+#     text = TextField() 
+#     question_type = CharField(default='single_choice')
+
+
+# class AnswerOption(Table):
+#     number = IntegerField()
+#     question = ForeignKeyField(Question, backref='answer_options')
+#     text = TextField()
+#     is_correct = BooleanField(default=False)
+
+
+# class UserAnswer(Table):
+#     user = ForeignKeyField(User, field=User.username, backref='answers')
+#     question = ForeignKeyField(Question, backref='user_answers')
+#     answer_option = ForeignKeyField(AnswerOption, backref='selected_by')
+#     answered_at = DateTimeField(default=datetime.now)
 
 
 if __name__ == "__main__":
     database.connect()
-    database.drop_tables([User, Poll, Question, AnswerOption, UserAnswer])
-    database.create_tables([User, Poll, Question, AnswerOption, UserAnswer])
+    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
     database.close()
+
+    Role.get_or_create(status=Roles.STUDENT)
+    teacher_role, _ = Role.get_or_create(status=Roles.TEACHER)
+
+    base_teacher, _ = User.get_or_create(
+        username = 'teacher',
+        defaults={
+            'name': 'teacher',
+            'telegram_link': 'https://t.me/teacher_tg.com',
+            'password_hash': get_password_hash('12345')
+        })
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = teacher_role
+    )

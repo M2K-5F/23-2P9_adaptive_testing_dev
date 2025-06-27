@@ -31,8 +31,6 @@ export const Input = (props: {className?: string, value?: string, required? : bo
             />
 
             <label className="valid_message">{props.invalidMessage ?? 'invalid field'}</label>
-
-            {/* {props.name === 'username' ? <label>username already Registered</label> : null} */}
         </>
     )
 }

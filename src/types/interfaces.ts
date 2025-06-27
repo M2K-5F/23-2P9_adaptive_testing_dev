@@ -1,10 +1,9 @@
+export type status = 'teacher' | 'student' | "forbidden" | "unautorized" | "undefined" | "serverunavailable"
 
-import { Status} from './types'
-
-interface userStoreShema {
+export interface userStoreShema {
     nick: string | undefined,
-    status: 'teacher' | 'student',
-    RegUser: (data:userShema, isRemember: boolean) => void,
+    status: status,
+    RegUser: (data:userShema) => void,
     DelUser: Function
 }
 
@@ -17,7 +16,7 @@ export interface RegistrationForm {
     password_rp: string
 }
 
-interface userShema {
+export interface userShema {
     nick: string | undefined,
     status: 'teacher' | 'student',
 }
@@ -30,23 +29,38 @@ export interface Answer {
 
 export interface Question {
     id?: number
-    question_type: 'single_choice'
+    question_type: 'single'
     text: string,
     answer_options: Answer[]
 }
 
-interface Form {
+export interface Form {
     title: string,
     description: string,
     questions: Question[]
 }
 
-interface ShowFormShema {
+export interface ShowFormShema {
     form: Form,
     setForm: (_:Form) => void
 }
 
+
+export interface CreatedCourse {
+    created_by: string,
+    id: number,
+    is_active: boolean,
+    title: string
+}
+
+
+export interface FollowedCourse {
+    id: number,
+    user: string,
+    course: CreatedCourse,
+    course_progress: number
+}
+
 export interface FormCreate extends Partial<Form>{}
 
-export {userShema, userStoreShema, ShowFormShema, Form}
 

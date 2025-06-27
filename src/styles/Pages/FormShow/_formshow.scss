@@ -33,6 +33,8 @@ main.showform__container {
             font-size: large;
             border-radius: 5px;
             padding: 7px;
+            max-width: 50dvw;
+            max-height: 90px;
             border: white 2px dashed;
             margin-bottom: 20px;
         }
@@ -42,6 +44,7 @@ main.showform__container {
         }
 
         section {
+            padding-top: 5px;
             border-bottom: dashed white 2px;
             border-top: dashed white 2px;
             width: 650px;
@@ -60,27 +63,39 @@ main.showform__container {
 
             & > article {
                 @include formbg;
-                height: fit-content;
+                min-height: 180px;
                 align-items: baseline;
                 padding-left: 30px;
                 margin-bottom: 10px;
+                gap: 5px;
+
+                legend.question__legend {
+                    max-width: 100%;
+                    font-size: x-large;
+                    min-width: 50%;
+                    margin-right: 20px;
+                    width: auto;
+                    max-height: 200px;
+                    text-overflow:clip;
+                    overflow-y: auto;
+                }
 
                 fieldset {
                     display: flex;
                     flex-direction: column;
                     outline: none;
+                    height: auto;
                     border: none;
                     width: 90%;
                     gap: 10px;
 
                     article.answer__container {
-                        height: 40px;
+                        min-height: 40px;
                         width: 100%;
                         position: relative;
 
                         label.answer__label {
                             border: 2px black solid;
-                            height: 100%;
                             width: 100%;
                             text-align: center;
                             align-content: center;
@@ -89,8 +104,11 @@ main.showform__container {
                             border-radius:15px;
                             @include pretty_hover;
                             color: black;
-                            font-family: 'Courier New', Courier, monospace;
+                            font-size: 14px;
+                            font-family:  monospace;
                             font-weight: 600;
+                            padding: 5px;
+                            min-height: 40px;
                         }
 
                         input.answer__input {

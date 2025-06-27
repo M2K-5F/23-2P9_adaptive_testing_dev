@@ -1,41 +1,32 @@
-from datetime import datetime, timedelta
-
+"""utils"""
 import jwt
 from passlib.context import CryptContext
+from typing import Union
 
 from config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
 def encode_jwt(
     payload: dict,
     private_key: str = str(settings.auth_jwt.private_key_path),
     algorithm: str = settings.auth_jwt.algorithm,
-    expire_timedelta: timedelta | None = None,
-    expire_munites: int = settings.auth_jwt.access_token_expire
 ):
     with open(private_key, "r") as f:
         private_key = f.read()
     to_encode = payload.copy()
-    now = datetime.utcnow()
-    if expire_timedelta:
-        expire = now + expire_timedelta
-
-    else:
-        expire = now + timedelta(minutes=expire_munites)
-
 
     encoded = jwt.encode(
-                    to_encode,
-                    private_key,
-                    algorithm)
-                    
+        to_encode,
+        private_key,
+        algorithm
+    )
+
     return encoded
 
 
 def decode_jwt(
-    token: str | bytes,
+    token: str,
     public_key: str = str(settings.auth_jwt.public_key_path),
     algorithm: str = settings.auth_jwt.algorithm
 ):

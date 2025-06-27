@@ -1,30 +1,35 @@
 """descriptions for all user interactions (API)"""
-import datetime 
-from typing import Annotated
-import secrets
 from pydantic import BaseModel
-from fastapi import Depends, APIRouter, HTTPException, status, Form, Response, Cookie, Request, Body 
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, \
-                            HTTPBasicCredentials, HTTPBasic, HTTPAuthorizationCredentials
+from fastapi import Depends, APIRouter, HTTPException, status, Cookie, Body, Query 
+from fastapi.security import OAuth2PasswordBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
-from passlib.context import CryptContext
+from typing import Union
 
 from shemas import (
-    UserCreate, Token,
-    UserOut, Poll, PollCreate,
-    PollAnswersSubmit, PollWithQuestions
-    )
-from crud import find_user, create_user, create_poll, find_password, find_polls, \
-                find_questions, submit_poll_answers, check_user_answers_from_db, find_poll
+    UserCreate, UserOut, Course, Roles,
+    QuestionBase, AnswerOptionBase
+)
+from crud import (
+    find_user, create_user, find_password, 
+    compare_role, course_create, change_activity_of_course, 
+    get_courses_list, create_topic, get_teacher_topics_by_course,
+    change_activity_of_topic, create_question, get_question_list,
+    arch_question, follow_course, follow_topic, get_followed_courses,
+    get_followed_topics
+)
 from utils import verify_password, encode_jwt, decode_jwt
+from db import User, UserRole, Role, UserCourse
 
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+auth_router = APIRouter(prefix="/auth", tags=["Auth"])
+course_router = APIRouter(prefix='/course', tags=["Courses"])
+topic_router = APIRouter(prefix="/topic", tags=["Topics"])
+question_router = APIRouter(prefix="/quetion", tags=["Questions"])
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/login", 
+    auto_error=False
+)
 
 class AuthUser(BaseModel): 
     username: str
@@ -33,25 +38,39 @@ class AuthUser(BaseModel):
 async def validate_auth_user(
     user: AuthUser = Body()
 ) -> UserOut:
-    data = await find_user(user.username)
-    password_hash = await find_password(user.username)
+    current_user = find_user(user.username)
+    password_hash = find_password(user.username)
 
-    if not data or not verify_password(user.password, password_hash):
-        raise HTTPException(status_code=401)
+    if not current_user or not verify_password(user.password, password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
-    return UserOut(**data)
+    return current_user
+
 
 
 async def get_current_user(
-    access_token: str|bytes = Cookie(None, include_in_schema=False)
-) -> str:
+    access_token: Union[str, bytes, None] = Cookie(None, include_in_schema=False),
+    bearer_token: Union[str, None]= Depends(oauth2_scheme),
+) -> Union[str, None]:
     credentials_exception = HTTPException(
-        status_code=401,
+        status_code=status.HTTP_403_FORBIDDEN,
         detail="Could not validate credentials",
     )
+    if not access_token and not bearer_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED
+            )
+
     try:
-        payload = decode_jwt(access_token)
+        token = access_token or bearer_token
+        if token is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED
+            )
+
+        payload = decode_jwt(token=token)
         username: str = payload.get("sub")
+
         if username is None:
             raise credentials_exception
 
@@ -62,119 +81,321 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    username: str = Depends(get_current_user),
+    username: str = Depends(get_current_user)
 ) -> UserOut:
-    
-    user = await find_user(username)
+
+    user = find_user(username)
 
     if not user:
         raise HTTPException(
-            status_code=403,
-            detail='hyinya'
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='could not find user'
         )
 
-    if user["is_active"]:
-        return UserOut(**user)
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="user inactive"
-    )
+    return user
 
 
-@router.post("/login")
+@auth_router.post("/login")
 async def login_for_access_token(
-    user: UserCreate = Depends(validate_auth_user)
+    user: UserOut = Depends(validate_auth_user)
 ) -> JSONResponse:
     jwt_payload = {
         "sub": user.username,
         "username": user.username
     }
+    
     token = encode_jwt(jwt_payload)
-    response = JSONResponse(content={'username': user.name, 'role': user.role})
+    response = JSONResponse(
+        content={
+            'username': user.name, 
+            'role': user.role, 
+            "token": token
+        }
+    )
+
     response.set_cookie(
         key='access_token',
-        value=token,
+        value=str(token),
         path="/",
         httponly=True,
         max_age=3600*24*30
     )
-    return  response
+
+    return response
 
 
-@router.post("/register")
+@auth_router.get('/users/me')
+async def users_me(
+    user = Depends(get_current_active_user)
+) -> JSONResponse: 
+    return JSONResponse(
+        content={
+            'nick': user.name, 
+            'status': user.role, 
+        }
+    )
+
+@auth_router.post('/logout')
+async def logout():
+    response = JSONResponse(
+        'logout: true'
+    )
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        httponly=True,
+    )
+    
+    return response
+
+
+@auth_router.post("/register")
 async def register(user: UserCreate) -> str:
-    print(user)
-    user_data = await create_user(user)
+    user_data = create_user(user)
     return user_data
 
+# @router.post("/create_poll")
+# async def create_full_poll(
+#     poll_data: PollCreate,
+#     current_user: UserOut = Depends(get_current_active_user)
+# ) -> JSONResponse:
+#     if compare_role(current_user.username, Roles.STUDENT):
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Only teachers can create polls"
+#         )
 
-@router.post("/create_poll")
-async def create_full_poll(
-    poll_data: PollCreate,
-    current_user: Annotated[UserOut, Depends(get_current_active_user)]
-):
-    if current_user.role == "student":
+#     db_poll = await create_poll(poll_data, current_user)
+
+#     return db_poll
+
+
+# @router.get('/ping_poll/{poll_id}')
+# async def ping_poll(
+#     poll_id: int,
+#     current_user: UserOut = Depends(get_current_active_user)
+# ) -> JSONResponse:
+#     if compare_role(current_user.username, Roles.TEACHER):
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Only studens can see questions"
+#         )
+
+#     return find_poll(poll_id)
+
+
+# @router.get("/get_poll/{poll_id}", response_model=PollWithQuestions)
+# async def get_poll_questions(
+#     poll_id: int,
+#     current_user: UserOut = Depends(get_current_active_user)
+# ) -> JSONResponse:
+#     if compare_role(current_user.username, Roles.TEACHER):
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Only studens can see questions"
+#         )
+
+#     return await find_questions(poll_id)
+
+
+# @router.post("/polls/{poll_id}/submit-answers/")
+# async def submit_answers(
+#     poll_id: int,
+#     answers_data: PollAnswersSubmit,
+#     current_user: UserOut = Depends(get_current_active_user)
+# ) -> JSONResponse:
+#     if compare_role(current_user.username, Roles.TEACHER):
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Only students can submit answers"
+#         )
+
+#     return submit_poll_answers(poll_id, answers_data, current_user)
+
+
+# @router.get("/polls/check")
+# async def check_statistic(
+#     current_user: UserOut = Depends(get_current_active_user)
+# ) -> JSONResponse:
+#     if compare_role(current_user.username, Roles.STUDENT):
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN, 
+#             detail='Only teachers can see stats'
+#         )
+
+#     return check_user_answers_from_db(current_user.username)
+
+
+@course_router.post('/create')
+async def create_course(
+    current_user: UserOut = Depends(get_current_active_user),
+    course_title = Query(default="course")
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only teachers can create polls"
         )
 
-    db_poll = await create_poll(poll_data, current_user)
-
-    return db_poll
+    return course_create(course_title, user=current_user)
 
 
-@router.get('/ping_poll/{poll_id}')
-async def ping_poll(
-    poll_id: int,
-    current_user: UserCreate = Depends(get_current_active_user)
-):
-    if current_user.role == "teacher":
+@course_router.get('/get')
+async def get_teacher_courses(
+    current_user = Depends(get_current_active_user)
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only studens can see questions"
+            detail="Only teachers can create polls"
         )
-    return await find_poll(poll_id)
+    
+    return get_courses_list(current_user)
 
 
-@router.get("/get_poll/{poll_id}", response_model=PollWithQuestions)
-async def get_poll_questions(
-    poll_id: int,
+@course_router.get('/get_followed')
+async def get_followed_teacher_courses(
+    current_user = Depends(get_current_active_user)
+) -> JSONResponse:
+    return get_followed_courses(current_user)
+
+
+@course_router.put('/arch')
+async def arch_course(
+    course_id = Query(default="course"),
     current_user: UserOut = Depends(get_current_active_user)
-):
-    if current_user.role == "teacher":
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only studens can see questions"
+            detail="Only teachers can create polls"
         )
-    content = await find_questions(poll_id)
 
-    return JSONResponse(content=content)
+    return change_activity_of_course(course_id=course_id, user=current_user)
+
+    
+@course_router.post("/follow")
+def follow_teacher_course(
+    current_user: UserOut = Depends(get_current_active_user),
+    course_id = Query()
+) -> JSONResponse:
+    return follow_course(current_user, course_id)
 
 
-@router.post("/polls/{poll_id}/submit-answers/")
-async def submit_answers(
-    poll_id: int,
-    answers_data: PollAnswersSubmit,
-    current_user: UserOut = Depends(get_current_active_user)
-):
-    # Проверяем, что пользователь - студент
-    if current_user.role == "teacher":
+@course_router.delete('/unfollow')
+def unfollow_teacher_course(
+    current_user: UserOut = Depends(get_current_active_user),
+    course_id = Query()
+) -> JSONResponse:
+    return follow_course(current_user, course_id, True)
+
+
+@topic_router.post('/create')
+def create_teacher_topic(
+    current_user: UserOut = Depends(get_current_active_user),
+    topic_title = Query("topic"),
+    description = Query("some_description"),
+    course_id = Query()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only students can submit answers"
+            detail="Only teachers can create topics"
         )
 
-    return submit_poll_answers(poll_id, answers_data, current_user)
+    return create_topic(current_user, topic_title, description, course_id)
 
 
-@router.get("/polls/check")
-async def check_statistic(
-    current_user: UserOut = Depends(get_current_active_user)
-) -> dict:
-    if current_user.role == 'student':
+@topic_router.get("/get")
+def get_teacher_topics(
+    current_user: UserOut = Depends(get_current_active_user),
+    course_id: str = Query()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
         raise HTTPException(
-            status_code=403, 
-            detail='Only teachers can see stats'
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
         )
-    return check_user_answers_from_db(current_user.username)
+
+    return get_teacher_topics_by_course(current_user, course_id)
+
+
+@topic_router.get('/get_followed')
+async def get_followed_teacher_topics(
+    current_user: UserOut = Depends(get_current_active_user),
+    course_id = Query()
+) -> JSONResponse:
+    return get_followed_topics(current_user, course_id)
+
+
+@topic_router.put('/arch')
+def arch_topic(
+    current_user = Depends(get_current_active_user),
+    topic_id: str = Query(),
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return change_activity_of_topic(current_user, topic_id)
+
+
+@topic_router.post("/follow")
+def follow_teacher_topic(
+    current_user = Depends(get_current_active_user),
+    topic_id = Query()
+) -> JSONResponse:
+    return follow_topic(current_user, topic_id)
+
+
+@topic_router.delete('/unfollow')
+def unfollow_teacher_topic(
+    current_user = Depends(get_current_active_user),
+    topic_id = Query()
+) -> JSONResponse:
+    return follow_topic(current_user, topic_id, True)
+
+    
+@question_router.post('/create')
+def create_teacher_question(
+    current_user = Depends(get_current_active_user),
+    topic_id = Query(),
+    question: QuestionBase = Body()
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return create_question(current_user, topic_id, question)
+
+
+@question_router.get('/get')
+def get_questions(
+    current_user = Depends(get_current_active_user),
+    topic_id = Query(),
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return get_question_list(current_user, topic_id)
+
+
+@question_router.put('/acrh')
+def arch_teacher_question(
+    current_user = Depends(get_current_active_user),
+    question_id = Query(),
+) -> JSONResponse:
+    if compare_role(current_user.username, Roles.STUDENT):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can create topics"
+        )
+    
+    return arch_question(current_user, question_id)
