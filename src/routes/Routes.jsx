@@ -9,7 +9,7 @@ import Results from "../Pages/Results";
 import Createform from "../Pages/CreateForm";
 import ForbiddenPage from "../Pages/errors/HTTP_403";
 import ServiceUnavailablePage from "../Pages/errors/HTTP_503";
-import TeacherPortal from "../Pages/TeacherPage";
+import TeacherPortal from "../Pages/TeacherPortal";
 
 
 export default function RoutePaths () {
