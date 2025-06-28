@@ -151,12 +151,10 @@ def get_courses_list(user: UserOut):
 
 @database.atomic()
 def get_followed_courses(user: UserOut):
-    followed_courses = UserCourse.select(UserCourse, Course).join(Course, on=(UserCourse.course == Course.id)).where(UserCourse.user == user.username)
-    if not followed_courses:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No followed courses"
-        )
+    followed_courses = UserCourse\
+                        .select(UserCourse, Course)\
+                        .join(Course, on=(UserCourse.course == Course.id))\
+                        .where(UserCourse.user == user.username)
 
     return JSONResponse([{**uc.__data__, "course": uc.course.__data__} for uc in followed_courses])
 
@@ -198,13 +196,6 @@ def follow_course(user: UserOut, course_id: str, unfollow: bool = False):
 
 @database.atomic()
 def create_topic(user: UserOut, title: str, description: str, course_id: str):
-    current_user = User.get_or_none(User.username == user.username)
-    if not current_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not found"
-        )
-    
     current_course = Course.get_or_none(Course.id == course_id)
     if not current_course:
         raise HTTPException(
@@ -220,7 +211,7 @@ def create_topic(user: UserOut, title: str, description: str, course_id: str):
     )
     if not is_created:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Topic with this title and description already created"
         )
     

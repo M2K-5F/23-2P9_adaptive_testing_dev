@@ -61,6 +61,10 @@ export interface FollowedCourse {
     course_progress: number
 }
 
+export interface CreatedTopic extends CreatedCourse {
+    description: string
+}
+
 export interface FormCreate extends Partial<Form>{}
 
 

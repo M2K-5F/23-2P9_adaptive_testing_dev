@@ -42,7 +42,7 @@
 
 .course-card {
     // @include formbg;
-    background-color: rgb(239, 255, 219);
+    background-color: rgb(255, 255, 255);
     width: 45dvw;
     min-width: 400px;
     border: 1px solid #ddd;
@@ -197,4 +197,11 @@ div.search-list-param {
     transform: translateY(-50%);
     color: #999;
     font-size: 1.2rem;
+}
+
+#topic-title-input, #topic-desc-input {
+    font-size: large;
+    &::placeholder {
+        font-size: large;
+    }
 }

@@ -10,6 +10,7 @@ import Createform from "../Pages/CreateForm";
 import ForbiddenPage from "../Pages/errors/HTTP_403";
 import ServiceUnavailablePage from "../Pages/errors/HTTP_503";
 import TeacherPortal from "../Pages/TeacherPortal";
+import TopicsPortal from "../Pages/EditCoursePortal";
 
 
 export default function RoutePaths () {
@@ -22,21 +23,16 @@ export default function RoutePaths () {
           <Route path="/*" Component={MainLOUT}>
 
             <Route path="users/*">
-              <Route path="autorize" Component={Autorize}/>
-              <Route path="registration" Component={Regisration} />
+                <Route path="autorize" Component={Autorize}/>
+                <Route path="registration" Component={Regisration} />
             </Route>
-
-            <Route path="*" element={<MainRedirect checkAccount={true} /> } >
 
             <Route path="forstudent" Component={StudentPortal} />
-            <Route path="showForm" Component={ShowForm} />
 
-            <Route path="forteacher/" Component={TeacherPortal} />
-                <Route path="forteacher/results/" Component={Results}>
-            </Route>
-            <Route path="createform" Component={Createform} /> 
+            <Route path="forteacher" Component={TeacherPortal} />
 
-            </Route>
+            <Route path="edit/course" Component={TopicsPortal} /> 
+
 
           </Route>
 

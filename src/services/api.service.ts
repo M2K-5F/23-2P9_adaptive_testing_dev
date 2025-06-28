@@ -16,11 +16,14 @@ class ApiServiceClass {
         this.navigate ? this.navigate(path, {replace: replace}) : console.log('еще не инициализирован')
     }
 
-    requestToServer = (URL: apiUrl, init?: RequestInit,queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false) => {
-        const params = {}
-        return fetch(`${URL}?${queries && Object.entries(queries).map((query => {
-            return `${query[0]}=${query[1]}&`
-        }))}`, init)
+    requestToServer = (URL: apiUrl, init?: RequestInit,queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false,) => {
+        let queryString = ''
+
+        if (queries) {
+            Object.entries(queries).map(query => queryString += `${query[0]}=${query[1]}&`)
+        }
+
+        return fetch(`${URL}?${queryString}`, init)
         .catch(() => {
             userStore.setState( state => ({...state, status: "serverunavailable"}))
             throw Error('503')

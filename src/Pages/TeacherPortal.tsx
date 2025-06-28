@@ -7,10 +7,13 @@ import { Loader } from '../Components/Loader'
 import { debounce } from "../utils/debounce";
 import { toast, ToastContainer } from "react-toastify";
 import {useCourseSearch} from '../hooks/useCourseSearch'
+import { SearchElement } from "../Components/SearchElement";
+import { userStore } from "../stores/userStore";
 
 
 export default function TeacherPortal() {
     const nav = useNavigate()
+    const {nick} = userStore()
     const [isLoading, setIsLoading] = useState(true)
     const [courseList, setCourseList] = useImmer<[CreatedCourse[], FollowedCourse[]]>([[], []])
     const [searchQuery, setSearchQuery] = useState<string>("")
@@ -59,6 +62,10 @@ export default function TeacherPortal() {
                     draft[1] = data[1]
                 })
             })
+            .catch(error => {
+                console.log(error);
+                
+            })
             .finally(() => setIsLoading(false))
         }
     }, [isLoading])
@@ -93,53 +100,9 @@ export default function TeacherPortal() {
                 {searchQuery.length > 0 && 
                     <section className="search-variants-section">
                         {searchedCourses.length ? 
-                            searchedCourses.map(course => 
-                                <div 
-                                key={course.id} 
-                                onClick={() => {navigateToCourse(course.id)}} 
-                                className="search-list-param">
-                                    <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
-                                    fill="currentColor" 
-                                    height="24" 
-                                    viewBox="0 0 24 24" 
-                                    width="24" 
-                                    focusable="false" 
-                                    aria-hidden="true">
-                                        <path clipRule="evenodd" 
-                                        d="M16.296 16.996a8 8 0 11.707-.708l3.909 
-                                        3.91-.707.707-3.909-3.909zM18 11a7 7 0 
-                                        00-14 0 7 7 0 1014 0z" 
-                                        fillRule="evenodd">
-                                        </path>
-                                    </svg>
-
-                                    <span 
-                                    key={course.id} 
-                                    className="search-variants">
-                                        <span 
-                                        style={{
-                                            marginRight: '10px',
-                                            color: "#2196F3",
-                                            fontSize: '1.1rem'
-                                            }}>{
-                                                course.title
-                                            }</span>
-
-                                        создан:
-
-                                        <span 
-                                        style={{
-                                            marginLeft: '5px',
-                                            color: "#4CAF50", 
-                                            fontSize: '1.1rem'
-                                        }}>{
-                                            course.created_by
-                                        }</span>
-                                    </span>
-
-                                </div>
-                            ) :
+                            searchedCourses.map( course => 
+                                <SearchElement course={course} navigate={navigateToCourse} navigateToEdit={course.created_by === nick}/>
+                            ) : 
                             <span>Ничего не найдено</span>
                         }
                     </section>
