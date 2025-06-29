@@ -85,7 +85,7 @@ export default function TeacherPortal() {
             <ToastContainer theme='dark' style={{top: "250px",marginLeft: 'auto', right: '100px'}} position='top-right' /> 
 
 
-            <div style={{position: 'sticky'}} className="courses-search-container">
+            <search style={{position: 'sticky'}} className="courses-search-container">
                 <search>
                     <input
                         type="text"
@@ -107,7 +107,7 @@ export default function TeacherPortal() {
                         }
                     </section>
                 }
-            </div>
+            </search>
 
 
             <header className="portal-header">
@@ -137,7 +137,8 @@ export default function TeacherPortal() {
                         </>
                     }
                     <button 
-                    className="create-course-btn"  
+                    className="create-course-btn"
+                    style={{backgroundColor: isCreating && "red"}}
                     onClick={() => 
                         setIsCreating(isCreating === 'creating' ? false : 'creating'
                     )}>{

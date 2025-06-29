@@ -22,8 +22,8 @@ export default function TopicsPortal() {
         return null
     }
 
-    const navigateToTopic = (topicId: number, toEdit: boolean = false) => {
-        nav(`${toEdit ? "/edit/topic" : "/topic"}?topic_id=${topicId}&course_id=${courseId}`)
+    const navigateToTopic = (topicId: number) => {
+        nav(`/edit/topic?topic_id=${topicId}&course_id=${courseId}`)
     }
 
     const handleCreateTopic = () => {
@@ -76,6 +76,7 @@ export default function TopicsPortal() {
         }
     }, [isCreating])
 
+
     if (isLoading) {
         return <Loader /> 
     }
@@ -87,12 +88,13 @@ export default function TopicsPortal() {
             <div style={{position: 'sticky'}} className="courses-search-container">
                 <search>
                     <input
-                        type="text"
-                        placeholder="Поиск по названию темы..."
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.currentTarget.value)}
-                        className="courses-search-input"
+                    type="text"
+                    placeholder="Поиск по названию темы..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.currentTarget.value)}
+                    className="courses-search-input"
                     />
+                    
                     <span className="search-icon">🔍</span>
                 </search>
 
@@ -278,7 +280,7 @@ const TopicElement = ({
             </div>
 
             <div className="course-actions">
-                    <button onClick={() => navigate(topic.id, true)}>
+                    <button onClick={() => navigate(topic.id)}>
                         Перейти к теме
                     </button>
             </div>
