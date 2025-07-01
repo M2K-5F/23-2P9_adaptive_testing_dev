@@ -1,12 +1,12 @@
 import { ChangeEvent, FormEvent, RefObject, useContext, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Input } from "../Components/Input"
+import { Input } from "../../Components/Input"
 import React from "react"
 import axios from "axios"
-import { WaitModal } from '../Components/WaitModal'
-import { URL } from "../config/api.constants"
-import {useRedirect} from '../hooks/useRedirect'
-import { ThrowMsg } from "../utils/form.utils"
+import { WaitModal } from '../../Components/WaitModal'
+import { URL } from "../../config/api.constants"
+import {useRedirect} from '../../hooks/useRedirect'
+import { ThrowMsg } from "../../utils/form.utils"
 // import { pingPoll } from "../services/api.service"
 
 export default function StudentPortal () {

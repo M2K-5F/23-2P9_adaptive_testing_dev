@@ -65,6 +65,22 @@ export interface CreatedTopic extends CreatedCourse {
     description: string
 }
 
+export interface AnswerOption {
+    id: number
+    text: string
+    is_correct: boolean
+    by_question: number
+}
+
+export interface CreatedQuestion {
+    id: number
+    text: string
+    by_topic: number
+    question_type: 'single' | 'multiple'
+    is_active: boolean
+    answer_options: AnswerOption[]
+}
+
 export interface FormCreate extends Partial<Form>{}
 
 

@@ -1,31 +1,28 @@
-import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
-import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useState } from "react";
-import { archTopic, createTopic, getTopics, getFollowedTopics } from "../services/api.service";
-import { DraftFunction, Updater, useImmer } from "use-immer";
-import { CreatedTopic } from "../types/interfaces";
-import { Loader } from '../Components/Loader'
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { createTopic, getTopics } from "../../../services/api.service";
+import { CreatedTopic } from "../../../types/interfaces";
+import { Loader } from '../../../Components/Loader'
 import { toast, ToastContainer } from "react-toastify";
-import { useTopicSearch } from '../hooks/useTopicSearch'
+import { useTopicSearch } from '../../../hooks/useTopicSearch'
+import {SearchElement}  from '../../../Components/SearchElement'
+import { TopicElement } from "./components/TopicElement";
 
 export default function TopicsPortal() {
     const nav = useNavigate()
-    const [searchParams] = useSearchParams()
-    const courseId = searchParams.get('course_id')
+    const courseId = useSearchParams()[0].get('course_id')
     const [isLoading, setIsLoading] = useState(true)
     const [topicList, setTopicList] = useState<CreatedTopic[]>([])
     const [searchQuery, setSearchQuery] = useState<string>("")
     const [isCreating, setIsCreating] = useState<"creating" | 'created' | false>(false)
     const searchedTopics = useTopicSearch(topicList, searchQuery)
-
+    const [expandedTopic, setExpandedTopic] = useState<number>(-1)
+    
     if (!courseId) {
         nav('/courses')
         return null
     }
-
-    const navigateToTopic = (topicId: number) => {
-        nav(`/edit/topic?topic_id=${topicId}&course_id=${courseId}`)
-    }
-
+    
     const handleCreateTopic = () => {
         const titleInput = document.getElementById("topic-title-input") as HTMLInputElement
         const descInput = document.getElementById("topic-desc-input") as HTMLInputElement
@@ -76,7 +73,8 @@ export default function TopicsPortal() {
         }
     }, [isCreating])
 
-
+    console.log(expandedTopic);
+    
     if (isLoading) {
         return <Loader /> 
     }
@@ -102,42 +100,7 @@ export default function TopicsPortal() {
                     <section className="search-variants-section">
                         {searchedTopics.length ? 
                             searchedTopics.map(topic => 
-                                <div 
-                                key={topic.id} 
-                                onClick={() => navigateToTopic(topic.id)} 
-                                className="search-list-param"
-                                >
-                                    <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
-                                    fill="currentColor" 
-                                    height="24" 
-                                    viewBox="0 0 24 24" 
-                                    width="24" 
-                                    focusable="false" 
-                                    aria-hidden="true"
-                                    >
-                                        <path 
-                                        clipRule="evenodd" 
-                                        d="M16.296 16.996a8 8 0 11.707-.708l3.909 
-                                        3.91-.707.707-3.909-3.909zM18 11a7 7 0 
-                                        00-14 0 7 7 0 1014 0z" 
-                                        fillRule="evenodd"
-                                        />
-                                    </svg>
-
-                                    <span 
-                                    className="search-variants"
-                                    >
-                                        <span 
-                                        style={{
-                                            marginRight: '10px',
-                                            color: "#2196F3",
-                                            fontSize: '1.1rem'
-                                        }}>
-                                            {topic.title}
-                                        </span>
-                                    </span>
-                                </div>
+                                <SearchElement course={topic} callbackfn={(topic) => {setExpandedTopic(topic.id)}}/> 
                             ) :
                             <span>Ничего не найдено</span>
                         }
@@ -227,63 +190,18 @@ export default function TopicsPortal() {
 
             {topicList.length ? 
                 <div className="courses-flex">
-                    {topicList.map(topic => 
+                    {topicList.map((topic, index) => 
                         <TopicElement 
                             key={topic.id}
                             topic={topic} 
                             loadingSetter={setIsLoading}
-                            navigate={navigateToTopic}
+                            index={index}
+                            isExpanded={expandedTopic === topic.id}
                         />
                     )}
                 </div> 
                 : <p className="no-courses-message">Нет созданных тем</p>
             }
-        </div>
-    )
-}
-
-const TopicElement = ({ 
-    topic, 
-    loadingSetter, 
-    navigate, 
-}: {
-    topic, 
-    loadingSetter: Dispatch<SetStateAction<boolean>>, 
-    navigate: (topicId: number, toEdit?: boolean) => void,
-}) => {
-    return (
-        <div className={`course-card ${!topic.is_active ? 'archived' : ''}`}>
-            <div className="course-header">
-                <h3>{topic.title}</h3>
-                    <button
-                    onClick={() => {
-                        archTopic(topic.id)
-                        .then(() => {
-                            loadingSetter(true)
-                        })
-                    }}
-                    className="archive-btn"
-                    title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
-                    >{
-                        topic.is_active ? '🗄️' : '📦'
-                    }</button>
-            </div>
-
-            <p>{topic.description || "Нет описания"}</p>
-
-            <div className="course-status">
-                Статус: {topic.is_active ? 
-                    <span key={topic.id} className="active">Активный</span>
-                    : 
-                    <span key={topic.id} className="archived">В архиве</span>
-                }
-            </div>
-
-            <div className="course-actions">
-                    <button onClick={() => navigate(topic.id)}>
-                        Перейти к теме
-                    </button>
-            </div>
         </div>
     )
 }

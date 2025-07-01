@@ -1,11 +1,11 @@
 import { isRouteErrorResponse, useNavigate } from "react-router-dom"
 import React, { FormEvent, RefObject, useEffect, useRef } from "react"
-import { userStore } from "../stores/userStore"
-import { Input } from "../Components/Input"
-import {WaitModal} from '../Components/WaitModal'
-import { ThrowMsg } from "../utils/form.utils"
-import { URL } from "../config/api.constants";
-import { loginUser } from "../services/api.service"
+import { userStore } from "../../../stores/userStore"
+import { Input } from "../../../Components/Input"
+import {WaitModal} from '../../../Components/WaitModal'
+import { ThrowMsg } from "../../../utils/form.utils"
+import { URL } from "../../../config/api.constants";
+import { loginUser } from "../../../services/api.service"
 
 export default function Autorize () {
     const nav = useNavigate()

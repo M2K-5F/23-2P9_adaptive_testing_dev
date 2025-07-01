@@ -1,11 +1,11 @@
 import { FormEvent, RefObject, useRef, useState } from "react"
 import { data, Form, useNavigate } from "react-router-dom"
-import { RegistrationForm } from "../types/interfaces"
-import { Input } from "../Components/Input"
-import { WaitModal } from "../Components/WaitModal"
-import { URL } from "../config/api.constants";
-import { ThrowMsg } from "../utils/form.utils"
-import { registerUser } from "../services/api.service"
+import { RegistrationForm } from "../../../types/interfaces"
+import { Input } from "../../../Components/Input"
+import { WaitModal } from "../../../Components/WaitModal"
+import { URL } from "../../../config/api.constants";
+import { ThrowMsg } from "../../../utils/form.utils"
+import { registerUser } from "../../../services/api.service"
 
 export default function Regisration () {
     const SuccessfulModal: RefObject<HTMLDialogElement | null> = useRef(null)

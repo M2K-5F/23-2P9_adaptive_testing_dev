@@ -1,14 +1,14 @@
 import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { archCourse, createCourse, getCourses, getFollowedCourses } from "../services/api.service";
+import { archCourse, createCourse, getCourses, getFollowedCourses } from "../../services/api.service";
 import { DraftFunction, Updater, useImmer } from "use-immer";
-import { CreatedCourse, FollowedCourse } from "../types/interfaces";
-import { Loader } from '../Components/Loader'
-import { debounce } from "../utils/debounce";
+import { CreatedCourse, FollowedCourse } from "../../types/interfaces";
+import { Loader } from '../../Components/Loader'
+import { debounce } from "../../utils/debounce";
 import { toast, ToastContainer } from "react-toastify";
-import {useCourseSearch} from '../hooks/useCourseSearch'
-import { SearchElement } from "../Components/SearchElement";
-import { userStore } from "../stores/userStore";
+import {useCourseSearch} from '../../hooks/useCourseSearch'
+import { SearchElement } from "../../Components/SearchElement";
+import { userStore } from "../../stores/userStore";
 
 
 export default function TeacherPortal() {
@@ -138,7 +138,7 @@ export default function TeacherPortal() {
                     }
                     <button 
                     className="create-course-btn"
-                    style={{backgroundColor: isCreating && "red"}}
+                    style={ isCreating ? {backgroundColor: "red"} : {}}
                     onClick={() => 
                         setIsCreating(isCreating === 'creating' ? false : 'creating'
                     )}>{

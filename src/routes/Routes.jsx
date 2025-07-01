@@ -1,16 +1,12 @@
 import { BrowserRouter, redirect, Route, Routes, useNavigate } from "react-router-dom";
-import StudentPortal from "../Pages/StudentPage";
+import StudentPortal from "../Pages/forstudent/StudentPage";
 import MainLOUT from "../Layouts/MainLOUT";
-import Autorize from "../Pages/Autorize";
-import Regisration from "../Pages/Registration";
-import MainRedirect from "../Layouts/Redirect";
-import ShowForm from "../Pages/Form";
-import Results from "../Pages/Results";
-import Createform from "../Pages/CreateForm";
+import Autorize from "../Pages/users/Autorize/Autorize";
+import Regisration from "../Pages/users/Registration/Registration";
 import ForbiddenPage from "../Pages/errors/HTTP_403";
 import ServiceUnavailablePage from "../Pages/errors/HTTP_503";
-import TeacherPortal from "../Pages/TeacherPortal";
-import TopicsPortal from "../Pages/EditCoursePortal";
+import TeacherPortal from "../Pages/forteacher/TeacherPortal";
+import TopicsPortal from "../Pages/edit/course/EditCoursePortal";
 
 
 export default function RoutePaths () {
@@ -32,7 +28,6 @@ export default function RoutePaths () {
             <Route path="forteacher" Component={TeacherPortal} />
 
             <Route path="edit/course" Component={TopicsPortal} /> 
-
 
           </Route>
 

@@ -24,7 +24,7 @@ from db import User, UserRole, Role, UserCourse
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 course_router = APIRouter(prefix='/course', tags=["Courses"])
 topic_router = APIRouter(prefix="/topic", tags=["Topics"])
-question_router = APIRouter(prefix="/quetion", tags=["Questions"])
+question_router = APIRouter(prefix="/question", tags=["Questions"])
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login", 
@@ -387,7 +387,7 @@ def get_questions(
     return get_question_list(current_user, topic_id)
 
 
-@question_router.put('/acrh')
+@question_router.put('/arch')
 def arch_teacher_question(
     current_user = Depends(get_current_active_user),
     question_id = Query(),

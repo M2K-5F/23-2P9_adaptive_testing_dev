@@ -1,15 +1,14 @@
 import { NavigateFunction } from "react-router-dom"
 import { CreatedCourse } from "../types/interfaces"
 
-export const SearchElement = ({course, navigate, navigateToEdit}: {
+export const SearchElement = ({course, callbackfn}: {
     course: CreatedCourse,
-    navigate: (courseID: number, toEdit?: boolean) => void, 
-    navigateToEdit?: boolean
+    callbackfn: (...args) => void
 }) => {
     return (
         <div 
         key={course.id} 
-        onClick={() => {navigate(course.id, navigateToEdit)}} 
+        onClick={() => {callbackfn(course)}} 
         className="search-list-param">
             <svg 
             xmlns="http://www.w3.org/2000/svg" 
