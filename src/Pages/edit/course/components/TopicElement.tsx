@@ -36,10 +36,10 @@ export const TopicElement = ({
 
 
     return (
-        <article onClick={() => setExpanded(!expanded)} style={{order: order}} className={`course-card ${!topic.is_active ? 'archived' : ''} ${expanded ? 'expanded' : ''}`}>
+        <article style={{order: order}} className={`course-card ${!topic.is_active ? 'archived' : ''} ${expanded ? 'expanded' : ''}`}>
             <section className="summary">
                 <div className="course-header">
-                    <h3>{topic.title}</h3>
+                    <h3  onClick={() => setExpanded(!expanded)}>{topic.title}</h3>
                         <button
                         onClick={() => {
                             archTopic(topic.id)
@@ -70,10 +70,12 @@ export const TopicElement = ({
             {expanded && 
                 <section className="details">
                     <h4 style={{marginTop: '10px'}}>Вопросы темы:</h4>
-                    {!questions?.length && <span>Нет созданных вопросов</span>}
-                    {questions?.length && questions.map( question => 
-                        <QuestionElement key={question.id} question={question} /> 
-                    )}
+                    {questions?.length ? 
+                        questions.map( question => 
+                            <QuestionElement key={question.id} question={question} /> 
+                        ) : 
+                        <span>Нет созданных вопросов</span> 
+                    }
                 </section>}
         </article>
     )
