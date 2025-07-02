@@ -23,6 +23,7 @@ export default function TopicsPortal() {
         return null
     }
     
+    
     const handleCreateTopic = () => {
         const titleInput = document.getElementById("topic-title-input") as HTMLInputElement
         const descInput = document.getElementById("topic-desc-input") as HTMLInputElement

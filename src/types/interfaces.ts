@@ -22,7 +22,7 @@ export interface userShema {
 }
 
 export interface Answer {
-    id?: number
+    id: number
     text: string
     is_correct? : boolean
 }

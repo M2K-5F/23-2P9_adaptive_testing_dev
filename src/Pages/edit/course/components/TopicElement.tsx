@@ -1,16 +1,14 @@
 import { Dispatch, SetStateAction, useState, useEffect, useLayoutEffect} from "react"
-import {CreatedTopic, CreatedQuestion} from '../../../../types/interfaces'
+import {CreatedTopic, CreatedQuestion, Question} from '../../../../types/interfaces'
 import {useFlexOrder} from '../../../../hooks/useFlexOrder'
 import {getQuestions, archTopic } from '../../../../services/api.service'
 import {QuestionElement} from '../components/QuestionElement'
+import { CreatedQuestionElement } from "./CreateQuestionElement"
+import { Button } from "../../../../Components/Button"
+import { useImmer } from "use-immer"
 
 
-export const TopicElement = ({ 
-    topic, 
-    loadingSetter,
-    index,
-    isExpanded
-}: {
+export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
     topic: CreatedTopic, 
     loadingSetter: Dispatch<SetStateAction<boolean>>,
     index: number,
@@ -18,6 +16,7 @@ export const TopicElement = ({
 }) => {
     const [expanded, setExpanded] = useState<boolean>(false)
     const [questions, setQuestions] = useState<CreatedQuestion[] | undefined>()
+    const [isCreating, setIsCreating] = useState<boolean>(false)
     const order = useFlexOrder(index, expanded)
 
     useLayoutEffect(() => {
@@ -33,6 +32,7 @@ export const TopicElement = ({
             .catch((error: Error) => setQuestions([]))
         }
     }, [expanded] ) 
+    
 
 
     return (
@@ -74,8 +74,40 @@ export const TopicElement = ({
                         questions.map( question => 
                             <QuestionElement key={question.id} question={question} /> 
                         ) : 
-                        <span>Нет созданных вопросов</span> 
+                        <h5 style={{margin: '10px 10px'}}>Нет созданных вопросов</h5> 
                     }
+                    {!isCreating ?
+                        <button 
+                        style={{marginLeft: '10px', height: '35px'}} 
+                        onClick={() => {setIsCreating(true)}} 
+                        className="create-course-btn"
+                        >
+                            + Создать вопрос
+                        </button> 
+                            :
+                        <>
+                        <CreatedQuestionElement 
+                        isCreatingSetter={setIsCreating}
+                        />
+                        
+                        <menu>
+                            <button 
+                            className="create-course-btn"
+                            onClick={() => console.log()
+                            }
+                            >
+                                ✔ Создать    
+                            </button>
+
+                            <button
+                            style={{backgroundColor: 'red'}}
+                            className="create-course-btn"
+                            onClick={() => setIsCreating(false)}>
+                                Отменить создание
+                            </button>
+                        </menu>
+                        </>
+                        }
                 </section>}
         </article>
     )

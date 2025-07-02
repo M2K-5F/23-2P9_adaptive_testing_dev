@@ -194,15 +194,16 @@ export default function Createform () {
 
                 <section className="createform__questions__container">
                     {form.questions.map( (question, index) => 
-                    <QuestionElement 
-                    addAnswer={addAnswer}
-                    key={index} 
-                    question={question} 
-                    id={index} 
-                    answerTextSetter={setAnswerText} 
-                    questionTextSetter={setQuestionText}
-                    answerCorrectSetter={setAnswerCorrect} 
-                    /> )}
+                        <QuestionElement 
+                        addAnswer={addAnswer}
+                        key={index} 
+                        question={question} 
+                        id={index} 
+                        answerTextSetter={setAnswerText} 
+                        questionTextSetter={setQuestionText}
+                        answerCorrectSetter={setAnswerCorrect} 
+                        />
+                    )}
                     <Button 
                     className="createform__addquestion__button"
                     isPretty
