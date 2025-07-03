@@ -2,6 +2,9 @@ import { memo, ChangeEvent, SetStateAction, Dispatch } from "react"
 import { Button } from "../../../../Components/Button"
 import { Answer, Question } from "../../../../types/interfaces"
 import { Updater, useImmer } from "use-immer"
+import { ThrowMsg } from "../../../../utils/form.utils"
+import { toast, ToastContainer } from "react-toastify"
+import { createQuestion } from "../../../../services/api.service"
 
 
 const autoResizeTextarea = (textarea: HTMLTextAreaElement) => {
@@ -12,15 +15,61 @@ const autoResizeTextarea = (textarea: HTMLTextAreaElement) => {
 
 export const CreatedQuestionElement = memo((props: {
     isCreatingSetter: Dispatch<SetStateAction<boolean>>
+    topic_id: number
 }) => {
-    const [createdQuestion, setCreatedQuestion] = useImmer<Question>({id: 0, answer_options: [{text: '', is_correct: false, id: 0}], text: '', question_type: 'single'})
+    const [createdQuestion, setCreatedQuestion] = useImmer<Question>({answer_options: [{ id: 0, text: '', is_correct: false}], text: '', question_type: 'single'})
+
+    const createQuestionFromDraft = () => {
+        const question = createdQuestion
+
+        if (!question.text ) {
+            toast.error('Введите текст вопроса', {containerId: 'toast-output-2'})
+            return
+        }
+
+        if (!question.answer_options.length) {
+            toast.error('Как тебе удалось удалить первый вариант ответа!?', {containerId: 'toast-output-2'})
+            return
+        }
+        
+        if (question.answer_options.filter(answer => answer.text).length !== question.answer_options.length) {
+            toast.error('Вы заполнили не все поля с ответами', {containerId: 'toast-output-2'})
+            return
+        }
+        const correctAnswersCount = question.answer_options.filter(answer => answer.is_correct).length
+        switch (true) {
+            case correctAnswersCount === 0:
+                toast.error('Выберите хотя бы один верный вариант ответа', {containerId: 'toast-output-2'})
+                return
+            
+            case correctAnswersCount === question.answer_options.length:
+                toast.error('Верными не могут быть все ответы', {containerId: 'toast-output-2'})
+                return
+        }
+
+        const toCreate: Question = {text: question.text, question_type: question.question_type, answer_options: question.answer_options.map(answer => ({text: answer.text, is_correct: answer.is_correct}))}
+        console.log(toCreate);
+        
+        createQuestion(props.topic_id, toCreate)
+        .then(() => {
+            toast.success('Вопрос в теме успешно создан', {containerId: 'edit-course-portal-output'})
+            props.isCreatingSetter(false)
+        })
+        .catch((error: Error) => {
+            switch (error.message) {
+                case '400':
+
+            }
+        })
+        
+    }
 
 
     return(
-        <article className="question__container" >
-            <label className="question__text__label">Текст вопроса:</label>
-            <textarea 
-            className="main_input"
+        <article className="create-question-container question-card expanded" >
+            <textarea
+            style={{resize: 'none'}}
+            className="pretty_input"
             onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
                 const value = event.currentTarget.value
                 setCreatedQuestion((draft) => {draft.text = value})
@@ -28,9 +77,13 @@ export const CreatedQuestionElement = memo((props: {
             value={createdQuestion.text} 
             />
 
-            <label className="question__answers__label">Варианты ответов:</label>
+            <h5>Тип: {createdQuestion.question_type === 'single' ? "Один ответ" : "Несколько ответов"}</h5>
 
-            <fieldset className="">
+            <fieldset 
+            style={{marginBottom: '10px'}} 
+            className="answer-options"
+            >
+                <h5>Варианты ответов:</h5>
                 {createdQuestion.answer_options.map( (answer, index) => 
                     <AnswerElement 
                     index={index}
@@ -39,9 +92,28 @@ export const CreatedQuestionElement = memo((props: {
                     />
                 )}
             </fieldset>
+
+            <output className="">
+                <ToastContainer
+                toastStyle={{marginBottom: '10px'}}
+                pauseOnHover={false}
+                className={'ToastifyBlock'}
+                position='bottom-left'
+                theme='dark'
+                // autoClose={0}
+                key="create-question-output-toast-container" 
+                containerId="toast-output-2" 
+                /> 
+            </output>
             
-            <menu style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-                <button
+            <menu 
+            style={{
+                display: 'flex', 
+                gap: '10px', 
+                marginBottom: '10px'
+            }}>
+                <button 
+                title="Добавить вариант ответа"
                 className="create-course-btn"
                 onClick={() => {
                     setCreatedQuestion(draft => {
@@ -50,6 +122,14 @@ export const CreatedQuestionElement = memo((props: {
                 }}
                 >
                     + Добавить вариант ответа
+                </button>
+
+                <button 
+                title="Создать вопрос в курсе"
+                className="create-course-btn"
+                onClick={() => createQuestionFromDraft()}
+                >
+                    ✔ Создать вопрос   
                 </button>
             </menu>
 
@@ -86,13 +166,12 @@ const AnswerElement = memo((props: {
             </header>
             <div>    
                 <textarea maxLength={115} minLength={3}
-                required
+                style={{resize: 'none'}}
                 className="pretty_input"
                 value={props.answer.text}
                 onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
                     const value = event.currentTarget.value
                     props.questionSetter(draft => {draft.answer_options[props.index].text = value})
-                    autoResizeTextarea(event.currentTarget)
                 }}
                 />
             </div>

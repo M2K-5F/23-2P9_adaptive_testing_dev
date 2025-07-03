@@ -324,7 +324,7 @@ def create_question(user: UserOut, topic_id: str, question: QuestionBase ):
     created_question, is_created = Question.get_or_create(
         text = question.text,
         by_topic = current_topic,
-        question_type = "single"
+        defaults = {"question_type" : question.question_type}
     )
 
     if not is_created:

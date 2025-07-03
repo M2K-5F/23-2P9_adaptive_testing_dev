@@ -259,6 +259,9 @@ export const createQuestion = (topic_id: number, question: Question) => {
         {
             credentials: 'include',
             method: "post",
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(question),
         },
         {   

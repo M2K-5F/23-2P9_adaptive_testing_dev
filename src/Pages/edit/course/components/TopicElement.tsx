@@ -87,18 +87,11 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
                             :
                         <>
                         <CreatedQuestionElement 
+                        topic_id={topic.id}
                         isCreatingSetter={setIsCreating}
                         />
                         
                         <menu>
-                            <button 
-                            className="create-course-btn"
-                            onClick={() => console.log()
-                            }
-                            >
-                                ✔ Создать    
-                            </button>
-
                             <button
                             style={{backgroundColor: 'red'}}
                             className="create-course-btn"

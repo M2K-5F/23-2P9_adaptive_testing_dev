@@ -17,7 +17,7 @@ export const QuestionElement = ({
     }
 
     return (
-        <div className={`question-card ${expanded ? 'expanded' : ''} ${isActive ? '' : 'archived'}`}>
+        <article className={`question-card ${expanded ? 'expanded' : ''} ${isActive ? '' : 'archived'}`}>
             <div className="question-header">
                 <h4 onClick={() => setExpanded(!expanded)} style={{cursor: 'pointer'}}>
                     {question.text}
@@ -63,6 +63,6 @@ export const QuestionElement = ({
                     )}
                 </div>
             )}
-        </div>
+        </article>
     )
 }

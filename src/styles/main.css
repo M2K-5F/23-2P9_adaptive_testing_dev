@@ -87,6 +87,14 @@ body {
   transition: --bg-color-start 0.4s, --bg-color-stop 0.4s;
 }
 
+.Toastify__toast {
+  flex: none;
+}
+
+.ToastifyBlock {
+  position: static;
+}
+
 #main-nav {
   display: flex;
   align-items: center;

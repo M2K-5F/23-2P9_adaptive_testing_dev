@@ -31,12 +31,12 @@ export default function TopicsPortal() {
         const description = descInput.value.trim()
         
         if (title.length < 3) {
-            toast.error("Название должно содержать минимум 3 символа")
+            toast.error("Название должно содержать минимум 3 символа", {containerId: 'edit-course-portal-output'})
             return
         }
 
         if (description.length < 3) {
-            toast.error("Описание должно содержать минимум 3 символа")
+            toast.error("Описание должно содержать минимум 3 символа", {containerId: 'edit-course-portal-output'})
             return
         }
 
@@ -49,9 +49,9 @@ export default function TopicsPortal() {
         })
         .catch((error: Error) => {
             if (error.message === "400") {
-                toast.error('Тема с таким названием уже существует')
+                toast.error('Тема с таким названием уже существует', {containerId: 'edit-course-portal-output'})
             } else {
-                toast.error('Ошибка при создании темы')
+                toast.error('Ошибка при создании темы', {containerId: 'edit-course-portal-output'})
             }
         })
     }
@@ -82,7 +82,7 @@ export default function TopicsPortal() {
 
     return (
         <div className="teacher-portal">
-            <ToastContainer theme='dark' style={{top: "250px", marginLeft: 'auto', right: '100px'}} position='top-right' /> 
+            <ToastContainer containerId={'edit-course-portal-output'} theme='dark' style={{top: "250px", marginLeft: 'auto', right: '100px'}} position='top-right' /> 
 
             <div style={{position: 'sticky'}} className="courses-search-container">
                 <search>
