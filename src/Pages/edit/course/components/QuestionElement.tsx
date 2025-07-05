@@ -1,46 +1,55 @@
 import { CreatedQuestion } from "../../../../types/interfaces"
-import { useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { archQuestion } from "../../../../services/api.service"
 
 
 export const QuestionElement = ({ 
-    question,
+    question, loadingSetter
 }: {
     question: CreatedQuestion,
+    loadingSetter: Dispatch<SetStateAction<boolean>>
 }) => {
     const [expanded, setExpanded] = useState<boolean>(false)
-    const [isActive, setIsArchiving] = useState<boolean>(question.is_active)
 
     const handleArchive = () => {
         archQuestion(question.id)
-        .then(() => setIsArchiving(!isActive))
+        .then(() => loadingSetter(true))
     }
 
+
     return (
-        <article className={`question-card ${expanded ? 'expanded' : ''} ${isActive ? '' : 'archived'}`}>
+        <article className={`question-card ${expanded ? 'expanded' : ''} ${question.is_active ? '' : 'archived'}`}>
+
             <div className="question-header">
+
                 <h4 onClick={() => setExpanded(!expanded)} style={{cursor: 'pointer'}}>
                     {question.text}
                 </h4>
+
                 <div className="question-actions">
+
                     <button 
                     className="question-action-btn"
                     onClick={handleArchive}
                     title={question.is_active ? 'Архивировать' : 'Разархивировать'}
                     >
-                        {isActive ? '🗄️' : '📦'}
+                        {question.is_active ? '🗄️' : '📦'}
                     </button>
+                    
                 </div>
+
             </div>
 
             <div className="question-meta">
+
                 <span>
                     Тип: {question.question_type === 'single' ? 'Один ответ' : 'Множественный выбор'}
                 </span>
 
-                <span className={`status ${!isActive ? 'archived' : 'active'}`}>
-                    {isActive ? 'Активный' : 'В архиве'}
+                <span className={`status ${!question.is_active ? 'archived' : 'active'}`}>
+                    {question.is_active ? 'Активный' : 'В архиве'}
                 </span>
+
             </div>
 
             {expanded && (

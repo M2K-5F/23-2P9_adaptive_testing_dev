@@ -22,14 +22,14 @@ export interface userShema {
 }
 
 export interface Answer {
-    id: number
+    id?: number
     text: string
     is_correct? : boolean
 }
 
 export interface Question {
     id?: number
-    question_type: 'single'
+    question_type: 'single' | 'multiple'
     text: string,
     answer_options: Answer[]
 }
@@ -66,7 +66,7 @@ export interface CreatedTopic extends CreatedCourse {
 }
 
 export interface AnswerOption {
-    id: number
+    id?: number
     text: string
     is_correct: boolean
     by_question: number

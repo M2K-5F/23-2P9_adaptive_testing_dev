@@ -101,7 +101,7 @@ export default function TeacherPortal() {
                     <section className="search-variants-section">
                         {searchedCourses.length ? 
                             searchedCourses.map( course => 
-                                <SearchElement course={course} navigate={navigateToCourse} navigateToEdit={course.created_by === nick}/>
+                                <SearchElement course={course} callbackfn={(args) => navigateToCourse(course.id, course.created_by === nick)} />
                             ) : 
                             <span>Ничего не найдено</span>
                         }

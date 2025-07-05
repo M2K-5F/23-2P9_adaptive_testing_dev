@@ -4,8 +4,7 @@ import {useFlexOrder} from '../../../../hooks/useFlexOrder'
 import {getQuestions, archTopic } from '../../../../services/api.service'
 import {QuestionElement} from '../components/QuestionElement'
 import { CreatedQuestionElement } from "./CreateQuestionElement"
-import { Button } from "../../../../Components/Button"
-import { useImmer } from "use-immer"
+import {Loader} from '../../../../Components/Loader'
 
 
 export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
@@ -15,8 +14,6 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
     isExpanded?: boolean
 }) => {
     const [expanded, setExpanded] = useState<boolean>(false)
-    const [questions, setQuestions] = useState<CreatedQuestion[] | undefined>()
-    const [isCreating, setIsCreating] = useState<boolean>(false)
     const order = useFlexOrder(index, expanded)
 
     useLayoutEffect(() => {
@@ -25,35 +22,29 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
         } else { setExpanded(false)}
     }, [isExpanded])
 
-    useEffect(() => {
-        if (expanded) {
-            getQuestions(topic.id)
-            .then((data: CreatedQuestion[]) => setQuestions(data))
-            .catch((error: Error) => setQuestions([]))
-        }
-    }, [expanded] ) 
-    
-
 
     return (
         <article style={{order: order}} className={`course-card ${!topic.is_active ? 'archived' : ''} ${expanded ? 'expanded' : ''}`}>
             <section className="summary">
                 <div className="course-header">
                     <h3  onClick={() => setExpanded(!expanded)}>{topic.title}</h3>
-                        <button
-                        onClick={() => {
-                            archTopic(topic.id)
-                            .then(() => {
-                                loadingSetter(true)
-                            })
-                        }}
-                        className="archive-btn"
-                        title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
-                        >{
-                            topic.is_active ? '🗄️' : '📦'
-                        }</button>
+
+                    <button
+                    onClick={() => {
+                        archTopic(topic.id)
+                        .then(() => {
+                            loadingSetter(true)
+                        })
+                    }}
+                    className="archive-btn"
+                    title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
+                    >{
+                        topic.is_active ? '🗄️' : '📦'
+                    }</button>
                 </div>
+
                 <p>{topic.description || "Нет описания"}</p>
+
                 <div className="course-status">
                     Статус: {topic.is_active ?
                         <span key={topic.id} className="active">Активный</span>
@@ -61,21 +52,52 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
                         <span key={topic.id} className="archived">В архиве</span>
                     }
                 </div>
+
                 <div className="course-actions">
                         <button style={{backgroundColor: expanded ? 'red': ''}} onClick={() => setExpanded(!expanded)}>
                             {expanded ? 'Закрыть тему' : 'Перейти к теме'}
                         </button>
                 </div>
             </section>
-            {expanded && 
-                <section className="details">
+
+            {expanded && <TopicSummary topic={topic} />}
+        </article>
+    )
+}
+
+const TopicSummary = (props: {
+    topic: CreatedTopic
+}) => {
+    const [isLoading, setIsLoading] = useState(true)
+    const [questions, setQuestions] = useState<CreatedQuestion[]>([])
+    const [isCreating, setIsCreating] = useState(false)
+
+    useEffect(() => {
+        if (isLoading) {
+            getQuestions(props.topic.id)
+            .then((data: CreatedQuestion[]) => {
+                setQuestions(data)
+            })
+            .finally(() => setIsLoading(false))
+        }
+    })
+    
+
+    return(
+        <section className="details">
+
                     <h4 style={{marginTop: '10px'}}>Вопросы темы:</h4>
-                    {questions?.length ? 
-                        questions.map( question => 
-                            <QuestionElement key={question.id} question={question} /> 
+
+                    {!isLoading ? 
+                        (questions?.length ? 
+                            questions.map(question => 
+                                <QuestionElement key={question.id} loadingSetter={setIsLoading} question={question} /> 
+                            ) : 
+                            <h5 style={{margin: '10px 10px'}}>Нет созданных вопросов</h5> 
                         ) : 
-                        <h5 style={{margin: '10px 10px'}}>Нет созданных вопросов</h5> 
+                        <Loader /> 
                     }
+
                     {!isCreating ?
                         <button 
                         style={{marginLeft: '10px', height: '35px'}} 
@@ -87,7 +109,8 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
                             :
                         <>
                         <CreatedQuestionElement 
-                        topic_id={topic.id}
+                        topic_id={props.topic.id}
+                        topicLoadingSetter={setIsLoading}
                         isCreatingSetter={setIsCreating}
                         />
                         
@@ -100,8 +123,7 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
                             </button>
                         </menu>
                         </>
-                        }
-                </section>}
-        </article>
+                    }
+                </section>
     )
 }

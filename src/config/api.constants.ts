@@ -1,4 +1,8 @@
-export const URL = 'http://localhost:8001' as const
+const host = 'http://localhost' as const
+const port = '8001' as const 
+
+export const URL = `${host}:${port}` as const
+
 const courseUrl = `${URL}/course` as const
 const topicUrl = `${URL}/topic` as const
 const questionUrl = `${URL}/question` as const

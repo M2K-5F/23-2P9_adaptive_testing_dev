@@ -1,8 +1,6 @@
 import { memo, ChangeEvent, SetStateAction, Dispatch } from "react"
-import { Button } from "../../../../Components/Button"
 import { Answer, Question } from "../../../../types/interfaces"
 import { Updater, useImmer } from "use-immer"
-import { ThrowMsg } from "../../../../utils/form.utils"
 import { toast, ToastContainer } from "react-toastify"
 import { createQuestion } from "../../../../services/api.service"
 
@@ -14,10 +12,21 @@ const autoResizeTextarea = (textarea: HTMLTextAreaElement) => {
 
 
 export const CreatedQuestionElement = memo((props: {
+    topicLoadingSetter: Dispatch<SetStateAction<boolean>>
     isCreatingSetter: Dispatch<SetStateAction<boolean>>
     topic_id: number
 }) => {
-    const [createdQuestion, setCreatedQuestion] = useImmer<Question>({answer_options: [{ id: 0, text: '', is_correct: false}], text: '', question_type: 'single'})
+    const [createdQuestion, setCreatedQuestion] = useImmer<Question>({
+        text: '', 
+        question_type: 'single',
+        answer_options: [
+            {
+                id: 0, 
+                text: '', 
+                is_correct: true
+            },
+        ]
+    })
 
     const createQuestionFromDraft = () => {
         const question = createdQuestion
@@ -47,18 +56,31 @@ export const CreatedQuestionElement = memo((props: {
                 return
         }
 
-        const toCreate: Question = {text: question.text, question_type: question.question_type, answer_options: question.answer_options.map(answer => ({text: answer.text, is_correct: answer.is_correct}))}
-        console.log(toCreate);
-        
+        const toCreate: Question = {
+            text: question.text, 
+            question_type: question.question_type, 
+            answer_options: question.answer_options.map(answer => ({
+                text: answer.text, is_correct: answer.is_correct
+            }))
+        }
+
         createQuestion(props.topic_id, toCreate)
         .then(() => {
             toast.success('Вопрос в теме успешно создан', {containerId: 'edit-course-portal-output'})
             props.isCreatingSetter(false)
+            props.topicLoadingSetter(true)
         })
         .catch((error: Error) => {
+            console.log(error.message);
+            
             switch (error.message) {
-                case '400':
+                case '404': 
+                    toast.error('Ошибка ', {containerId: 'toast-output-2'})
+                    break
 
+                case '400':
+                    toast.error('Вопрос с таким текстом уже создан в этой теме', {containerId: 'toast-output-2'})
+                    break
             }
         })
         
@@ -67,10 +89,11 @@ export const CreatedQuestionElement = memo((props: {
 
     return(
         <article className="create-question-container question-card expanded" >
-            <textarea
-            style={{resize: 'none'}}
+            <input
+            placeholder="Текст вопроса"
+            style={{resize: 'none', textOverflow: 'ellipsis', width: '40%', marginBottom: '5px', fontSize: 'large'}}
             className="pretty_input"
-            onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 const value = event.currentTarget.value
                 setCreatedQuestion((draft) => {draft.text = value})
             }}
@@ -138,55 +161,82 @@ export const CreatedQuestionElement = memo((props: {
     )
 })
 
+
 const AnswerElement = memo((props: {
     answer: Answer
     questionSetter: Updater<Question>
     index: number
 }) => {
     return(
-        <article style={{backgroundColor: 'gray', padding: '10px', width: '33%'}} className="answer__container">
-            <header style={{display: 'flex', width: '95%', justifyContent: 'space-between'}}>
+        <article style={{position: 'relative', borderRadius: '10px', border: '1px dashed black', marginBottom: '10px', padding: '10px', width: '40%'}} className="answer__container">
 
+            {Boolean(props.index) && 
+                <button
+                onClick={() => {
+                    props.questionSetter(draft => {
+                        const options = draft.answer_options.filter((answer, index) => index !== props.index)
+                        draft.answer_options = options
+                    })
+                }} 
+                style={{
+                    backgroundColor: 'white',
+                    position: 'absolute', 
+                    fontSize: 'medium', 
+                    width: 'fit-content', 
+                    marginLeft: 'auto',
+                    marginRight: '10px', 
+                    cursor: 'pointer',
+                    marginTop: '10px',
+                    border: '1px solid black',
+                    borderRadius: "5px",
+                    padding: '3px'
+                }}
+                >
+                    🗑️
+                </button>
+            }
+
+            <header style={{marginBottom: '5px'}}>
                 <label className="answer__text__label">{`Вариант ответа №${props.index + 1}:`}</label>
-
-                {Boolean(props.index) && 
-                    <button 
-                    onClick={() => {
-                        props.questionSetter(draft => {
-                            const options = draft.answer_options.filter((answer, index) => index !== props.index)
-                            draft.answer_options = options
-                        })
-                    }} 
-                    style={{width: '30px', height: '30px', cursor: 'pointer'}}
-                    >
-                        🗑️
-                    </button>
-                }
-
             </header>
-            <div>    
-                <textarea maxLength={115} minLength={3}
-                style={{resize: 'none'}}
+
+            <div 
+            style={{display: 'flex', width: '90%', justifyContent: 'space-between'}}
+            >
+                <input maxLength={115} minLength={3}
+                style={{width: '90%'}}
                 className="pretty_input"
                 value={props.answer.text}
-                onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                     const value = event.currentTarget.value
                     props.questionSetter(draft => {draft.answer_options[props.index].text = value})
                 }}
                 />
-            </div>
 
-            <input required
-            type='checkbox'
-            className="answer__text__radio"
-            checked={props.answer.is_correct}
-            onClick={ (event) => {
-                const checked = event.currentTarget.checked
-                props.questionSetter(draft => {draft.answer_options[props.index].is_correct = checked})
-            } }
-            onChange={ (event: ChangeEvent<HTMLInputElement>) => {
-                //
-            } }/>
+                <input required
+                style={{width: '15px'}}
+                type='checkbox'
+                className="answer__text__radio"
+                checked={props.answer.is_correct}
+                onClick={ (event) => {
+                    const checked = event.currentTarget.checked
+                    props.questionSetter(draft => {
+                        if (!(draft.answer_options.filter(answer => answer.is_correct).length === 1 && !checked)) {
+                            draft.answer_options[props.index].is_correct = checked
+                        }
+                        const correctAnswers = draft.answer_options.filter(answer => answer.is_correct).length
+                        if (correctAnswers > 1) {
+                            draft.question_type = 'multiple'
+                        } else {
+                            draft.question_type ='single'
+                        }
+                    })
+                } }
+                onChange={ (event: ChangeEvent<HTMLInputElement>) => {
+                    //
+                } }
+                />
+            </div>
         </article>
     )
 })
