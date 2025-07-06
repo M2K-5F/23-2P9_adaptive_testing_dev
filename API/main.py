@@ -1,8 +1,8 @@
 """main.py for API"""
 from fastapi import FastAPI
-from views import auth_router, topic_router, course_router, question_router
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from vievs import add_routers
 
 app = FastAPI()
 
@@ -14,11 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-app.include_router(router=auth_router)
-app.include_router(course_router)
-app.include_router(topic_router)
-app.include_router(question_router)
+add_routers(app)
 
 
 if __name__ == "__main__":

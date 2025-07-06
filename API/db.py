@@ -3,7 +3,7 @@ from datetime import datetime
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
 
 from shemas import Roles
-from utils import get_password_hash
+from app_utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
