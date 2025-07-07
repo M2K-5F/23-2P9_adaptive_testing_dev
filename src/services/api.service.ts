@@ -300,12 +300,12 @@ export const archQuestion = (question_id: number) => {
 
 export const getSearchedCourses = (searchQuery: string) => {
     return ApiService.requestToServer(
-        'http://localhost:8001/auth',
+        APIUrls.searchCourseURL,
         {
             credentials: 'include'
         },
         {
-            "search": searchQuery
+            "q": searchQuery
         }
     )
 }

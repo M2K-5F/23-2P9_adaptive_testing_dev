@@ -1,14 +1,14 @@
 import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { archCourse, createCourse, getCourses, getFollowedCourses } from "../../services/api.service";
+import { archCourse, createCourse, getCourses, getFollowedCourses, getSearchedCourses } from "../../services/api.service";
 import { DraftFunction, Updater, useImmer } from "use-immer";
 import { CreatedCourse, FollowedCourse } from "../../types/interfaces";
 import { Loader } from '../../Components/Loader'
-import { debounce } from "../../utils/debounce";
 import { toast, ToastContainer } from "react-toastify";
 import {useCourseSearch} from '../../hooks/useCourseSearch'
 import { SearchElement } from "../../Components/SearchElement";
 import { userStore } from "../../stores/userStore";
+import { SearchContainer } from "../../Components/SearchContainer";
 
 
 export default function TeacherPortal() {
@@ -17,7 +17,6 @@ export default function TeacherPortal() {
     const [isLoading, setIsLoading] = useState(true)
     const [courseList, setCourseList] = useImmer<FollowedCourse[]>([])
     const [searchQuery, setSearchQuery] = useState<string>("")
-    // const debouncedSetSearchQuery = useRef(debounce((value: string) => console.log('timer'), 500))
     const searchedCourses = useCourseSearch([], courseList, searchQuery)
 
     const navigateToCourse = (courseID: number) => {
@@ -25,12 +24,12 @@ export default function TeacherPortal() {
     }
 
     useEffect(() => {
-        if (isLoading)
-            getFollowedCourses()
-            .then((data: FollowedCourse[]) => {
-                setCourseList(data)
-            })
-            .finally(() => setIsLoading(false))
+        if (!isLoading) return
+        getFollowedCourses()
+        .then((data: FollowedCourse[]) => {
+            setCourseList(data)
+        })
+        .finally(() => setIsLoading(false))
     })
 
     if (isLoading) {
@@ -40,32 +39,14 @@ export default function TeacherPortal() {
     return (
         <div className="teacher-portal">
             <ToastContainer theme='dark' style={{top: "250px",marginLeft: 'auto', right: '100px'}} position='top-right' /> 
-
-            <search style={{position: 'sticky'}} className="courses-search-container">
-                <search>
-                    <input
-                        max={60}
-                        type="text"
-                        placeholder="Найти курс для прохождения"
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.currentTarget.value)}
-                        className="courses-search-input"
-                    />
-                    <span className="search-icon">🔍</span>
-                </search>
-
-                {searchQuery.length > 0 && 
-                    <section className="search-variants-section">
-                        {searchedCourses.length 
-                            ?   searchedCourses.map( course => 
-                                    <SearchElement course={course} callbackfn={(args) => navigateToCourse(course.id)} />
-                                ) 
-                            :   <span>Ничего не найдено</span>
-                        }
-                    </section>
-                }
-            </search>
             
+            <SearchContainer 
+            placeholder="Поиск по названию курса..."
+            searchfn={getSearchedCourses}
+            handlefn={(course) => console.log(course)} 
+            summary={{name: 'Создан: ', content: 'created_by'}}
+            />
+
             <header className="portal-header">
                 <h1>Мои курсы</h1>
             </header>
@@ -133,28 +114,28 @@ const CourseElement = ({ course, loadingSetter, navigate, courseProgress } :
                 }
             </div>
             <div className="course-actions">
-                {typeof courseProgress !== 'number' ? 
-                    <button 
-                    key={course.id}
-                    onClick={() => navigate(course.id, true)                        
-                    }>
-                        Перейти к курсу
-                    </button>
-                    :
-                    course.is_active ? 
-                        <button 
-                        key={course.id} 
-                        onClick={() => navigate(course.id)
-                        }>
-                            Перейти к прохождению курса
-                        </button> 
-                        :
-                        <span 
+                {typeof courseProgress !== 'number' 
+                    ?   <button 
                         key={course.id}
-                        className="locked"
-                        >
-                            Курс заблокирован для прохождения
-                        </span>
+                        onClick={() => navigate(course.id, true)                        
+                        }>
+                            Перейти к курсу
+                        </button>
+                        
+                    :   course.is_active 
+                        ?   <button 
+                            key={course.id} 
+                            onClick={() => navigate(course.id)
+                            }>
+                                Перейти к прохождению курса
+                            </button> 
+
+                        :   <span 
+                            key={course.id}
+                            className="locked"
+                            >
+                                Курс заблокирован для прохождения
+                            </span>
                 }
             </div>
         </div>

@@ -1,14 +1,17 @@
 import { NavigateFunction } from "react-router-dom"
 import { CreatedCourse } from "../types/interfaces"
+import { MouseEventHandler } from "react"
 
-export const SearchElement = ({course, callbackfn}: {
-    course: CreatedCourse,
-    callbackfn: (...args) => void
-}) => {
+export function SearchElement<T extends CreatedCourse>({element, title, summary, callbackfn}: {
+    element: T
+    title: keyof T
+    summary?: {name: string, content: keyof T}
+    callbackfn: (el: T) => void
+}) {
     return (
         <div 
-        key={course.id} 
-        onClick={() => {callbackfn(course)}} 
+        key={element.id && 0}
+        onClick={() => callbackfn(element)}
         className="search-list-param">
             <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -27,7 +30,7 @@ export const SearchElement = ({course, callbackfn}: {
             </svg>
 
             <span 
-            key={course.id} 
+            key={element.id && 0} 
             className="search-variants">
                 <span 
                 style={{
@@ -35,19 +38,22 @@ export const SearchElement = ({course, callbackfn}: {
                     color: "#2196F3",
                     fontSize: '1.1rem'
                     }}>{
-                        course.title
+                        String(element[title])
                     }</span>
 
-                создан:
+                {summary && <>
+                    <span>{summary.name}</span>
 
-                <span 
-                style={{
-                    marginLeft: '5px',
-                    color: "#4CAF50", 
-                    fontSize: '1.1rem'
-                }}>{
-                    course.created_by
-                }</span>
+                    <span 
+                    style={{
+                        marginLeft: '5px',
+                        color: "#4CAF50", 
+                        fontSize: '1.1rem'
+                    }}>{
+                        String(element[summary.content])
+                    }</span>
+                    </>
+                }
             </span>
 
         </div>

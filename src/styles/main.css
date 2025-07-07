@@ -825,7 +825,6 @@ main.studentnavigator__container #studentnavigator__form legend {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 15px;
-  min-height: 150px;
   height: -moz-fit-content;
   height: fit-content;
 }

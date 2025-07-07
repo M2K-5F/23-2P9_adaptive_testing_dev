@@ -6,6 +6,7 @@ export const URL = `${host}:${port}` as const
 const courseUrl = `${URL}/course` as const
 const topicUrl = `${URL}/topic` as const
 const questionUrl = `${URL}/question` as const
+const searchUrl = `${URL}/search` as const 
 
 export const APIUrls = {
     usersMeURL: `${URL}/auth/users/me`,//
@@ -30,6 +31,8 @@ export const APIUrls = {
     createQuestionURL: `${questionUrl}/create`,
     getQuestionsURL: `${questionUrl}/get`,
     archQuestionURL: `${questionUrl}/arch`,
+
+    searchCourseURL: `${searchUrl}/course`
 } as const
 
 

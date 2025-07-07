@@ -14,4 +14,3 @@ async def search_courses(
     q: str = Query()
 ) -> JSONResponse:
     return course_search(current_user, q)
-    
