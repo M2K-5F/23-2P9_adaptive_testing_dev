@@ -6,7 +6,7 @@ import { getSearchedCourses } from "../services/api.service"
 
 export const SearchContainer = <T extends CreatedCourse>({placeholder, searchfn, handlefn, summary, title}: {
     placeholder: string
-    searchfn: (searchQuery: string) => Promise<T[]>
+    searchfn: (searchQuery: string, callback: (courses: T[]) => void) => void
     handlefn: (element: T) => void
     title?: keyof T
     summary?: {name: string, content: keyof T}
@@ -15,8 +15,7 @@ export const SearchContainer = <T extends CreatedCourse>({placeholder, searchfn,
     const [searchQuery, setSearchQuery] = useState<string>('')
 
     const searchCourses = useDebounce((query: string) => {
-        searchfn(query)
-        .then((data) => setSearchedCourses(data))
+        searchfn(query, (courses) => setSearchedCourses(courses))
     })
 
 

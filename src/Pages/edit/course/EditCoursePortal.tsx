@@ -4,18 +4,16 @@ import { createTopic, getTopics } from "../../../services/api.service";
 import { CreatedTopic } from "../../../types/interfaces";
 import { Loader } from '../../../Components/Loader'
 import { toast, ToastContainer } from "react-toastify";
-import { useTopicSearch } from '../../../hooks/useTopicSearch'
-import {SearchElement}  from '../../../Components/SearchElement'
+import {SearchContainer} from '../../../Components/SearchContainer'
 import { TopicElement } from "./components/TopicElement";
+import {topicSearch} from '../../../utils/topicSearch'
 
 export default function TopicsPortal() {
     const nav = useNavigate()
     const courseId = useSearchParams()[0].get('course_id')
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
     const [topicList, setTopicList] = useState<CreatedTopic[]>([])
-    const [searchQuery, setSearchQuery] = useState<string>("")
     const [isCreating, setIsCreating] = useState<"creating" | 'created' | false>(false)
-    const searchedTopics = useTopicSearch(topicList, searchQuery)
     const [expandedTopic, setExpandedTopic] = useState<number>(-1)
     
     if (!courseId) {
@@ -69,7 +67,7 @@ export default function TopicsPortal() {
 
     useEffect(() => { 
         if (isCreating === 'created') {
-            toast.success('Тема успешно создана')
+            toast.success('Тема успешно создана', {containerId: 'create-topic-output'})
             setIsCreating(false)
         }
     }, [isCreating])
@@ -84,30 +82,12 @@ export default function TopicsPortal() {
         <div className="teacher-portal">
             <ToastContainer containerId={'create-topic-output'} theme='dark' style={{top: "250px", marginLeft: 'auto', right: '100px'}} position='top-right' /> 
 
-            <div style={{position: 'sticky'}} className="courses-search-container">
-                <search>
-                    <input
-                    type="text"
-                    placeholder="Поиск по названию темы..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.currentTarget.value)}
-                    className="courses-search-input"
-                    />
-                    
-                    <span className="search-icon">🔍</span>
-                </search>
-
-                {searchQuery.length > 0 && 
-                    <section className="search-variants-section">
-                        {searchedTopics.length ? 
-                            searchedTopics.map(topic => 
-                                <SearchElement course={topic} callbackfn={(topic) => {setExpandedTopic(topic.id)}}/> 
-                            ) :
-                            <span>Ничего не найдено</span>
-                        }
-                    </section>
-                }
-            </div>
+            <SearchContainer<CreatedTopic>
+            placeholder="Поиск по названию темы..."
+            searchfn={(query, callback) => callback(topicSearch(topicList, query))}
+            handlefn={(topic) => {setExpandedTopic(topic.id)}}
+            summary={{name: 'Создан: ', content: 'created_by'}}
+            />
 
             <header className="portal-header">
                 <h1>Темы созданные мной</h1>
