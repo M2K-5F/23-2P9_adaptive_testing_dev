@@ -5,16 +5,19 @@ import {getQuestions, archTopic } from '../../../../services/api.service'
 import {QuestionElement} from '../components/QuestionElement'
 import { CreatedQuestionElement } from "./CreateQuestionElement"
 import {Loader} from '../../../../Components/Loader'
+import { useEditCourseStore } from "../store/editCourseStore"
+import { useSearchParams } from "react-router-dom"
 
 
-export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
+export const TopicElement = ({ topic, index, isExpanded }: {
     topic: CreatedTopic, 
-    loadingSetter: Dispatch<SetStateAction<boolean>>,
     index: number,
     isExpanded?: boolean
 }) => {
+    const courseId = useSearchParams()[0].get('course_id')!
     const [expanded, setExpanded] = useState<boolean>(false)
     const order = useFlexOrder(index, expanded)
+    const fetchTopics = useEditCourseStore(store => store.fetchTopics)
 
     useLayoutEffect(() => {
         if (isExpanded) {
@@ -33,7 +36,7 @@ export const TopicElement = ({ topic, loadingSetter, index, isExpanded }: {
                     onClick={() => {
                         archTopic(topic.id)
                         .then(() => {
-                            loadingSetter(true)
+                            fetchTopics(courseId)
                         })
                     }}
                     className="archive-btn"

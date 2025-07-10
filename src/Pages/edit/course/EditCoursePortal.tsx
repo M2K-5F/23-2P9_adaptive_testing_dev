@@ -1,80 +1,48 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { createTopic, getTopics } from "../../../services/api.service";
 import { CreatedTopic } from "../../../types/interfaces";
 import { Loader } from '../../../Components/Loader'
 import { toast, ToastContainer } from "react-toastify";
 import {SearchContainer} from '../../../Components/SearchContainer'
 import { TopicElement } from "./components/TopicElement";
 import {topicSearch} from '../../../utils/topicSearch'
+import { useEditCourseStore } from "./store/editCourseStore";
+import { useCreateTopic } from "./hooks/createTopicHandler";
 
 export default function TopicsPortal() {
     const nav = useNavigate()
     const courseId = useSearchParams()[0].get('course_id')
-    const [isLoading, setIsLoading] = useState<boolean>(true)
-    const [topicList, setTopicList] = useState<CreatedTopic[]>([])
-    const [isCreating, setIsCreating] = useState<"creating" | 'created' | false>(false)
-    const [expandedTopic, setExpandedTopic] = useState<number>(-1)
+    const {
+        createdTopics,
+        isError, 
+        expandedTopic, 
+        isLoading, 
+        createdStatus,
+        fetchTopics,
+        setExpandedTopic,
+        toggleIsMenuOpen
+    } = useEditCourseStore()
+    const createHandler = useCreateTopic()
     
     if (!courseId) {
         nav('/courses')
         return null
     }
-    
-    
-    const handleCreateTopic = () => {
-        const titleInput = document.getElementById("topic-title-input") as HTMLInputElement
-        const descInput = document.getElementById("topic-desc-input") as HTMLInputElement
-        const title = titleInput.value.trim()
-        const description = descInput.value.trim()
-        
-        if (title.length < 3) {
-            toast.error("Название должно содержать минимум 3 символа", {containerId: 'create-topic-output'})
-            return
-        }
-
-        if (description.length < 3) {
-            toast.error("Описание должно содержать минимум 3 символа", {containerId: 'create-topic-output'})
-            return
-        }
-
-        createTopic(title, description, courseId)
-        .then(() => {
-            setIsLoading(true)
-            setIsCreating('created')
-            titleInput.value = ""
-            descInput.value = ""
-        })
-        .catch((error: Error) => {
-            if (error.message === "400") {
-                toast.error('Тема с таким названием уже существует', {containerId: 'create-topic-output'})
-            } else {
-                toast.error('Ошибка при создании темы', {containerId: 'create-topic-output'})
-            }
-        })
-    }
 
 
     useLayoutEffect(() => {
-        if (isLoading === true) {
-            getTopics(Number(courseId))
-            .then(data => {                
-                setTopicList(data)
-            })
-            .finally(() => setIsLoading(false))
-        }
+        if (isLoading) fetchTopics(courseId)
     }, [isLoading])
 
     useEffect(() => { 
-        if (isCreating === 'created') {
+        if (createdStatus.isCreated) {
             toast.success('Тема успешно создана', {containerId: 'create-topic-output'})
-            setIsCreating(false)
         }
-    }, [isCreating])
+    }, [createdStatus.isCreating])
 
     console.log(expandedTopic);
     
-    if (isLoading) {
+    if (isLoading || createdStatus.isCreating) {
         return <Loader /> 
     }
 
@@ -84,7 +52,7 @@ export default function TopicsPortal() {
 
             <SearchContainer<CreatedTopic>
             placeholder="Поиск по названию темы..."
-            searchfn={(query, callback) => callback(topicSearch(topicList, query))}
+            searchfn={(query, callback) => callback(topicSearch(createdTopics, query))}
             handlefn={(topic) => {setExpandedTopic(topic.id)}}
             summary={{name: 'Создан: ', content: 'created_by'}}
             />
@@ -92,7 +60,7 @@ export default function TopicsPortal() {
             <header className="portal-header">
                 <h1>Темы созданные мной</h1>
                 <div style={{width: '300px'}}>
-                    {isCreating === 'creating' &&
+                    {createdStatus.isMenuOpen &&
                         <div 
                         style={{
                             display: 'flex',
@@ -138,7 +106,7 @@ export default function TopicsPortal() {
 
                                 <button 
                                 className="create-course-btn" 
-                                onClick={handleCreateTopic}
+                                onClick={createHandler}
                                 style={{marginRight: '5px'}}
                                 >
                                     ✔ Создать
@@ -147,7 +115,7 @@ export default function TopicsPortal() {
                                 <button 
                                 style={{backgroundColor: 'red'}}
                                 className="create-course-btn"  
-                                onClick={() => setIsCreating(false)}
+                                onClick={toggleIsMenuOpen}
                                 >
                                     × Отмена
                                 </button>
@@ -155,13 +123,13 @@ export default function TopicsPortal() {
                             </div>
                         </div>
                     }
-                    {!isCreating && (
+                    {!createdStatus.isMenuOpen && (
                         <button 
                         style={{
                             marginLeft: '40%'
                         }}
                         className="create-course-btn"  
-                        onClick={() => setIsCreating('creating')}
+                        onClick={toggleIsMenuOpen}
                         >
                             + Создать новую тему
                         </button>
@@ -169,19 +137,18 @@ export default function TopicsPortal() {
                 </div>
             </header>
 
-            {topicList.length ? 
+            {createdTopics.length ? 
                 <div className="courses-flex">
-                    {topicList.map((topic, index) => 
+                    {createdTopics.map((topic, index) => 
                         <TopicElement 
                             key={topic.id}
-                            topic={topic} 
-                            loadingSetter={setIsLoading}
+                            topic={topic}
                             index={index}
                             isExpanded={expandedTopic === topic.id}
                         />
                     )}
                 </div> 
-                : <p className="no-courses-message">Нет созданных тем</p>
+                : <p className="no-courses-message">{isError ? "Ошибка при запросе. Пожалуйста перезагрузите страницу" : "Нет созданных тем"}</p>
             }
         </div>
     )
