@@ -20,6 +20,7 @@ export const APIUrls = {
     archCourseURL: `${courseUrl}/arch`,
     followCourseURL: `${courseUrl}/follow`,
     unfollowCourseURL: `${courseUrl}/unfollow`,
+    getCourseURL: `${courseUrl}/get_by_id`,
 
     createTopicURL: `${topicUrl}/create`,
     getTopicsURL: `${topicUrl}/get`,

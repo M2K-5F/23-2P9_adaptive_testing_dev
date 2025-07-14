@@ -2,9 +2,9 @@ from pydantic import BaseModel
 from fastapi import Depends, APIRouter, HTTPException, status, Body
 from fastapi.responses import JSONResponse
 from shemas import UserCreate, UserOut
-from crud import find_user, create_user, find_password
-from app_utils import verify_password, encode_jwt
-from .depends import get_current_active_user
+from..cruds import find_user, create_user, find_password
+from Utils import verify_password, encode_jwt
+from api_depends import get_current_active_user
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 

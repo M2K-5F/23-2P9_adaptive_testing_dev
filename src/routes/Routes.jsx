@@ -7,6 +7,7 @@ import ForbiddenPage from "../Pages/errors/HTTP_403";
 import ServiceUnavailablePage from "../Pages/errors/HTTP_503";
 import TeacherPortal from "../Pages/forteacher/TeacherPortal";
 import TopicsPortal from "../Pages/edit/course/EditCoursePortal";
+import {CourseViewPage} from '../Pages/view/course/CourseViewPage'
 
 
 export default function RoutePaths () {
@@ -28,6 +29,8 @@ export default function RoutePaths () {
             <Route path="forteacher" Component={TeacherPortal} />
 
             <Route path="edit/course" Component={TopicsPortal} /> 
+
+            <Route path="course" Component={CourseViewPage} />
 
           </Route>
 

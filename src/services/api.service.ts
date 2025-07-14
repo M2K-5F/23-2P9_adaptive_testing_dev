@@ -2,7 +2,7 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { Form, Question } from '../types/interfaces'
+import { CreatedCourse, Form, Question } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -88,7 +88,7 @@ export const registerUser = async (body: string) => {
                 "Content-type": "application/json"
             },
             body: body
-        }
+        },
     )
 }
 
@@ -306,6 +306,19 @@ export const getSearchedCourses = (searchQuery: string) => {
         },
         {
             "q": searchQuery
+        }
+    )
+}
+
+
+export const getCourse = (courseId: string): Promise<{course_data: CreatedCourse, isFollowed: boolean}> => {
+    return ApiService.requestToServer(
+        APIUrls.getCourseURL,
+        {
+            credentials: 'include'
+        },
+        {
+            'course_id': courseId
         }
     )
 }

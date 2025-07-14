@@ -2,12 +2,12 @@
 
 
 from typing import Union
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, status, Request
 
-from JWTconfig import oauth2_scheme
-from app_utils import decode_jwt
-from shemas import UserOut
-from crud import find_user
+from Config import oauth2_scheme
+from Utils import decode_jwt
+from shemas import UserOut, Roles
+from shared.cruds import find_user
 
 
 async def get_current_user(
@@ -42,6 +42,7 @@ async def get_current_user(
     return username
 
 async def get_current_active_user(
+    request: Request,
     username: str = Depends(get_current_user)
 ) -> UserOut:
 
@@ -52,5 +53,22 @@ async def get_current_active_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='could not find user'
         )
+    
+    request.state.userdata = user
 
     return user
+
+
+async def is_teacher(user: UserOut = Depends(get_current_active_user)):
+    if user.role != Roles.TEACHER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    return
+
+
+async def is_student(user:UserOut = Depends(get_current_active_user)):
+    if user.role != Roles.STUDENT:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+
+async def get_user_from_request(request: Request):
+    return request.state.userdata

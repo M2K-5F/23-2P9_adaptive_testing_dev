@@ -43,7 +43,7 @@ export default function TeacherPortal() {
                     callback(data)
                 })
             }}
-            handlefn={(course) => console.log(course)} 
+            handlefn={(course) => navigateToCourse(course.id)} 
             summary={{name: 'Создан: ', content: 'created_by'}}
             />
 

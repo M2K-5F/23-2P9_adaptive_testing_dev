@@ -9,21 +9,21 @@ import { useEditCourseStore } from "../store/editCourseStore"
 import { useSearchParams } from "react-router-dom"
 
 
-export const TopicElement = ({ topic, index, isExpanded }: {
+export const TopicElement = ({ topic, index }: {
     topic: CreatedTopic, 
     index: number,
-    isExpanded?: boolean
 }) => {
     const courseId = useSearchParams()[0].get('course_id')!
     const [expanded, setExpanded] = useState<boolean>(false)
     const order = useFlexOrder(index, expanded)
-    const fetchTopics = useEditCourseStore(store => store.fetchTopics)
+    const {fetchTopics, expandedTopic} = useEditCourseStore()
+    
 
     useLayoutEffect(() => {
-        if (isExpanded) {
+        if (expandedTopic === topic.id) {
             setExpanded(true)
         } else { setExpanded(false)}
-    }, [isExpanded])
+    }, [expandedTopic])
 
 
     return (

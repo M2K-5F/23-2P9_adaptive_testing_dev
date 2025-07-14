@@ -126,21 +126,20 @@ export default function TeacherPortal() {
             </header>
 
 
-            {
-                courseList[0].length > 0 
-                    ? <div className="courses-flex">
-                        {
-                            courseList?.[0].map(course => 
-                                <CourseElement 
-                                key={course.id}
-                                course={course} 
-                                loadingSetter={setIsLoading}
-                                navigate={navigateToCourse}
-                                />
-                            )
-                        }
-                        </div> 
-                    : <p className="no-courses-message">Нет созданных курсов</p>
+            {courseList[0].length > 0 
+                ? <div className="courses-flex">
+                    {
+                        courseList?.[0].map(course => 
+                            <CourseElement 
+                            key={course.id}
+                            course={course} 
+                            loadingSetter={setIsLoading}
+                            navigate={navigateToCourse}
+                            />
+                        )
+                    }
+                    </div> 
+                : <p className="no-courses-message">Нет созданных курсов</p>
             }
 
 
@@ -149,22 +148,21 @@ export default function TeacherPortal() {
             </header>
             
 
-            {
-                courseList[1].length > 0
-                    ? <div className="courses-flex">
-                        {
-                            courseList?.[1].map(userCourse => 
-                                <CourseElement
-                                key={userCourse.course.id}
-                                course={userCourse.course}
-                                loadingSetter={setIsLoading}
-                                navigate={navigateToCourse}
-                                courseProgress={userCourse.course_progress}
-                                />
-                            )
-                        }
-                    </div>
-                    : <p className="no-courses-message">Нет доступных курсов для прохождения</p>
+            {courseList[1].length > 0
+                ? <div className="courses-flex">
+                    {
+                        courseList?.[1].map(userCourse => 
+                            <CourseElement
+                            key={userCourse.course.id}
+                            course={userCourse.course}
+                            loadingSetter={setIsLoading}
+                            navigate={navigateToCourse}
+                            courseProgress={userCourse.course_progress}
+                            />
+                        )
+                    }
+                </div>
+                : <p className="no-courses-message">Нет доступных курсов для прохождения</p>
             }
     </div>
     )

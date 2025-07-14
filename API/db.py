@@ -1,9 +1,9 @@
 """database discription"""
 from datetime import datetime
-from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
+from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 
-from shemas import Roles
-from app_utils import get_password_hash
+from shemas import Roles, UserOut
+from Utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
@@ -48,6 +48,7 @@ class Topic(Table):
     title = CharField(max_length=60)
     description = CharField(max_length=120)
     is_active = BooleanField(default=True)
+    number_in_course = IntegerField()
 
 
 class Question(Table):

@@ -15,7 +15,6 @@ export default function TopicsPortal() {
     const {
         createdTopics,
         isError, 
-        expandedTopic, 
         isLoading, 
         createdStatus,
         fetchTopics,
@@ -39,8 +38,6 @@ export default function TopicsPortal() {
             toast.success('Тема успешно создана', {containerId: 'create-topic-output'})
         }
     }, [createdStatus.isCreating])
-
-    console.log(expandedTopic);
     
     if (isLoading || createdStatus.isCreating) {
         return <Loader /> 
@@ -144,11 +141,14 @@ export default function TopicsPortal() {
                             key={topic.id}
                             topic={topic}
                             index={index}
-                            isExpanded={expandedTopic === topic.id}
                         />
                     )}
                 </div> 
-                : <p className="no-courses-message">{isError ? "Ошибка при запросе. Пожалуйста перезагрузите страницу" : "Нет созданных тем"}</p>
+                : <p className="no-courses-message">
+                    {isError 
+                        ?   "Ошибка при запросе. Пожалуйста перезагрузите страницу" 
+                        :   "Нет созданных тем"
+                    }</p>
             }
         </div>
     )

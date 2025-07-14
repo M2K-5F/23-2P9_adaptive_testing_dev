@@ -65,6 +65,11 @@ export interface CreatedTopic extends CreatedCourse {
     description: string
 }
 
+export interface FetchedTopic extends CreatedTopic {
+    number_in_course: number
+    count: number
+}
+
 export interface AnswerOption {
     id?: number
     text: string

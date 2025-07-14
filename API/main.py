@@ -2,7 +2,9 @@
 from fastapi import FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-from vievs import add_routers
+from shared import shared_router
+from student import student_router
+from teacher import teacher_router
 
 app = FastAPI()
 
@@ -14,7 +16,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-add_routers(app)
+app.include_router(shared_router)
+app.include_router(student_router)
+app.include_router(teacher_router)
 
 
 if __name__ == "__main__":
