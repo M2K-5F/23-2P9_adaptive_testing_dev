@@ -117,7 +117,7 @@ if __name__ == "__main__":
     database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
     database.close()
 
-    Role.get_or_create(status=Roles.STUDENT)
+    student_role, _ = Role.get_or_create(status=Roles.STUDENT)
     teacher_role, _ = Role.get_or_create(status=Roles.TEACHER)
 
     base_teacher, _ = User.get_or_create(
@@ -130,4 +130,9 @@ if __name__ == "__main__":
     UserRole.get_or_create(
         user = base_teacher,
         role = teacher_role
+    )
+
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = student_role
     )

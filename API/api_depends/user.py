@@ -53,21 +53,22 @@ async def get_current_active_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='could not find user'
         )
-    
+
     request.state.userdata = user
 
     return user
 
 
 async def is_teacher(user: UserOut = Depends(get_current_active_user)):
-    if user.role != Roles.TEACHER:
+    if Roles.TEACHER not in user.role:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return
 
 
 async def is_student(user:UserOut = Depends(get_current_active_user)):
-    if user.role != Roles.STUDENT:
+    if Roles.STUDENT not in user.role:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    return
 
 
 async def get_user_from_request(request: Request):

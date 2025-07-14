@@ -21,9 +21,15 @@ def create_user(user: UserCreate):
             password_hash=get_password_hash(user.password)
         )
 
+        if user.role == Roles.TEACHER:
+            UserRole.create(
+                user = currect_user,
+                role = Role.get_or_none(Role.status == Roles.TEACHER)
+            )
+            
         UserRole.create(
             user = currect_user,
-            role = Role.get_or_none(Role.status == user.role)
+            role = Role.get_or_none(Role.status == Roles.STUDENT)
         )
 
     except:
@@ -43,13 +49,15 @@ def find_user(username) :
             detail='user not finded',
             status_code=status.HTTP_401_UNAUTHORIZED
         )
-        
-    user_role = (UserRole.get_or_none(UserRole.user == current_user)).role.status
+
+    user_roles = UserRole.select().where(UserRole.user == current_user)
+    user_roles = [role.role.status for role in user_roles]
+    print('roles', user_roles)
     return UserOut(
         username=current_user.username,
         name=current_user.name,
         telegram_link=current_user.telegram_link,
-        role=user_role
+        role=user_roles
     )
 
 

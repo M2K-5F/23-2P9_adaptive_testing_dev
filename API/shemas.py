@@ -27,7 +27,7 @@ class UserCreate(UserBase):
 
 
 class UserOut(UserBase):
-    role: Roles
+    role: List[Roles]
 
 
 class Token(BaseModel):
