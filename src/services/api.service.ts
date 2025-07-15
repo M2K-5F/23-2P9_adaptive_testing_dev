@@ -16,7 +16,7 @@ class ApiServiceClass {
         this.navigate ? this.navigate(path, {replace: replace}) : console.log('еще не инициализирован')
     }
 
-    requestToServer = (URL: apiUrl, init?: RequestInit,queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false,) => {
+    requestToServer = (URL: apiUrl, init?: RequestInit, queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false,) => {
         let queryString = ''
 
         if (queries) {

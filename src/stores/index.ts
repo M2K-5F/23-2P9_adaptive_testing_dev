@@ -2,8 +2,8 @@ import { create, StoreApi } from "zustand";
 import {userStoreShema, userShema, ShowFormShema, Form} from '../types/interfaces.ts'
 import {Theme} from '../types/types.ts'
 
-export const themeStore = create(set => ({
-    theme:<Theme> 'light',
+export const themeStore = create<{theme: Theme, init: () => boolean, toggleTheme: () => void}>(set => ({
+    theme: 'light',
 
     init: () => {
         if (localStorage.getItem('theme') === 'dark') {
