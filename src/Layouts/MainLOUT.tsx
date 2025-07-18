@@ -5,42 +5,48 @@ import {userStore} from "../stores/userStore"
 import { useRef, useLayoutEffect } from "react"
 import { WaitModal } from "../Components/WaitModal"
 import {Loader} from '../Components/Loader'
-import { isPathAvailable } from "../config/routes.config"
+import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
 
 
 export default function MainLOUT () {
     const navigate = useNavigate()
-    const status = userStore().status
+    const {status, role} = userStore()
     ApiService.setNavigate(navigate)
 
     const shouldRedirect =
-        (['student', 'teacher'].includes(status) && !isPathAvailable(status)) ||
-        (status === 'forbidden' && !isPathAvailable('forbidden')) ||
-        (status === 'unautorized' && !isPathAvailable('unautorized')) ||
+        (status === 'authorized' && isStatusPathAvailable('unauthorized')) ||
+        (status === 'forbidden' && !isStatusPathAvailable('forbidden')) ||
+        (status === 'unauthorized' && !isStatusPathAvailable('unauthorized')) ||
         (status === 'serverunavailable')
 
     
     useLayoutEffect(() => {
         if (!shouldRedirect) return
 
-        if (['student', 'teacher'].includes(status) && !isPathAvailable(status)) {
-            navigate(`/for${status}`)
-        } 
+        if (status === 'authorized' && isStatusPathAvailable('unauthorized')) {
+            navigate('/')
+            return
+        }
         
-        else if (status === 'forbidden' && !isPathAvailable('forbidden')) {
+        if (status === 'forbidden' && !isStatusPathAvailable('forbidden')) {
             navigate('/403')
+            return
         } 
         
-        else if (status === 'unautorized' && !isPathAvailable('unautorized')) {
+        if (status === 'unauthorized' && !isStatusPathAvailable('unauthorized')) {
             navigate('/users/autorize')
+            return
         } 
         
-        else if (status === 'serverunavailable') {
-            console.time('time')
+        if (status === 'serverunavailable') {
             navigate('/503')
-            console.timeEnd('time')
-            
+            return
+        }
+
+        if (!isRolePathAvailable(role)) {
+            navigate('/')
+            return
         }
     }, [shouldRedirect, status, navigate])
 
@@ -60,13 +66,8 @@ export default function MainLOUT () {
                 <img 
                 id="icon" 
                 src="../assets/logo.svg" 
-                alt="Логотип" 
-                onClick={() => {
-                    sessionStorage.removeItem('formdata')
-                    status === 'student'
-                    ? navigate('/forstudent')
-                    : navigate('/forteacher')
-                }} 
+                alt="Логотип"
+                onClick={() => {status === 'authorized' && navigate('/')}}
                 />
 
                 <aside>

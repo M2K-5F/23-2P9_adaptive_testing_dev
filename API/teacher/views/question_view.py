@@ -9,7 +9,7 @@ from shemas import UserOut, Roles, QuestionBase
 question_router = APIRouter(prefix='/question', tags=['Teacher/Question'])
 
 
-@question_router.post('/create')
+@question_router.post('/create', summary='Create question by topic')
 def create_teacher_question(
     current_user = Depends(get_user_from_request),
     topic_id = Query(),
@@ -18,7 +18,7 @@ def create_teacher_question(
     return create_question(current_user, topic_id, question)
 
 
-@question_router.get('/get')
+@question_router.get('/get', summary='Get created by teacher questions at topic')
 def get_questions(
     current_user = Depends(get_user_from_request),
     topic_id = Query(),

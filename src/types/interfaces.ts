@@ -1,10 +1,13 @@
-export type status = 'teacher' | 'student' | "forbidden" | "unautorized" | "undefined" | "serverunavailable"
+export type status = 'authorized' | "forbidden" | "unauthorized" | "undefined" | "serverunavailable"
+export type role = 'teacher' | 'student' | "undefined"
 
 export interface userStoreShema {
     nick: string ,
     status: status,
-    RegUser: (data:userShema) => void,
+    role: role[]
+    regUser: (userShema) => void
     DelUser: Function
+    pingUser: () => void
 }
 
 export interface RegistrationForm {
@@ -18,7 +21,12 @@ export interface RegistrationForm {
 
 export interface userShema {
     nick: string | undefined,
-    status: 'teacher' | 'student',
+    role: role[]
+}
+
+export interface fetchedUserShema {
+    nick: string,
+    status: role[]
 }
 
 export interface Answer {
