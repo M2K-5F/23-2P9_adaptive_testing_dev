@@ -1,10 +1,13 @@
-export type status = 'teacher' | 'student' | "forbidden" | "unautorized" | "undefined" | "serverunavailable"
+export type status = 'authorized' | "forbidden" | "unauthorized" | "undefined" | "serverunavailable"
+export type role = 'teacher' | 'student' | "undefined"
 
 export interface userStoreShema {
-    nick: string | undefined,
+    nick: string ,
     status: status,
-    RegUser: (data:userShema) => void,
+    role: role[]
+    regUser: (userShema) => void
     DelUser: Function
+    pingUser: () => void
 }
 
 export interface RegistrationForm {
@@ -18,7 +21,12 @@ export interface RegistrationForm {
 
 export interface userShema {
     nick: string | undefined,
-    status: 'teacher' | 'student',
+    role: role[]
+}
+
+export interface fetchedUserShema {
+    nick: string,
+    status: role[]
 }
 
 export interface Answer {
@@ -29,7 +37,7 @@ export interface Answer {
 
 export interface Question {
     id?: number
-    question_type: 'single'
+    question_type: 'single' | 'multiple'
     text: string,
     answer_options: Answer[]
 }
@@ -59,6 +67,31 @@ export interface FollowedCourse {
     user: string,
     course: CreatedCourse,
     course_progress: number
+}
+
+export interface CreatedTopic extends CreatedCourse {
+    description: string
+}
+
+export interface FetchedTopic extends CreatedTopic {
+    number_in_course: number
+    count: number
+}
+
+export interface AnswerOption {
+    id?: number
+    text: string
+    is_correct: boolean
+    by_question: number
+}
+
+export interface CreatedQuestion {
+    id: number
+    text: string
+    by_topic: number
+    question_type: 'single' | 'multiple'
+    is_active: boolean
+    answer_options: AnswerOption[]
 }
 
 export interface FormCreate extends Partial<Form>{}

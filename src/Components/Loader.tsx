@@ -1,4 +1,4 @@
-export const Loader = () => {
+export function Loader() {
     return (
     <section className="WaitModal__container">
         <div id="circle1"></div>

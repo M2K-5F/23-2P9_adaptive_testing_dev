@@ -7,14 +7,14 @@ export default function UserProfile () {
     const navigate = useNavigate()
 
     const handleClick = (event: MouseEvent<HTMLDivElement>) => {
-        status !== 'unautorized' ? event.currentTarget.classList.toggle('active') : navigate('/users/autorize')
+        status !== 'unauthorized' ? event.currentTarget.classList.toggle('active') : navigate('/users/autorize')
     }
     
 
     return(
         <div  className="profile-container">
             <div onClick={(event) => handleClick(event)} className="user-shower">
-                <span >{ status === 'unautorized' ? 'Войти' : nick}</span>
+                <span >{ status === 'unauthorized' ? 'Войти' : nick}</span>
                 { window.location.pathname !== '/users/registration' && <div className="arrow-element" />}
             </div>
             <div className="user-menu">

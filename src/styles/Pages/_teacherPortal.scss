@@ -27,6 +27,7 @@
     background-color: #4CAF50;
     color: white;
     border: none;
+    height: 40px;
     padding: 10px 15px;
     border-radius: 4px;
     cursor: pointer;
@@ -35,20 +36,25 @@
 .courses-flex {
     margin-bottom: 30px;
     display: flex;
-    gap: 20px;
+    gap: 20px 1%;
     width: 95dvw;
     flex-wrap: wrap;
+    // justify-content: space-between;
 }
 
 .course-card {
     // @include formbg;
-    background-color: rgb(239, 255, 219);
-    width: 45dvw;
-    min-width: 400px;
+    background-color: rgb(255, 255, 255);
+    width: 32.5%;
+    min-width: 225px;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
-    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.course-card.expanded {
+    width: 100%;
 }
 
 .course-card:hover {
@@ -197,4 +203,103 @@ div.search-list-param {
     transform: translateY(-50%);
     color: #999;
     font-size: 1.2rem;
+}
+
+#topic-title-input, #topic-desc-input {
+    font-size: large;
+    &::placeholder {
+        font-size: large;
+    }
+}
+
+.question-card {
+    margin-top: 10px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.question-card.expanded {
+    background-color: #e9f1f2;
+}
+
+.question-card.archived {
+    opacity: 0.7;
+    background-color: #333;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.question-header h4 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.question-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.question-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+}
+
+.question-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #000000;
+    margin-bottom: 8px;
+}
+
+.status.active {
+    color: #4CAF50;
+}
+
+.status.archived {
+    color: #f44336;
+}
+
+.answer-options {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #555;
+}
+
+.answer-options h5 {
+    margin: 0 0 8px 0;
+    font-size: 1em;
+}
+
+.answer-options ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.answer-options li {
+    padding: 6px;
+    margin-bottom: 4px;
+    background-color: #ffb4b4;
+    border-radius: 4px;
+    border-left: 3px solid #ff0000;
+    color: red;
+}
+
+.answer-options li.correct-answer {
+    background-color: #bfffbf;
+    border-left: 3px solid #44ff4a;
+    color: green;
 }

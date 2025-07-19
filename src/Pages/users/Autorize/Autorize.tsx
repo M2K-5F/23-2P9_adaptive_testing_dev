@@ -1,15 +1,15 @@
 import { isRouteErrorResponse, useNavigate } from "react-router-dom"
 import React, { FormEvent, RefObject, useEffect, useRef } from "react"
-import { userStore } from "../stores/userStore"
-import { Input } from "../Components/Input"
-import {WaitModal} from '../Components/WaitModal'
-import { ThrowMsg } from "../utils/form.utils"
-import { URL } from "../config/api.constants";
-import { loginUser } from "../services/api.service"
+import { userStore } from "../../../stores/userStore"
+import { Input } from "../../../Components/Input"
+import {WaitModal} from '../../../Components/WaitModal'
+import { ThrowMsg } from "../../../utils/form.utils"
+import { URL } from "../../../config/api.constants";
+import { loginUser } from "../../../services/api.service"
 
 export default function Autorize () {
     const nav = useNavigate()
-    const {RegUser} = userStore()
+    const {regUser} = userStore()
     const queryParams = new URLSearchParams(window.location.search)
     const waitmodal: RefObject<HTMLDialogElement | null> = useRef(null)
 
@@ -26,7 +26,7 @@ export default function Autorize () {
         )
         .then( data => {
             waitmodal.current?.close()
-            RegUser({nick: data.username!, status: data.role!})
+            regUser({nick: data.username!, status: data.role!})
         })    
         .catch( error => {
             waitmodal.current?.close()

@@ -2,7 +2,7 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { Form, Question } from '../types/interfaces'
+import { CreatedCourse, Form, Question } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -16,11 +16,14 @@ class ApiServiceClass {
         this.navigate ? this.navigate(path, {replace: replace}) : console.log('еще не инициализирован')
     }
 
-    requestToServer = (URL: apiUrl, init?: RequestInit,queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false) => {
-        const params = {}
-        return fetch(`${URL}?${queries && Object.entries(queries).map((query => {
-            return `${query[0]}=${query[1]}&`
-        }))}`, init)
+    requestToServer = (URL: apiUrl, init?: RequestInit, queries?: object, ignoreUnautorize: boolean = false, ignoreForbidden: boolean = false,) => {
+        let queryString = ''
+
+        if (queries) {
+            Object.entries(queries).map(query => queryString += `${query[0]}=${query[1]}&`)
+        }
+
+        return fetch(`${URL}?${queryString}`, init)
         .catch(() => {
             userStore.setState( state => ({...state, status: "serverunavailable"}))
             throw Error('503')
@@ -85,7 +88,7 @@ export const registerUser = async (body: string) => {
                 "Content-type": "application/json"
             },
             body: body
-        }
+        },
     )
 }
 
@@ -256,6 +259,9 @@ export const createQuestion = (topic_id: number, question: Question) => {
         {
             credentials: 'include',
             method: "post",
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(question),
         },
         {   
@@ -294,12 +300,25 @@ export const archQuestion = (question_id: number) => {
 
 export const getSearchedCourses = (searchQuery: string) => {
     return ApiService.requestToServer(
-        'http://localhost:8001/auth',
+        APIUrls.searchCourseURL,
         {
             credentials: 'include'
         },
         {
-            "search": searchQuery
+            "q": searchQuery
+        }
+    )
+}
+
+
+export const getCourse = (courseId: string): Promise<{course_data: CreatedCourse, isFollowed: boolean}> => {
+    return ApiService.requestToServer(
+        APIUrls.getCourseURL,
+        {
+            credentials: 'include'
+        },
+        {
+            'course_id': courseId
         }
     )
 }

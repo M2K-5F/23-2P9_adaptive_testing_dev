@@ -1,0 +1,1 @@
+from .jwt_config import settings, oauth2_scheme

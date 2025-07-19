@@ -1,7 +1,8 @@
 import { Button } from "../../Components/Button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { userStore } from "../../stores/userStore";
+import { pingUser, userStore } from "../../stores/userStore";
+import { logoutUser } from "../../services/api.service";
 
 export default function ForbiddenPage() {
     const navigate = useNavigate();
@@ -27,7 +28,11 @@ export default function ForbiddenPage() {
                 type='button'
                 className="error-page__button"
                 text="Вернуться на главную"
-                onclick={() => navigate(['student', "teacher"].includes(status) ? `/for${status}` : '/users/autorize')}
+                onclick={() => {
+                    logoutUser().then(() => 
+                        navigate('/users/autorize')
+                    )
+                }}
             />
             </div>
         </div>

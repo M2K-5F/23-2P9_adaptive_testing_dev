@@ -1,9 +1,9 @@
 """database discription"""
 from datetime import datetime
-from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField
+from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 
-from shemas import Roles
-from utils import get_password_hash
+from shemas import Roles, UserOut
+from Utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
@@ -48,6 +48,7 @@ class Topic(Table):
     title = CharField(max_length=60)
     description = CharField(max_length=120)
     is_active = BooleanField(default=True)
+    number_in_course = IntegerField()
 
 
 class Question(Table):
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
     database.close()
 
-    Role.get_or_create(status=Roles.STUDENT)
+    student_role, _ = Role.get_or_create(status=Roles.STUDENT)
     teacher_role, _ = Role.get_or_create(status=Roles.TEACHER)
 
     base_teacher, _ = User.get_or_create(
@@ -129,4 +130,9 @@ if __name__ == "__main__":
     UserRole.get_or_create(
         user = base_teacher,
         role = teacher_role
+    )
+
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = student_role
     )
