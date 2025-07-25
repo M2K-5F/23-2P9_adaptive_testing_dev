@@ -7,7 +7,7 @@ from shemas import UserOut, Roles
 
 course_router = APIRouter(prefix='/course', tags=["Student/Course"])
 
-@course_router.get('/get_followed')
+@course_router.get('/get_followed', summary='Get user courses')
 async def get_followed_teacher_courses(
     current_user = Depends(get_user_from_request)
 ) -> JSONResponse:
@@ -28,7 +28,7 @@ def unfollow_teacher_course(
 ) -> JSONResponse:
     return unfollow_course(current_user, course_id)
 
-@course_router.get('/get_by_id')
+@course_router.get('/get_by_id', summary="Get course, is_followed by course_id")
 async def get_course(
     course_id = Query(),
     current_user = Depends(get_user_from_request)

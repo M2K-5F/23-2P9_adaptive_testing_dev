@@ -9,7 +9,7 @@ import {topicSearch} from '../../../utils/topicSearch'
 import { useEditCourseStore } from "./store/editCourseStore";
 import { useCreateTopic } from "./hooks/createTopicHandler";
 
-export default function TopicsPortal() {
+export function TopicsPortal() {
     const nav = useNavigate()
     const courseId = useSearchParams()[0].get('course_id')
     const {

@@ -1,15 +1,13 @@
 import { Outlet, useNavigate } from "react-router-dom"
-import ThemeSwitcher from "../Components/ThemeSwither"
-import UserProfile from "../Components/UserMenu"
 import {userStore} from "../stores/userStore"
-import { useRef, useLayoutEffect } from "react"
-import { WaitModal } from "../Components/WaitModal"
+import { useRef, useLayoutEffect, FC } from "react"
 import {Loader} from '../Components/Loader'
 import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
+import { ThemeSwitcher } from "@/Components/ThemeSwither"
 
 
-export default function MainLOUT () {
+export const RedirectWrapper: FC =  () => {
     const navigate = useNavigate()
     const {status, role} = userStore()
     ApiService.setNavigate(navigate)
@@ -60,27 +58,9 @@ export default function MainLOUT () {
     console.log(status)
     
 
-    return(
-        <>
-            <nav id="main-nav">
-                <img 
-                id="icon" 
-                src="../assets/logo.svg" 
-                alt="Логотип"
-                onClick={() => {status === 'authorized' && navigate('/')}}
-                />
-
-                <aside>
-                    {window.location.pathname === '/users/autorize' 
-                        ?   null 
-                        :   <UserProfile /> 
-                    }
-                    
-                    <ThemeSwitcher />
-
-                </aside>
-            </nav>
+    return(<>
+            <ThemeSwitcher /> 
             <Outlet />
-        </>
+    </>
     )
 }

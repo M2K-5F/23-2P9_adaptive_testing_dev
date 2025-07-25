@@ -13,7 +13,10 @@ from shemas import SubmitAnswerUnit, SubmitQuestionUnit, TopicSubmitAnswers, Use
 
 @database.atomic()
 def get_topics_by_course(user: UserOut, course_id: str):
-    topics = Topic.select().where(Topic.by_course == course_id)
+    topics = (Topic
+                .select()
+                .where(Topic.by_course == course_id)
+    )
 
     to_return = []
     for topic in topics:
@@ -26,7 +29,11 @@ def get_topics_by_course(user: UserOut, course_id: str):
 @database.atomic()
 def get_topics_by_followed_course(user: UserOut, user_course_id):
     
-    user_course: UserCourse = UserCourse.get_or_none(UserCourse.id == user_course_id, UserCourse.user == user.username, UserCourse.is_active == True)
+    user_course: UserCourse = UserCourse.get_or_none(
+        UserCourse.id == user_course_id, 
+        UserCourse.user == user.username, 
+        UserCourse.is_active
+    )
     
     if not user_course:
         raise HTTPException(400, 'you not followed at course')
@@ -43,61 +50,6 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
         model_to_dict(topic, exclude=[UserTopic.user], max_depth=1) 
         for topic in user_topics
     ])
-
-
-@database.atomic()
-def follow_topic(user: UserOut, topic_id, unfollow: bool = False):
-    try:
-        current_topic: Topic = Topic.get_by_id(topic_id)
-        if not current_topic.is_active:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "topic inactive"
-            )
-    
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Topic not found"
-        )
-
-
-    if not UserCourse.select().where(
-        UserCourse.user == user.username,
-        UserCourse.course == current_topic.by_course
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="cant follow topic by unfollow course"
-        )
-
-    user_topic, is_created = UserTopic.get_or_create(
-        user = user.username,
-        topic = current_topic
-    )
-
-    if not is_created and unfollow:
-        user_topic.delete_instance()
-
-        return JSONResponse(
-            content={
-                "deleted_user_topic": user_topic.__data__
-            }
-        )
-
-    if is_created and unfollow:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="topic already unfollowed"
-        )
-
-    if not is_created:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="topic already followed"
-        )
-    
-    return user_topic.__data__
 
 
 def start_topic(user: UserOut, user_topic_id: str):
@@ -204,7 +156,15 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
     user_topic.ready_to_pass = False
     user_topic.save()
 
-    ut = UserTopic.select().join(Topic).where(UserTopic.topic.number_in_course == user_topic.topic.number_in_course + 1, UserTopic.by_user_course == user_topic.by_user_course).first()
+    ut = (UserTopic
+            .select()
+            .join(Topic)
+            .where(
+                UserTopic.topic.number_in_course == user_topic.topic.number_in_course + 1, 
+                UserTopic.by_user_course == user_topic.by_user_course
+            )
+            .first()
+    )
     print(ut)
     if ut:
         ut.ready_to_pass = True

@@ -61,7 +61,7 @@ export const logoutUser = async () => {
 }
 
 
-export const loginUser = (body: string) => {
+export const loginUser = (login: string, password: string) => {
     return  ApiService.requestToServer(
         APIUrls.logInURL,
         {
@@ -71,7 +71,7 @@ export const loginUser = (body: string) => {
                 'accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: body
+            body: JSON.stringify({username: login, password: password})
         },
         undefined,
         true
