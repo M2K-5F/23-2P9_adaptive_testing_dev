@@ -30,8 +30,8 @@ export default function TopicsPortal() {
 
 
     useLayoutEffect(() => {
-        if (isLoading) fetchTopics(courseId)
-    }, [isLoading])
+        fetchTopics(courseId)
+    }, [])
 
     useEffect(() => { 
         if (createdStatus.isCreated) {

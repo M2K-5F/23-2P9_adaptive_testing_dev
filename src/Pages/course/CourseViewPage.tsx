@@ -1,13 +1,13 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { CreatedTopic, FollowedCourse } from "../../../types/interfaces";
-import { Loader } from '../../../Components/Loader';
+import { CreatedTopic, FollowedCourse } from "../../types/interfaces";
+import { Loader } from '../../Components/Loader';
 import { toast, ToastContainer } from "react-toastify";
 import { TopicElement } from "./Components/TopicElement";
-import { followCourse, getFollowedCourses, getTopics, unfollowCourse } from "../../../services/api.service";
-import { userStore } from "../../../stores/userStore";
+import { followCourse, getFollowedCourses, getTopics, unfollowCourse } from "../../services/api.service";
+import { userStore } from "../../stores/userStore";
 import { useCourseViewStore } from "./store/CourseViewStore";
-import { toastContainerIds } from "../../../config/toasts.constant";
+import { toastContainerIds } from "../../config/toasts.constant";
 
 export const  CourseViewPage = () => {
     const nav = useNavigate();
@@ -25,11 +25,11 @@ export const  CourseViewPage = () => {
     } = useCourseViewStore()
 
     useLayoutEffect(() => {
-        getData(courseId)
         if (!courseId) {
             nav('/courses');
             return;
         }
+        getData(courseId)
     }, []);
 
     useEffect(() => {

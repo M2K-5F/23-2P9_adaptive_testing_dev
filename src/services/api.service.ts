@@ -38,7 +38,7 @@ class ApiServiceClass {
                     throw Error
                 }
                 if (response.status === 401 && !ignoreUnautorize) {
-                    userStore.setState(state => ({...state, status: 'unautorized'}))
+                    userStore.setState(state => ({...state, status: 'unauthorized'}))
                     throw Error
                 }
                 throw Error(String(response.status))

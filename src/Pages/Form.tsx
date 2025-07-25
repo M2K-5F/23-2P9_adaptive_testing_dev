@@ -82,18 +82,17 @@ export default function ShowForm () {
         })
     }
 
-
     return(
-        <main className="showform__container">
+        <main className="showform__container ">
             <WaitModal ref={waitmodal} isOpen/> 
             <SuccessfulModal ref={successfulmodal} labels={['Форма отправлена', "Вернуться на главную страницу"]} redirectURI={'/'} />
 
-            <header> { form.title } </header>
+            <header className={}> { form.title } </header>
             <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
                 submitHandler(event)
             }} >
 
-                <h4> { form.description } </h4>
+                <h4 > { form.description } </h4>
 
                 <section className="showform__questions">
                     {form.questions.map(element => {

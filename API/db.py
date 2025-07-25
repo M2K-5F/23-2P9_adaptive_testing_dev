@@ -67,17 +67,22 @@ class Answer(Table):
 class UserCourse(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_courses")
     course = ForeignKeyField(Course, backref="user_courses")
+    is_active = BooleanField(default=True)
+    completed_topic_number = IntegerField(default=0)
     course_progress = FloatField(default=0)
 
 
 class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_topics")
     topic = ForeignKeyField(Topic)
-    # by_course = ForeignKeyField(Course)
+    by_user_course = ForeignKeyField(UserCourse)
+    ready_to_pass = BooleanField(default=False)
+    is_completed = BooleanField(default=False)
     topic_progress = FloatField(default=0)
 
 class UserQuestion(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_questions")
+    by_user_topic = ForeignKeyField(UserTopic)
     question = ForeignKeyField(Question)
     # by_topic = ForeignKeyField(Topic)
     question_score = FloatField(default=0)
@@ -114,6 +119,7 @@ class UserQuestion(Table):
 
 if __name__ == "__main__":
     database.connect()
+    database.drop_tables([UserCourse, UserTopic])
     database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
     database.close()
 

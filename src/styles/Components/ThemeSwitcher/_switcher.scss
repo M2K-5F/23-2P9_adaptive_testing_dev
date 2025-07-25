@@ -20,14 +20,14 @@
     }
     &::before {
       opacity: 1;
-      background-image:url('/public/Night.jpg');
+      background-image:url('/Night.jpg');
       background-repeat: no-repeat; 
       background-size: 100% 100%;
     }
   
     &::after {
       opacity: 0;
-      background-image:url('/public/Day.jpeg');
+      background-image:url('/Day.jpeg');
       background-repeat: no-repeat; 
       background-size: 100% 110%;
       background-position-y: -4px;

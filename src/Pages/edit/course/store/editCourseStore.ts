@@ -29,9 +29,10 @@ export const useEditCourseStore = create<editCourseStore>((set, get) => {
         },
         isError: false,
         expandedTopic: -1,
-        isLoading: true,
+        isLoading: false,
 
         fetchTopics: async (courseId: string) => {
+            set({isLoading: true})
             try {
                 const topics = await getTopics(Number(courseId))
                 set({createdTopics: topics, isLoading: false})

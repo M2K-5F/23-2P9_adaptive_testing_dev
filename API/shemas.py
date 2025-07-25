@@ -54,6 +54,24 @@ class QuestionBase(BaseModel):
     answer_options: List[AnswerOptionBase]
 
 
+class SubmitAnswerUnit(BaseModel):
+    id: int
+    is_correct: bool
+
+
+class SubmitQuestionUnit(BaseModel):
+    id: int
+    answer_options: List[SubmitAnswerUnit]
+
+
+
+class TopicSubmitAnswers(BaseModel):
+    user_topic_id: int
+    questions: List[
+        SubmitQuestionUnit
+    ]
+
+
 # class PollBase(BaseModel):
 #     title: str = Field(..., min_length=3, max_length=100, )
 #     description: Optional[str] = Field(None, max_length=500)
