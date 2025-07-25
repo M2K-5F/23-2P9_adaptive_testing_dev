@@ -6,9 +6,9 @@ import ForbiddenPage from "../Pages/errors/HTTP_403";
 import ServiceUnavailablePage from "../Pages/errors/HTTP_503";
 import HomePage from "../Pages/home/HomePage";
 import TopicsPortal from "../Pages/edit/course/EditCoursePortal";
-import {CourseViewPage} from '../Pages/view/course/CourseViewPage'
+import {CourseViewPage} from '../Pages/course/CourseViewPage'
 import { userStore } from "../stores/userStore";
-import { useLayoutEffect } from "react";
+import { use, useLayoutEffect } from "react";
 
 
 export default function RoutePaths () {
@@ -17,6 +17,8 @@ export default function RoutePaths () {
   useLayoutEffect(() => {
     pingUser()
   }, [])
+
+
   return(
     <>
       <BrowserRouter>

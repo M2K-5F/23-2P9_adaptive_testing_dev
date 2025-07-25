@@ -1,8 +1,8 @@
 import {create} from 'zustand'
-import { CreatedCourse, CreatedTopic, FetchedTopic } from '../../../../types/interfaces'
-import { followCourse, getCourse, getTopics, unfollowCourse } from '../../../../services/api.service'
+import { CreatedCourse, CreatedTopic, FetchedTopic } from '../../../types/interfaces'
+import { followCourse, getCourse, getTopics, unfollowCourse } from '../../../services/api.service'
 import { toast, ToastContainer } from "react-toastify";
-import { toastContainerIds } from '../../../../config/toasts.constant';
+import { toastContainerIds } from '../../../config/toasts.constant';
 
 interface CourseViewStoreShema {
     isLoading: boolean
@@ -25,7 +25,7 @@ export const useCourseViewStore = create<CourseViewStoreShema>((set, get) => ({
     getData: async (courseId: string) => {
         set({isLoading: true})
         const [topics, course] = await Promise.allSettled([getTopics(Number(courseId)), getCourse(courseId)])
-        let topicsData: FetchedTopic[], 
+        let topicsData: FetchedTopic[],
             courseData: CreatedCourse | undefined,
             isFollowed: boolean;
 

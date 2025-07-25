@@ -1,9 +1,9 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { URL } from "../config/api.constants";
 import { useRedirect } from "../hooks/useRedirect";
-import { Button } from "../Components/Button";
 import { data, useNavigate } from "react-router-dom";
 import {WaitModal} from '../Components/WaitModal'
+import {} from 'shadcn'
 // import { getStats } from "../services/api.service";
 
 interface PollStats {
@@ -45,6 +45,7 @@ export default function TeacherStats() {
 
   return (
     <main className="stats-container">
+      
       <header className="stats-header">
         <h1>Статистика опросов</h1>
         <p>Преподаватель: {stats.teacher}</p>
