@@ -10,6 +10,7 @@ import {CourseViewPage} from '../Pages/course/CourseViewPage'
 import { userStore } from "../stores/userStore";
 import { use, useLayoutEffect } from "react";
 import { AppLayout } from "@/Layouts/AppLayout";
+import { AuthLayout } from "@/Layouts/AuthLayout";
 
 
 export default function RoutePaths () {
@@ -28,7 +29,7 @@ export default function RoutePaths () {
           <Route path="/503" Component={ServiceUnavailablePage} />
           <Route path="" Component={RedirectWrapper}>
 
-            <Route path="/users/*">
+            <Route path="/users/*" Component={AuthLayout}>
                 <Route path="autorize" Component={Autorize}/>
                 <Route path="registration" Component={Regisration} />
             </Route>

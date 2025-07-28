@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom"
 import { toastContainerIds } from "../../../../config/toasts.constant"
 import { toast } from 'react-toastify'
-import { useEditCourseStore } from "../store/editCourseStore"
+import { useEditCourseStore } from "../api/editCourseStore"
 
 export const useCreateTopic = () => {
     const createTopic = useEditCourseStore(store => store.createTopic)

@@ -6,32 +6,36 @@ import { toast, ToastContainer } from "react-toastify";
 import {SearchContainer} from '../../../Components/SearchContainer'
 import { TopicElement } from "./components/TopicElement";
 import {topicSearch} from '../../../utils/topicSearch'
-import { useEditCourseStore } from "./store/editCourseStore";
+import { useEditCourseStore } from "./api/editCourseStore";
 import { useCreateTopic } from "./hooks/createTopicHandler";
+import { useTopicStore } from "@/stores/useTopicStore";
+import { useAsideApi } from "@/stores/useAsideStore";
 
 export function TopicsPortal() {
     const nav = useNavigate()
-    const courseId = useSearchParams()[0].get('course_id')
+    const courseId = Number(useSearchParams()[0].get('course_id') )
     const {
-        createdTopics,
         isError, 
         isLoading, 
         createdStatus,
-        fetchTopics,
         setExpandedTopic,
         toggleIsMenuOpen
     } = useEditCourseStore()
+    const {createdTopics, fetchTopics, reset} = useTopicStore()
+    const {expandedCreatedCourse, setExpandedCreatedCourse} = useAsideApi()
     const createHandler = useCreateTopic()
+    
     
     if (!courseId) {
         nav('/courses')
         return null
     }
-
-
+    
     useLayoutEffect(() => {
-        fetchTopics(courseId)
-    }, [])
+        fetchTopics(String(courseId))
+        expandedCreatedCourse !== courseId && setExpandedCreatedCourse(courseId)
+
+    }, [courseId])
 
     useEffect(() => { 
         if (createdStatus.isCreated) {
@@ -49,7 +53,7 @@ export function TopicsPortal() {
 
             <SearchContainer<CreatedTopic>
             placeholder="Поиск по названию темы..."
-            searchfn={(query, callback) => callback(topicSearch(createdTopics, query))}
+            searchfn={(query, callback) => callback(topicSearch(createdTopics[Number(courseId)], query))}
             handlefn={(topic) => {setExpandedTopic(topic.id)}}
             summary={{name: 'Создан: ', content: 'created_by'}}
             />
@@ -134,9 +138,9 @@ export function TopicsPortal() {
                 </div>
             </header>
 
-            {createdTopics.length ? 
+            {createdTopics[Number(courseId)] ? 
                 <div className="courses-flex">
-                    {createdTopics.map((topic, index) => 
+                    {createdTopics[Number(courseId)].map((topic, index) => 
                         <TopicElement 
                             key={topic.id}
                             topic={topic}

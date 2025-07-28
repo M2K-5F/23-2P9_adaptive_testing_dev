@@ -1,171 +1,104 @@
-import { FormEvent, RefObject, useRef, useState } from "react"
-import { data, Form, useNavigate } from "react-router-dom"
-import { RegistrationForm } from "../../../types/interfaces"
-import { Input } from "../../../Components/Input"
-import { WaitModal } from "../../../Components/WaitModal"
-import { URL } from "../../../config/api.constants";
-import { ThrowMsg } from "../../../utils/form.utils"
-import { registerUser } from "../../../services/api.service"
+import { useRegStore } from "./store/useRegStore"
+import { Input } from "@/Components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/Components/ui/card"
+import { Label } from "@/Components/ui/label"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/Components/ui/select"
+import { Button } from "@/Components/ui/button"
+import { AuthLayout, ValueContext } from "@/Layouts/AuthLayout"
+import { useContext, useEffect } from "react"
 
 export default function Regisration () {
-    const SuccessfulModal: RefObject<HTMLDialogElement | null> = useRef(null)
-    const WaitingModal: RefObject<HTMLDialogElement | null> = useRef(null)
-    const user: RefObject<{login: string, password: string}> = useRef({login:'',password:''})
-    const navigate = useNavigate()
-
-    
-    function validate(form: HTMLFormElement) {
-        const Form = Object.entries(Object.fromEntries(new FormData(form)) as Partial<RegistrationForm>)
-        let password: string = ''
-        let flag: boolean = true
-        for (const [field, value] of Form) {
-            
-            if (field === 'password' && value ) {
-                password = value
-            } 
-
-            if (field === 'repeat' && value) {
-                if (value === password) {
-                    continue
-                } else {
-                    ThrowMsg('repeat')
-                    flag = false
-                    continue
-                }
-            }
-
-            if (!value || value.length < 3) {
-                ThrowMsg(field)
-                flag = false
-                continue
-            }
-
-            
-        }
-        return flag ? Form : false
-    }
-    
-    async function handleRegistration (event: FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        const form = event.currentTarget
-        const validatedForm = validate(form)
-        if (validatedForm) {
-            WaitingModal.current?.showModal()
-
-            registerUser( JSON.stringify(Object.fromEntries(validatedForm)))
-            .then( () => {
-                WaitingModal.current?.close()
-                SuccessfulModal.current?.showModal()
-            })
-            .catch( error => {
-                WaitingModal.current?.close()
-                switch (Number(error.message)) {
-                    case 422:
-                        ThrowMsg('telegram_link')
-                        break
-                        
-                    case 400: 
-                        ThrowMsg("username", "Имя пользователя занято")
-                        break
-                }
-            })
-        }
-    }
+    const setPage = useContext(ValueContext)!
+    const {values, role, errors, setRole, fieldSetter, useRegistration, reset} = useRegStore()
 
 
-        return(
-        <>
-            <main className="registration-container">
-                <Modal ref={SuccessfulModal} user={user} />
-                <WaitModal ref={WaitingModal} /> 
+    useEffect(reset, [])
 
-                <form 
-                onInvalid={
-                    event => {validate(event.currentTarget)}
-                } 
-                onSubmit={
-                    (event:FormEvent<HTMLFormElement>) => { handleRegistration(event) } 
-                } 
-                id="registration-form">
-
-                    <legend>Регистрация</legend>
-
-                    <Input 
-                    isPretty
-                    name='username' 
-                    onChange={(event) => {
-                        user.current.login = event.currentTarget.value
-                    }} invalidMessage="Некорректный логин" />
-
-                    <Input 
-                    isPretty
-                    name='name' 
-                    onChange={undefined}
-                    invalidMessage="Некорректное имя пользователя" /> 
-
-                    <Input 
-                    isPretty
-                    name="telegram_link" 
-                    onChange={undefined}
-                    defaultValue="https://t.me/example-user.com" 
-                    invalidMessage="Неправильная ссылка"/> 
-
-                    <fieldset>
-                        {/* <legend>Выберите роль:</legend>   */}
-
-                        <div>
-                            <input type="radio" 
-                            name="role"
-                            defaultValue='teacher'
-                            className="main_radio"
-                            id="for_teacher"/>
-
-                            <label htmlFor="for_teacher">Учитель</label>
-
-                            <input type="radio"
-                            name="role"
-                            defaultValue='student'
-                            className="main_radio"
-                            id="for_student"
-                            defaultChecked
-                            />
-                            
-                            <label htmlFor="for_student">Студент</label>
-                        </div>
-
-
-                    </fieldset>
-
-                    <Input 
-                    isPretty
-                    name='password' 
-                    onChange={(event) => {
-                        user.current.password = event.currentTarget.value
-                    }}
-                    invalidMessage="Пароль слишком короткий"/> 
-
-                    <Input
-                    isPretty
-                    name='repeat' 
-                    onChange={undefined}
-                    invalidMessage="Пароли не совпадают" /> 
-
-                    <button type='submit' className="pretty_button">Зарегистрироваться</button>
-                </form>
-            </main>
-        </>
-    )
-}
-
-const Modal = ({ref, user}) => {
-    const nav = useNavigate()
 
     return(
-        <>
-            <dialog className="SuccessfulModal"  ref={ref}>
-                <label>Вы зарегистрированы!</label>
-                <button className="main_button" onClick={() => { nav(`/users/autorize?login=${user.current.login}&password=${user.current.password}`)}} >Авторизоваться</button>
-            </dialog>
-        </>
+        <Card className="w-full ">
+            <CardHeader className="text-center">
+                <CardTitle>Регистрация</CardTitle>
+                <CardDescription>
+                    Зарегистрировать новую учетную запись
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form className="flex flex-col gap-y-4">
+            
+                    <div className="grid gap-2 items-baseline">
+                        <Label htmlFor="username">Логин:</Label>
+                        <Input placeholder="используется при входе" id="username" value={values.username} onChange={fieldSetter}/>
+                        {errors.username == 'unvalid' && 
+                            <Label className={'font-medium text-red-700'}>
+                                Логин должен содержать минимум 3 символа
+                            </Label>
+                        }
+
+                        {errors.username === 'alreadyused' && 
+                            <Label className="font-medium text-red-700">
+                                Логин занят
+                            </Label>
+                        }
+                    </div>
+            
+                    <div className="grid grid-cols-5 gap-x-2 items-baseline">
+                    
+                        <div className="grid gap-2 col-start-1 col-end-3">
+                            <Label>Роль:</Label>
+                            <Select value={role} onValueChange={setRole}>
+                                <SelectTrigger className="max-w-full w-full">
+                                    <SelectValue placeholder='Выбрать роль'/>
+                                </SelectTrigger>
+                                <SelectContent >
+                                    <SelectGroup>
+                                        <SelectLabel>Роли</SelectLabel>
+                                        <SelectItem value="student">Студент</SelectItem>
+                                        <SelectItem value="teacher">Преподаватель</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    
+                        <div className="grid gap-2 col-start-3 col-end-6">
+                            <Label htmlFor="name">Имя пользователя:</Label>
+                            <Input id="name" value={values.name} onChange={fieldSetter} placeholder="отображаемое имя" /> 
+                            {errors.name == 'unvalid' && 
+                                <Label className={'font-medium text-red-700'}>
+                                    Имя должно содержать минимум 3 символа
+                                </Label>
+                            }
+                        </div>
+                    </div>
+            
+                    <div className="grid gap-x-2 grid-cols-2 items-baseline">
+                    
+                        <div className="grid gap-2">
+                            <Label>Пароль:</Label>
+                            <Input value={values.password} onChange={fieldSetter} id="password" placeholder="password" />
+                            {errors.password == 'unvalid' && 
+                                <Label className={'font-medium text-red-700'}>
+                                    Пароль должен содержать минимум 3 символа
+                                </Label>
+                            }
+                        </div>
+                    
+                        <div className="grid gap-2">
+                            <Label>Повтор пароля:</Label>
+                            <Input id="repeat" value={values.repeat} onChange={fieldSetter} placeholder="repeat" /> 
+                            {errors.repeat === 'unvalid' || errors.repeat === 'notmatches' && 
+                                <Label className={'font-medium text-red-700'}>
+                                    Пароли не совпадают
+                                </Label>
+                            }
+                        </div>
+                    
+                    </div>
+            
+                    <Button onClick={() => useRegistration(setPage)} type="button">Зарегистрироваться</Button>
+            
+                </form>
+            </CardContent>
+        </Card>
     )
 }

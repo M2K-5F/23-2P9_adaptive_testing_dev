@@ -6,9 +6,9 @@ export function ThemeSwitcher () {
 
     return(
         <>
-            <div className={`swither ${theme === 'light' && 'switcher-on'}`} onClick={toggleTheme}>
-                <div className="switcher-circle circle" />
-                <div className="switcher-circle" />
+            <div className="relative h-8 w-16" onClick={toggleTheme}>
+                <img className={"absolute w-16 h-8 rounded-[8rem] border-2 " + (theme === 'dark' ? 'opacity-0' : '')} src="/Night.jpg" alt=""></img>
+                <img src="/Day.jpeg" alt="" className={"absolute w-16 h-8 rounded-[8rem] border-2 " + (theme === 'light' ? 'opacity-0' : '')}/>
             </div>
         </>
     )

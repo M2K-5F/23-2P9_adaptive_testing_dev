@@ -4,9 +4,14 @@ import { Input } from "@/Components/ui/input"
 import { Label } from "@/Components/ui/label"
 import { Button } from "@/Components/ui/button"
 import { useAuth } from "./hooks/useAuth"
+import { Toggle } from "@/Components/ui/toggle"
+import { ToggleGroup } from "@radix-ui/react-toggle-group"
+import { ToggleGroupItem } from "@/Components/ui/toggle-group"
+import { useContext } from "react"
+import { ValueContext } from "@/Layouts/AuthLayout"
 
 export default function Autorize () {
-    const nav = useNavigate()
+    const setValue = useContext(ValueContext)
     const {
         loginHandler, 
         passwordHandler, 
@@ -20,12 +25,12 @@ export default function Autorize () {
 
 
     return (
-        <main className={'flex h-dvh justify-center items-center '}>
-            <Card className="scale-110 w-full max-w-sm h-fit mb-30">
-                <CardHeader>
+            <Card className="w-full max-w-sm h-fit mb-[14px]">
+                
+                <CardHeader className="text-center">
                     <CardTitle className={'text-center'}>Войти в свой аккаунт</CardTitle>
                     <CardDescription>
-                        Войти в аккаунт используя логин и пароль
+                        Войти в аккаунт kptcID используя логин и пароль
                     </CardDescription>
                 </CardHeader>
 
@@ -72,9 +77,8 @@ export default function Autorize () {
                         Войти
                     </Button>
                     {isAuthError && <Label className="font-medium text-red-700">Неверный логин или пароль!</Label>}
-                    <Button onClick={() => nav('/users/registration')} variant="link">Зарегистрироваться</Button>
+                    <Button onClick={() => setValue && setValue('reg')} variant="link">Зарегистрироваться</Button>
                 </CardFooter>
             </Card>
-    </main>
     )
 }

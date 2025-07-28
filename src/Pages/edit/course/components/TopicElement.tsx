@@ -5,7 +5,7 @@ import {getQuestions, archTopic } from '../../../../services/api.service'
 import {QuestionElement} from '../components/QuestionElement'
 import { CreatedQuestionElement } from "./CreateQuestionElement"
 import {Loader} from '../../../../Components/Loader'
-import { useEditCourseStore } from "../store/editCourseStore"
+import { useEditCourseStore } from "../api/editCourseStore"
 import { useSearchParams } from "react-router-dom"
 
 

@@ -14,7 +14,6 @@ export const themeStore = create<store>((set, get) => {
         
         toggleTheme: () => {
             const th = get().theme
-            console.log(th);
             document.documentElement.classList.toggle('dark')
             localStorage.setItem('theme', th === 'dark' ? 'light' : 'dark')
             set({theme: th === 'dark' ? 'light' : 'dark'})

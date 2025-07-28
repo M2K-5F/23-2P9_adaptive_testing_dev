@@ -1,13 +1,13 @@
 import { Outlet, useNavigate } from "react-router-dom"
 import {userStore} from "../stores/userStore"
-import { useRef, useLayoutEffect, FC } from "react"
+import { useRef, useLayoutEffect, FC, memo } from "react"
 import {Loader} from '../Components/Loader'
 import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
 import { ThemeSwitcher } from "@/Components/ThemeSwither"
 
 
-export const RedirectWrapper: FC =  () => {
+export const RedirectWrapper: FC = () => {
     const navigate = useNavigate()
     const {status, role} = userStore()
     ApiService.setNavigate(navigate)
@@ -59,7 +59,6 @@ export const RedirectWrapper: FC =  () => {
     
 
     return(<>
-            <ThemeSwitcher /> 
             <Outlet />
     </>
     )
