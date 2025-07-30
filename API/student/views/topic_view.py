@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from fastapi.responses import JSONResponse
 
 from api_depends import get_user_from_request
-from ..cruds import follow_topic, get_topics_by_course, get_topics_by_followed_course, start_topic, submit_topic_answers
+from ..cruds import get_topics_by_course, get_topics_by_followed_course, start_topic, submit_topic_answers
 from shemas import TopicSubmitAnswers, UserOut, Roles
 
 topic_router = APIRouter(prefix="/topic", tags=["Student/Topics"])
 
 
-@topic_router.get('/get_followed', summary='Get topics by followed course')
+@topic_router.get('/get_followed', summary='Get user topics by followed course')
 async def get_followed_teacher_topics(
     current_user: UserOut = Depends(get_user_from_request),
     user_course_id = Query()
@@ -22,22 +22,6 @@ def get_teacher_topics(
     course_id: str = Query()
 ) -> JSONResponse:
     return get_topics_by_course(current_user, course_id)
-
-
-@topic_router.post("/follow", summary='Follow topic')
-def follow_teacher_topic(
-    current_user = Depends(get_user_from_request),
-    topic_id = Query()
-) -> JSONResponse:
-    return follow_topic(current_user, topic_id)
-
-
-@topic_router.delete('/unfollow', summary='Unfollow topic')
-def unfollow_teacher_topic(
-    current_user = Depends(get_user_from_request),
-    topic_id = Query()
-) -> JSONResponse:
-    return follow_topic(current_user, topic_id, True)
 
 
 @topic_router.post('/start', summary='Start passing the topic at followed course')

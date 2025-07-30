@@ -1,25 +1,24 @@
 import { Outlet, useNavigate } from "react-router-dom"
-import ThemeSwitcher from "../Components/ThemeSwither"
-import UserProfile from "../Components/UserMenu"
 import {userStore} from "../stores/userStore"
-import { useRef, useLayoutEffect } from "react"
-import { WaitModal } from "../Components/WaitModal"
+import { useRef, useLayoutEffect, FC, memo, useEffect } from "react"
 import {Loader} from '../Components/Loader'
 import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
+import { ThemeSwitcher } from "@/Components/ThemeSwither"
 
 
-export default function MainLOUT () {
+export const RedirectWrapper: FC = () => {
     const navigate = useNavigate()
     const {status, role} = userStore()
-    ApiService.setNavigate(navigate)
 
     const shouldRedirect =
         (status === 'authorized' && isStatusPathAvailable('unauthorized')) ||
         (status === 'forbidden' && !isStatusPathAvailable('forbidden')) ||
         (status === 'unauthorized' && !isStatusPathAvailable('unauthorized')) ||
         (status === 'serverunavailable')
-
+    
+    
+    useEffect(() => ApiService.setNavigate(navigate), [])
     
     useLayoutEffect(() => {
         if (!shouldRedirect) return
@@ -48,7 +47,8 @@ export default function MainLOUT () {
             navigate('/')
             return
         }
-    }, [shouldRedirect, status, navigate])
+        console.log(status)
+    }, [shouldRedirect, status])
 
     if (status === 'undefined') {
         return <Loader /> 
@@ -57,30 +57,9 @@ export default function MainLOUT () {
     if (shouldRedirect) {
         return null
     }
-    console.log(status)
     
 
     return(
-        <>
-            <nav id="main-nav">
-                <img 
-                id="icon" 
-                src="../assets/logo.svg" 
-                alt="Логотип"
-                onClick={() => {status === 'authorized' && navigate('/')}}
-                />
-
-                <aside>
-                    {window.location.pathname === '/users/autorize' 
-                        ?   null 
-                        :   <UserProfile /> 
-                    }
-                    
-                    <ThemeSwitcher />
-
-                </aside>
-            </nav>
-            <Outlet />
-        </>
+        <Outlet />
     )
 }

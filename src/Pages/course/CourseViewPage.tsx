@@ -13,7 +13,7 @@ export const  CourseViewPage = () => {
     const nav = useNavigate();
     const { nick } = userStore();
     const [searchParams] = useSearchParams();
-    const courseId = searchParams.get('course_id')!;
+    const courseId = searchParams.get('fcourse_id')!;
     const {
         getData, 
         isFollowed, 
@@ -26,11 +26,11 @@ export const  CourseViewPage = () => {
 
     useLayoutEffect(() => {
         if (!courseId) {
-            nav('/courses');
+            nav('/');
             return;
         }
         getData(courseId)
-    }, []);
+    }, [courseId]);
 
     useEffect(() => {
         if (isFollowError) toast.error('Не удалось осуществить операцию', {
@@ -50,7 +50,6 @@ export const  CourseViewPage = () => {
 
     return (
         <div className="teacher-portal">
-            <ToastContainer containerId={toastContainerIds.courseViewPageContainer} theme='dark' style={{top: "250px", marginLeft: 'auto', right: '100px'}} position='top-right' />
 
             <header className="portal-header">
                 <h1>{course?.title || 'Курс'}</h1>
@@ -72,7 +71,7 @@ export const  CourseViewPage = () => {
 const CourseDetailsContainer = () => {
     const {topics, isFollowed} = useCourseViewStore()
     return(
-        <section style={{width: '85dvw'}} className="course-topics">
+        <section className="course-topics">
             <div className="topics-flex">
                 {topics.length
                     ?   topics.sort((topic1, topic2) => topic1.number_in_course - topic2.number_in_course).map((topic, index) => {

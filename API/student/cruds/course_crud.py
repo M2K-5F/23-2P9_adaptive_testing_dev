@@ -26,8 +26,6 @@ def follow_course(user: UserOut, course_id: str):
             detail="Course not found"
         )
 
-    topics: list[Topic] = Topic.select().where(Topic.by_course == current_course, Topic.is_active == True).order_by(Topic.number_in_course)
-
     [user_course, is_created] = UserCourse.get_or_create(
         user = user.username,
         course = current_course,
@@ -45,6 +43,8 @@ def follow_course(user: UserOut, course_id: str):
                 user_course.save()
 
                 return JSONResponse(user_course.__data__)
+    
+    topics: list[Topic] = Topic.select().where(Topic.by_course == current_course, Topic.is_active == True).order_by(Topic.number_in_course)
 
     for index, topic in enumerate(topics):
         UserTopic.create(
@@ -68,7 +68,7 @@ def unfollow_course(user: UserOut, course_id: str):
             detail="Course not found"
         )
     
-    user_course = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active == True)
+    user_course = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
     if not user_course:
         raise HTTPException(400, 'you not followed')
 
@@ -88,5 +88,5 @@ def get_course_by_id(user: UserOut, courseId: int):
             status_code=status.HTTP_404_NOT_FOUND
         )
     
-    followed_course = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active == True)
+    followed_course = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
     return JSONResponse({'course_data': current_course.__data__, 'isFollowed': True if followed_course else False, })
