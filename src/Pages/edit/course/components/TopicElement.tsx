@@ -5,42 +5,43 @@ import {getQuestions, archTopic } from '../../../../services/api.service'
 import {QuestionElement} from '../components/QuestionElement'
 import { CreatedQuestionElement } from "./CreateQuestionElement"
 import {Loader} from '../../../../Components/Loader'
-import { useEditCourseStore } from "../api/editCourseStore"
 import { useSearchParams } from "react-router-dom"
+import { useTopicStore } from "@/stores/useTopicStore"
 
 
 export const TopicElement = ({ topic, index }: {
     topic: CreatedTopic, 
     index: number,
 }) => {
-    const courseId = useSearchParams()[0].get('course_id')!
-    const [expanded, setExpanded] = useState<boolean>(false)
-    const order = useFlexOrder(index, expanded)
-    const {fetchTopics, expandedTopic} = useEditCourseStore()
+    const [params, setParams] = useSearchParams()
+    const courseId = Number(params.get('course_id'))
+    const expandedTopic = Number(params.get('expanded'))
+    const isExpanded = expandedTopic === topic.id
+    const fetchTopics = useTopicStore(s => s.fetchTopics)
+    const order = useFlexOrder(index, isExpanded)
+    const handleExpand = () => {
+        setParams(p => {
+            p.set('expanded', `${isExpanded ? '0': topic.id}`)
+            return p
+        })
+    }
     
-
-    useLayoutEffect(() => {
-        if (expandedTopic === topic.id) {
-            setExpanded(true)
-        } else { setExpanded(false)}
-    }, [expandedTopic])
 
 
     return (
-        <article style={{order: order}} className={`course-card ${!topic.is_active ? 'archived' : ''} ${expanded ? 'expanded' : ''}`}>
-            <section className="summary">
-                <div className="course-header">
-                    <h3  onClick={() => setExpanded(!expanded)}>{topic.title}</h3>
+        <article>
+            <section>
+                <div>
+                    <h3  onClick={() => {}}>{topic.title}</h3>
 
                     <button
-                    onClick={() => {
-                        archTopic(topic.id)
-                        .then(() => {
-                            fetchTopics(courseId)
-                        })
-                    }}
-                    className="archive-btn"
-                    title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
+                        onClick={() => {
+                            archTopic(topic.id)
+                            .then(() => {
+                                fetchTopics(courseId)
+                            })
+                        }}
+                        title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
                     >{
                         topic.is_active ? '🗄️' : '📦'
                     }</button>
@@ -48,7 +49,7 @@ export const TopicElement = ({ topic, index }: {
 
                 <p>{topic.description || "Нет описания"}</p>
 
-                <div className="course-status">
+                <div>
                     Статус: {topic.is_active ?
                         <span key={topic.id} className="active">Активный</span>
                         :
@@ -56,14 +57,14 @@ export const TopicElement = ({ topic, index }: {
                     }
                 </div>
 
-                <div className="course-actions">
-                        <button style={{backgroundColor: expanded ? 'red': ''}} onClick={() => setExpanded(!expanded)}>
-                            {expanded ? 'Закрыть тему' : 'Перейти к теме'}
+                <div>
+                        <button style={{backgroundColor: isExpanded ? 'red': ''}} onClick={handleExpand}>
+                            {isExpanded ? 'Закрыть тему' : 'Перейти к теме'}
                         </button>
                 </div>
             </section>
 
-            {expanded && <TopicSummary topic={topic} />}
+            {isExpanded && <TopicSummary topic={topic} />}
         </article>
     )
 }

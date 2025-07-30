@@ -14,7 +14,7 @@ import { AuthLayout } from "@/Layouts/AuthLayout";
 
 
 export default function RoutePaths () {
-  const {pingUser} = userStore()
+  const pingUser = userStore(s => s.pingUser)
 
   useLayoutEffect(() => {
     pingUser()
@@ -23,7 +23,7 @@ export default function RoutePaths () {
 
   return(
     <>
-      <BrowserRouter>
+      <BrowserRouter >
         <Routes>
           <Route path="/403" Component={ForbiddenPage} /> 
           <Route path="/503" Component={ServiceUnavailablePage} />

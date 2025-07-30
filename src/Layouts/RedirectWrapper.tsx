@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom"
 import {userStore} from "../stores/userStore"
-import { useRef, useLayoutEffect, FC, memo } from "react"
+import { useRef, useLayoutEffect, FC, memo, useEffect } from "react"
 import {Loader} from '../Components/Loader'
 import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
@@ -10,14 +10,15 @@ import { ThemeSwitcher } from "@/Components/ThemeSwither"
 export const RedirectWrapper: FC = () => {
     const navigate = useNavigate()
     const {status, role} = userStore()
-    ApiService.setNavigate(navigate)
 
     const shouldRedirect =
         (status === 'authorized' && isStatusPathAvailable('unauthorized')) ||
         (status === 'forbidden' && !isStatusPathAvailable('forbidden')) ||
         (status === 'unauthorized' && !isStatusPathAvailable('unauthorized')) ||
         (status === 'serverunavailable')
-
+    
+    
+    useEffect(() => ApiService.setNavigate(navigate), [])
     
     useLayoutEffect(() => {
         if (!shouldRedirect) return
@@ -46,7 +47,8 @@ export const RedirectWrapper: FC = () => {
             navigate('/')
             return
         }
-    }, [shouldRedirect, status, navigate])
+        console.log(status)
+    }, [shouldRedirect, status])
 
     if (status === 'undefined') {
         return <Loader /> 
@@ -55,11 +57,9 @@ export const RedirectWrapper: FC = () => {
     if (shouldRedirect) {
         return null
     }
-    console.log(status)
     
 
-    return(<>
-            <Outlet />
-    </>
+    return(
+        <Outlet />
     )
 }

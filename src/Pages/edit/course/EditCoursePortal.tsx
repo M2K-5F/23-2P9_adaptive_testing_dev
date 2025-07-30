@@ -9,132 +9,42 @@ import {topicSearch} from '../../../utils/topicSearch'
 import { useEditCourseStore } from "./api/editCourseStore";
 import { useCreateTopic } from "./hooks/createTopicHandler";
 import { useTopicStore } from "@/stores/useTopicStore";
-import { useAsideApi } from "@/stores/useAsideStore";
 
 export function TopicsPortal() {
-    const nav = useNavigate()
-    const courseId = Number(useSearchParams()[0].get('course_id') )
+    const navigate = useNavigate()
+    const [params, setParams] = useSearchParams()
+    const courseId = Number(params.get('course_id'))
+    const expandedTopic = Number(params.get('expanded'))
+    
     const {
         isError, 
         isLoading, 
         createdStatus,
-        setExpandedTopic,
         toggleIsMenuOpen
     } = useEditCourseStore()
-    const {createdTopics, fetchTopics, reset} = useTopicStore()
-    const {expandedCreatedCourse, setExpandedCreatedCourse} = useAsideApi()
+    const {createdTopics, fetchTopics} = useTopicStore()
     const createHandler = useCreateTopic()
     
-    
-    if (!courseId) {
-        nav('/courses')
-        return null
-    }
-    
     useLayoutEffect(() => {
-        fetchTopics(String(courseId))
-        expandedCreatedCourse !== courseId && setExpandedCreatedCourse(courseId)
-
+        if (!courseId) {
+            navigate('/')
+            return 
+        }
+        fetchTopics(courseId)
     }, [courseId])
 
-    useEffect(() => { 
-        if (createdStatus.isCreated) {
-            toast.success('Тема успешно создана', {containerId: 'create-topic-output'})
-        }
-    }, [createdStatus.isCreating])
-    
     if (isLoading || createdStatus.isCreating) {
         return <Loader /> 
     }
 
     return (
         <div className="teacher-portal">
-            <ToastContainer containerId={'create-topic-output'} theme='dark' style={{top: "250px", marginLeft: 'auto', right: '100px'}} position='top-right' /> 
-
-            <SearchContainer<CreatedTopic>
-            placeholder="Поиск по названию темы..."
-            searchfn={(query, callback) => callback(topicSearch(createdTopics[Number(courseId)], query))}
-            handlefn={(topic) => {setExpandedTopic(topic.id)}}
-            summary={{name: 'Создан: ', content: 'created_by'}}
-            />
 
             <header className="portal-header">
                 <h1>Темы созданные мной</h1>
                 <div style={{width: '300px'}}>
-                    {createdStatus.isMenuOpen &&
-                        <div 
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '5px',
-                            marginBottom: '10px'
-                        }}>
-                            <input 
-                            id="topic-title-input" 
-                            style={{
-                                width: '100%',
-                                borderRadius: '5px',
-                                color: "black", 
-                                backgroundColor: 'white', 
-                                caretColor: "black",
-                                padding: '8px'
-                            }}
-                            placeholder="Название темы" 
-                            />
-
-                            <textarea
-                            id="topic-desc-input"
-                            style={{
-                                resize: 'none',
-                                width: "100%",
-                                borderRadius: '5px',
-                                color: "black",
-                                backgroundColor: 'white',
-                                caretColor: "black",
-                                padding: '8px',
-                                minHeight: '60px'
-                            }}
-                            placeholder="Описание темы"
-                            />
-
-                            <div 
-                            style={{
-                                display: 'flex', 
-                                gap: '5px', 
-                                width: "100%", 
-                                justifyContent: "center"
-                            }}>
-
-                                <button 
-                                className="create-course-btn" 
-                                onClick={createHandler}
-                                style={{marginRight: '5px'}}
-                                >
-                                    ✔ Создать
-                                </button>
-
-                                <button 
-                                style={{backgroundColor: 'red'}}
-                                className="create-course-btn"  
-                                onClick={toggleIsMenuOpen}
-                                >
-                                    × Отмена
-                                </button>
-
-                            </div>
-                        </div>
-                    }
-                    {!createdStatus.isMenuOpen && (
-                        <button 
-                        style={{
-                            marginLeft: '40%'
-                        }}
-                        className="create-course-btn"  
-                        onClick={toggleIsMenuOpen}
-                        >
-                            + Создать новую тему
-                        </button>
-                    )}
+                    
+                    
                 </div>
             </header>
 

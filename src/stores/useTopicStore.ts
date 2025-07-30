@@ -9,13 +9,13 @@ interface States {
 }
 
 interface Actions {
-    fetchTopics: (courseId: string) => void
+    fetchTopics: (courseId: number) => void
     reset: () => void
 }
 
 export const useTopicStore = create<States & Actions>()(immer((set, get) => ({
     fetchTopics: async (courseId) => {
-        const topics = await getTopics(Number(courseId)) as CreatedTopic[]
+        const topics = await getTopics(courseId) as CreatedTopic[]
         set(draft => {
             draft.createdTopics[Number(courseId)] = topics
         })

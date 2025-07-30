@@ -7,9 +7,11 @@ import { userStore } from "./userStore";
 interface States {
     expandedCreatedCourse: number
     expandedFollowedCourse: number
+    expandedCreatedTopic: number
 }
 
 interface Actions {
+    setExpandedTopic: (topicId: number) => void
     setExpandedCreatedCourse: (id: number) => void
     setExpandedFollowedCourse: (id: number) => void
 }
@@ -17,16 +19,12 @@ interface Actions {
 export const useAsideApi = create<States & Actions>()(immer((set, get) => ({
     expandedCreatedCourse: -1,
     expandedFollowedCourse: -1,
+    expandedCreatedTopic: -1,
 
     setExpandedCreatedCourse: (id) => {
         set(draft => {
-            draft.expandedFollowedCourse = -1
-            console.log(id, draft.expandedCreatedCourse)
-            
             if (draft.expandedCreatedCourse !== id) {
                 draft.expandedCreatedCourse = id
-            } else {
-                draft.expandedCreatedCourse = -1
             }
         })
     },
@@ -36,5 +34,15 @@ export const useAsideApi = create<States & Actions>()(immer((set, get) => ({
             draft.expandedFollowedCourse = id
             draft.expandedCreatedCourse = -1
         })
-    },    
+    },
+
+    setExpandedTopic: (topicId) => {
+        set(draft => {
+            if (draft.expandedCreatedTopic != topicId) {
+                draft.expandedCreatedTopic = topicId
+            } else {
+                draft.expandedCreatedTopic = -1
+            }
+        })
+    }
 })))
