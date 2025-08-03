@@ -2,12 +2,21 @@ import { themeStore } from "@/stores/themeStore"
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, ToasterProps } from "sonner"
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const theme = themeStore(store => store.theme)
-  
+interface Props extends ToasterProps {
+  themeAlt?: boolean
+}
+
+const Toaster = ({ ...props }: Props) => {
+  let { theme } = themeStore()
+  if (props.themeAlt) {
+    if (theme === 'dark') {
+      theme = 'light'
+    } else {theme = 'dark'}
+  } 
 
   return (
     <Sonner
+      {...props}
       theme={theme}
       className="toaster group"
       style={
@@ -17,7 +26,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-border": "var(--border)",
         } as React.CSSProperties
       }
-      {...props}
     />
   )
 }

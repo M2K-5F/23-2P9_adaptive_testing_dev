@@ -1,59 +1,48 @@
-import { memo, ChangeEvent, SetStateAction, Dispatch } from "react"
+import { memo, ChangeEvent, FC } from "react"
 import { Answer, Question } from "../../../../types/interfaces"
 import { Updater, useImmer } from "use-immer"
-import { toast, ToastContainer } from "react-toastify"
 import { createQuestion } from "../../../../services/api.service"
+import { toast } from "sonner"
+import { Button } from '@/Components/ui/button'
+import { Input } from "@/Components/ui/input"
+import { Checkbox } from "@/Components/ui/checkbox"
+import { Label } from "@/Components/ui/label"
 
-
-const autoResizeTextarea = (textarea: HTMLTextAreaElement) => {
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight}px`
-}
-
-
-export const CreatedQuestionElement = memo((props: {
-    topicLoadingSetter: Dispatch<SetStateAction<boolean>>
-    isCreatingSetter: Dispatch<SetStateAction<boolean>>
-    topic_id: number
-}) => {
+export const CreatedQuestionElement:FC<{createQuestionHandler: () => void, topic_id: number, }> = memo((props) => {
     const [createdQuestion, setCreatedQuestion] = useImmer<Question>({
-        text: '', 
+        text: '',
         question_type: 'single',
-        answer_options: [
-            {
-                id: 0, 
-                text: '', 
-                is_correct: true
-            },
-        ]
+        answer_options: [{
+            id: 0,
+            text: '',
+            is_correct: true
+        }]
     })
 
     const createQuestionFromDraft = () => {
         const question = createdQuestion
+        let description: string | undefined
+        const correctAnswersCount = question.answer_options.filter(answer => answer.is_correct).length
 
         if (!question.text ) {
-            toast.error('Введите текст вопроса', {containerId: 'toast-output-2'})
-            return
+            description = 'Введите текст вопроса'
+        }
+        else if (!question.answer_options.length) {
+            description = 'Как тебе удалось удалить первый вариант ответа!?'
+        }
+        else if (question.answer_options.filter(answer => answer.text).length !== question.answer_options.length) {
+            description = 'Вы заполнили не все поля с ответами'
+        }
+        else if (correctAnswersCount === 0) {
+            description = 'Выберите хотя бы один верный вариант ответа'
+        }
+        else if (correctAnswersCount === question.answer_options.length) {
+            description = 'Верными не могут быть все ответы'
         }
 
-        if (!question.answer_options.length) {
-            toast.error('Как тебе удалось удалить первый вариант ответа!?', {containerId: 'toast-output-2'})
+        if (description) {
+            toast('Ошибка при создании вопроса:', {description: description})
             return
-        }
-        
-        if (question.answer_options.filter(answer => answer.text).length !== question.answer_options.length) {
-            toast.error('Вы заполнили не все поля с ответами', {containerId: 'toast-output-2'})
-            return
-        }
-        const correctAnswersCount = question.answer_options.filter(answer => answer.is_correct).length
-        switch (true) {
-            case correctAnswersCount === 0:
-                toast.error('Выберите хотя бы один верный вариант ответа', {containerId: 'toast-output-2'})
-                return
-            
-            case correctAnswersCount === question.answer_options.length:
-                toast.error('Верными не могут быть все ответы', {containerId: 'toast-output-2'})
-                return
         }
 
         const toCreate: Question = {
@@ -66,175 +55,126 @@ export const CreatedQuestionElement = memo((props: {
 
         createQuestion(props.topic_id, toCreate)
         .then(() => {
-            toast.success('Вопрос в теме успешно создан', {containerId: 'edit-course-portal-output'})
-            props.isCreatingSetter(false)
-            props.topicLoadingSetter(true)
+            toast('Вопрос в теме успешно создан!')
+            props.createQuestionHandler()
         })
         .catch((error: Error) => {
-            console.log(error.message);
-            
             switch (error.message) {
                 case '404': 
-                    toast.error('Ошибка ', {containerId: 'toast-output-2'})
+                    toast('Ошибка')
                     break
 
                 case '400':
-                    toast.error('Вопрос с таким текстом уже создан в этой теме', {containerId: 'toast-output-2'})
+                    toast('Вопрос с таким текстом уже создан в этой теме!')
                     break
             }
         })
         
     }
 
-
-    return(
-        <article className="create-question-container question-card expanded" >
-            <input
-            placeholder="Текст вопроса"
-            style={{resize: 'none', textOverflow: 'ellipsis', width: '40%', marginBottom: '5px', fontSize: 'large'}}
-            className="pretty_input"
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                const value = event.currentTarget.value
-                setCreatedQuestion((draft) => {draft.text = value})
-            }}
-            value={createdQuestion.text} 
+    return (
+        <article className=" rounded-lg p-6 pt-4 shadow-md mb-6 border border-gray-200">
+            <Label className="text-md mb-3">Создание вопроса:</Label>
+            <Input
+                placeholder="Текст вопроса"
+                className="max-w-100 w-full mb-4 h-10  overflow-ellipsis focus-visible:ring-2 focus-visible:ring-offset-2 border-gray-300"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setCreatedQuestion(draft => { draft.text = e.target.value })
+                }}
+                value={createdQuestion.text}
             />
 
-            <h5>Тип: {createdQuestion.question_type === 'single' ? "Один ответ" : "Несколько ответов"}</h5>
+            <h5 className="text-md border-b-2 w-fit mb-2">
+                Тип: {createdQuestion.question_type === 'single' ? "Один ответ" : "Несколько ответов"}
+            </h5>
 
-            <fieldset 
-            style={{marginBottom: '10px'}} 
-            className="answer-options"
-            >
-                <h5>Варианты ответов:</h5>
-                {createdQuestion.answer_options.map( (answer, index) => 
-                    <AnswerElement 
-                    index={index}
-                    answer={answer}
-                    questionSetter={setCreatedQuestion}
+            <fieldset className="mb-4">
+                <h5 className="text-md font-medium mb-3">Варианты ответов:</h5>
+                {createdQuestion.answer_options.map((answer, index) => (
+                    <AnswerElement
+                        key={index}
+                        index={index}
+                        answer={answer}
+                        questionSetter={setCreatedQuestion}
                     />
-                )}
+                ))}
             </fieldset>
 
-            <output className="">
-                <ToastContainer
-                toastStyle={{marginBottom: '10px'}}
-                pauseOnHover={false}
-                className={'ToastifyBlock'}
-                position='bottom-left'
-                theme='dark'
-                // autoClose={0}
-                key="create-question-output-toast-container" 
-                containerId="toast-output-2" 
-                /> 
-            </output>
-            
-            <menu 
-            style={{
-                display: 'flex', 
-                gap: '10px', 
-                marginBottom: '10px'
-            }}>
-                <button 
-                title="Добавить вариант ответа"
-                className="create-course-btn"
-                onClick={() => {
-                    setCreatedQuestion(draft => {
-                        draft.answer_options.push({id: draft.answer_options.length, text: '', is_correct: false})
-                    })
-                }}
+            <div className="flex flex-wrap gap-3">
+                <Button
+                    onClick={() => {
+                        setCreatedQuestion(draft => {
+                            draft.answer_options.push({
+                                id: draft.answer_options.length,
+                                text: '',
+                                is_correct: false
+                            })
+                        })
+                    }}
+                    className="hover:bg-green-300"
                 >
                     + Добавить вариант ответа
-                </button>
+                </Button>
 
-                <button 
-                title="Создать вопрос в курсе"
-                className="create-course-btn"
-                onClick={() => createQuestionFromDraft()}
-                >
-                    ✔ Создать вопрос   
-                </button>
-            </menu>
-
+                <Button className="bg-green-500 hover:bg-green-400" onClick={createQuestionFromDraft}>
+                    ✔ Создать вопрос
+                </Button>
+            </div>
         </article>
-        
     )
 })
-
 
 const AnswerElement = memo((props: {
     answer: Answer
     questionSetter: Updater<Question>
     index: number
 }) => {
-    return(
-        <article style={{position: 'relative', borderRadius: '10px', border: '1px dashed black', marginBottom: '10px', padding: '10px', width: '40%'}} className="answer__container">
-
-            {Boolean(props.index) && 
-                <button
-                onClick={() => {
-                    props.questionSetter(draft => {
-                        const options = draft.answer_options.filter((answer, index) => index !== props.index)
-                        draft.answer_options = options
-                    })
-                }} 
-                style={{
-                    backgroundColor: 'white',
-                    position: 'absolute', 
-                    fontSize: 'medium', 
-                    width: 'fit-content', 
-                    marginLeft: 'auto',
-                    marginRight: '10px', 
-                    cursor: 'pointer',
-                    marginTop: '10px',
-                    border: '1px solid black',
-                    borderRadius: "5px",
-                    padding: '3px'
-                }}
+    return (
+        <article className="relative border border-dashed border-gray-400 rounded-lg mb-4 p-4 max-w-100 w-full">
+            {Boolean(props.index) && (
+                <Button
+                    onClick={() => {
+                        props.questionSetter(draft => {
+                            draft.answer_options = draft.answer_options.filter((_, i) => i !== props.index)
+                        })
+                    }}
+                    variant={'outline'}
+                    className="absolute w-8 h-8 right-3 top-2  text-sm px-2 py-1"
                 >
                     🗑️
-                </button>
-            }
+                </Button>
+            )}
 
-            <header style={{marginBottom: '5px'}}>
-                <label className="answer__text__label">{`Вариант ответа №${props.index + 1}:`}</label>
+            <header className="mb-2">
+                <Label className="font-medium">{`Вариант №${props.index + 1}:`}</Label>
             </header>
 
-            <div 
-            style={{display: 'flex', width: '90%', justifyContent: 'space-between'}}
-            >
-                <input maxLength={115} minLength={3}
-                style={{width: '90%'}}
-                className="pretty_input"
-                value={props.answer.text}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                    const value = event.currentTarget.value
-                    props.questionSetter(draft => {draft.answer_options[props.index].text = value})
-                }}
+            <div className="flex w-full items-center gap-3">
+                <Input
+                    placeholder="введите текст ответа"
+                    maxLength={115}
+                    minLength={3}
+                    className="flex-1"
+                    value={props.answer.text}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        props.questionSetter(draft => {
+                            draft.answer_options[props.index].text = e.target.value
+                        })
+                    }}
                 />
 
-                <input required
-                style={{width: '15px'}}
-                type='checkbox'
-                className="answer__text__radio"
-                checked={props.answer.is_correct}
-                onClick={ (event) => {
-                    const checked = event.currentTarget.checked
-                    props.questionSetter(draft => {
-                        if (!(draft.answer_options.filter(answer => answer.is_correct).length === 1 && !checked)) {
-                            draft.answer_options[props.index].is_correct = checked
-                        }
-                        const correctAnswers = draft.answer_options.filter(answer => answer.is_correct).length
-                        if (correctAnswers > 1) {
-                            draft.question_type = 'multiple'
-                        } else {
-                            draft.question_type ='single'
-                        }
-                    })
-                } }
-                onChange={ (event: ChangeEvent<HTMLInputElement>) => {
-                    //
-                } }
+                <Checkbox
+                    className="h-5 w-5"
+                    checked={props.answer.is_correct}
+                    onCheckedChange={(checked) => {
+                        props.questionSetter(draft => {
+                            if (!(draft.answer_options.filter(a => a.is_correct).length === 1 && !checked)) {
+                                draft.answer_options[props.index].is_correct = !!checked
+                            }
+                            const correctAnswers = draft.answer_options.filter(a => a.is_correct).length
+                            draft.question_type = correctAnswers > 1 ? 'multiple' : 'single'
+                        })
+                    }}
                 />
             </div>
         </article>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { themeStore } from "../stores/themeStore";
+import { themeStore } from "../../stores/themeStore";
 
 export function ThemeSwitcher () {
     const {theme, toggleTheme} = themeStore()

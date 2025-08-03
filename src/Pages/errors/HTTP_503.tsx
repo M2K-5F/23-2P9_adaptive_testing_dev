@@ -1,4 +1,4 @@
-import {Button} from '../../Components/Button'
+import { Button } from '@/Components/ui/button'
 import { useNavigate } from "react-router-dom";
 import { userStore } from '../../stores/userStore';
 import { useEffect } from 'react';
@@ -25,11 +25,9 @@ export default function ServiceUnavailablePage() {
             </p>
             <div className="error-page__buttons">
             <Button type='button'
-                isPretty
                 className="error-page__button primary"
-                text="Попробовать снова"
-                onclick={() => window.location.reload()}
-            />
+                onClick={() => window.location.reload()}
+            >Попробовать снова</Button>
             </div>
         </div>
         </main>

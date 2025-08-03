@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { CreatedTopic, FollowedCourse } from "../../types/interfaces";
-import { Loader } from '../../Components/Loader';
+import { Loader } from '../../Components/ui/Loader';
 import { toast, ToastContainer } from "react-toastify";
 import { TopicElement } from "./Components/TopicElement";
 import { followCourse, getFollowedCourses, getTopics, unfollowCourse } from "../../services/api.service";

@@ -298,7 +298,7 @@ export const archQuestion = (question_id: number) => {
 }
 
 
-export const getSearchedCourses = (searchQuery: string) => {
+export const searchCourses = (searchQuery: string) => {
     return ApiService.requestToServer(
         APIUrls.searchCourseURL,
         {

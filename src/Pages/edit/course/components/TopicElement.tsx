@@ -1,15 +1,14 @@
-import { Dispatch, SetStateAction, useState, useEffect, useLayoutEffect} from "react"
-import {CreatedTopic, CreatedQuestion, Question} from '../../../../types/interfaces'
-import {useFlexOrder} from '../../../../hooks/useFlexOrder'
-import {getQuestions, archTopic } from '../../../../services/api.service'
-import {QuestionElement} from '../components/QuestionElement'
-import { CreatedQuestionElement } from "./CreateQuestionElement"
-import {Loader} from '../../../../Components/Loader'
+import { useState, useEffect, memo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
+import { Button } from "@/Components/ui/button"
+import { CreatedTopic, CreatedQuestion } from "../../../../types/interfaces"
+import { getQuestions, archTopic } from "../../../../services/api.service"
+import { QuestionElement } from './QuestionElement'
+import { CreatedQuestionElement } from "./CreateQuestionElement"
+import { Badge } from "@/Components/ui/badge"
 
-
-export const TopicElement = ({ topic, index }: {
+export const TopicElement = memo(({ topic, index }: {
     topic: CreatedTopic, 
     index: number,
 }) => {
@@ -18,116 +17,111 @@ export const TopicElement = ({ topic, index }: {
     const expandedTopic = Number(params.get('expanded'))
     const isExpanded = expandedTopic === topic.id
     const fetchTopics = useTopicStore(s => s.fetchTopics)
-    const order = useFlexOrder(index, isExpanded)
+    const [questions, setQuestions] = useState<CreatedQuestion[]>([])
+    const [isCreating, setIsCreating] = useState(false)
+    
     const handleExpand = () => {
         setParams(p => {
             p.set('expanded', `${isExpanded ? '0': topic.id}`)
             return p
         })
     }
-    
+
+    const fetchQuestions = async () => {
+        setQuestions(await getQuestions(topic.id))
+    }
+
+    const handleArchTopic = (topicId: number) => {
+        archTopic(topic.id)
+        .then(() => {fetchTopics(courseId)})
+    }
+
+    useEffect(() => {fetchQuestions()}, [])
 
 
     return (
-        <article>
-            <section>
-                <div>
-                    <h3  onClick={() => {}}>{topic.title}</h3>
+        <article className={`border border-foreground overflow-hidden rounded-lg shadow-sm mb-4 ${isExpanded ? 'col-span-2' : ''} ${topic.is_active ? '' : 'opacity-70'} `}>
+            <section className="p-4 bg-muted">
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-medium cursor-pointer" onClick={handleExpand}>
+                        {topic.title}
+                    </h3>
 
-                    <button
-                        onClick={() => {
-                            archTopic(topic.id)
-                            .then(() => {
-                                fetchTopics(courseId)
-                            })
-                        }}
+                    <Button
+                        variant='outline'
+                        size="sm"
+                        onClick={() => {handleArchTopic(topic.id)}}
                         title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
-                    >{
-                        topic.is_active ? '🗄️' : '📦'
-                    }</button>
+                    >
+                        {topic.is_active ? '🗄️' : '📦'}
+                    </Button>
                 </div>
 
-                <p>{topic.description || "Нет описания"}</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                    {topic.description || "Нет описания"}
+                </p>
 
-                <div>
-                    Статус: {topic.is_active ?
-                        <span key={topic.id} className="active">Активный</span>
-                        :
-                        <span key={topic.id} className="archived">В архиве</span>
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm">Статус:</span>
+                    {topic.is_active ?
+                        <Badge className="cursor-pointer" onClick={() => handleArchTopic(topic.id)} variant='default'>Активный</Badge> :
+                        <Badge className="cursor-pointer" onClick={() => handleArchTopic(topic.id)} variant="outline">В архиве</Badge>
                     }
                 </div>
 
-                <div>
-                        <button style={{backgroundColor: isExpanded ? 'red': ''}} onClick={handleExpand}>
-                            {isExpanded ? 'Закрыть тему' : 'Перейти к теме'}
-                        </button>
-                </div>
+                <Button
+                    variant={isExpanded ? "destructive" : "default"}
+                    size="sm"
+                    onClick={handleExpand}
+                >
+                    {isExpanded ? 'Закрыть тему' : 'Перейти к теме'}
+                </Button>
             </section>
 
-            {isExpanded && <TopicSummary topic={topic} />}
-        </article>
-    )
-}
+            {isExpanded && 
+                <section className="border-t p-4 bg-muted/50">
+                    <h4 className="text-md font-medium mb-3">Вопросы темы:</h4>
 
-const TopicSummary = (props: {
-    topic: CreatedTopic
-}) => {
-    const [isLoading, setIsLoading] = useState(true)
-    const [questions, setQuestions] = useState<CreatedQuestion[]>([])
-    const [isCreating, setIsCreating] = useState(false)
-
-    useEffect(() => {
-        if (isLoading) {
-            getQuestions(props.topic.id)
-            .then((data: CreatedQuestion[]) => {
-                setQuestions(data)
-            })
-            .finally(() => setIsLoading(false))
-        }
-    })
-    
-
-    return(
-        <section className="details">
-
-                    <h4 style={{marginTop: '10px'}}>Вопросы темы:</h4>
-
-                    {!isLoading ? 
-                        (questions?.length ? 
+                    {questions?.length ? 
                             questions.map(question => 
-                                <QuestionElement key={question.id} loadingSetter={setIsLoading} question={question} /> 
+                                <QuestionElement 
+                                    key={question.id} 
+                                    question={question} 
+                                    fetchQuestions={fetchQuestions}
+                                /> 
                             ) : 
-                            <h5 style={{margin: '10px 10px'}}>Нет созданных вопросов</h5> 
-                        ) : 
-                        <Loader /> 
+                            <p className="text-sm text-muted-foreground m-2.5">Нет созданных вопросов</p>
+                    
                     }
 
-                    {!isCreating ?
-                        <button 
-                        style={{marginLeft: '10px', height: '35px'}} 
-                        onClick={() => {setIsCreating(true)}} 
-                        className="create-course-btn"
+                    {!isCreating ? (
+                        <Button 
+                            variant='default'
+                            className="mt-3 ml-2 h-9 bg-green-400 hover:bg-green-300"
+                            onClick={() => setIsCreating(true)}
                         >
                             + Создать вопрос
-                        </button> 
-                            :
+                        </Button>
+                    ) : (
                         <>
-                        <CreatedQuestionElement 
-                        topic_id={props.topic.id}
-                        topicLoadingSetter={setIsLoading}
-                        isCreatingSetter={setIsCreating}
-                        />
-                        
-                        <menu>
-                            <button
-                            style={{backgroundColor: 'red'}}
-                            className="create-course-btn"
-                            onClick={() => setIsCreating(false)}>
-                                Отменить создание
-                            </button>
-                        </menu>
+                            <CreatedQuestionElement 
+                                topic_id={topic.id}
+                                createQuestionHandler={() => {setIsCreating(false), fetchQuestions()}}
+                            />
+                            
+                            <div className="mt-3">
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setIsCreating(false)}
+                                >
+                                    Отменить создание
+                                </Button>
+                            </div>
                         </>
-                    }
+                    )}
                 </section>
+            }
+        </article>
     )
-}
+})

@@ -1,8 +1,8 @@
-import { Button } from "../../Components/Button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { pingUser, userStore } from "../../stores/userStore";
+import { userStore } from "../../stores/userStore";
 import { logoutUser } from "../../services/api.service";
+import { Button } from "@/Components/ui/button";
 
 export default function ForbiddenPage() {
     const navigate = useNavigate();
@@ -24,16 +24,14 @@ export default function ForbiddenPage() {
             </p>
             <div className="error-page__buttons">
             <Button
-                isPretty
                 type='button'
                 className="error-page__button"
-                text="Вернуться на главную"
-                onclick={() => {
+                onClick={() => {
                     logoutUser().then(() => 
                         navigate('/users/autorize')
                     )
                 }}
-            />
+            >Вернуться на главную</Button>
             </div>
         </div>
         </main>

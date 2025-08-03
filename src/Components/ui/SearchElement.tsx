@@ -1,5 +1,5 @@
 import { NavigateFunction } from "react-router-dom"
-import { CreatedCourse } from "../types/interfaces"
+import { CreatedCourse } from "../../types/interfaces"
 import { MouseEventHandler } from "react"
 
 export function SearchElement<T extends CreatedCourse>({element, title, summary, callbackfn}: {

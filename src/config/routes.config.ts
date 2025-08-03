@@ -24,3 +24,10 @@ export const isRolePathAvailable = (roles: role[]) => {
     }
     return !shouldRedirect
 }
+
+export const routes = {
+    home: '/',
+    editCourse: (courseId: number, expanded: number = 0) => `/edit/course?course_id=${courseId}&expanded=${expanded}`,
+    viewCourse: (fcourseId: number) => `/course?fcourse_id=${fcourseId}`,
+    
+}

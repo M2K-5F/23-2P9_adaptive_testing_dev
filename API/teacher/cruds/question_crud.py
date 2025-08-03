@@ -73,11 +73,6 @@ def get_question_list(user: UserOut, topic_id: str):
     questions = Question.select().where(
         Question.by_topic == current_topic
     )
-    if not questions:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not found"
-        )
     
     to_return = []
     for question in questions:

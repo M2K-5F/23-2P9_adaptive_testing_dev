@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+@layer components {  
+}
+
+.srch-input:focus + div > .srch-placeholder,
+.srch-input:not(:placeholder-shown) + div > .srch-placeholder {
+  visibility: hidden;
+  z-index: -infinity;
+}
