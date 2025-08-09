@@ -32,7 +32,7 @@ export const AsidePanelLayout: React.FC<{}> = memo(() => {
             'h-dvh shrink-0 z-10',
             isOpen ? 'w-[300px]' : 'w-[60px]'
         )}
-        style={{transition: 'width cubic-bezier(.4,0,.2,1) 0.2s'}}
+        style={{transition: `width cubic-bezier(.4,0,.2,1) ${isOpen ?  '.2s' : '.3s'}`}}
         >
             <div 
             className={clsx(
@@ -40,7 +40,7 @@ export const AsidePanelLayout: React.FC<{}> = memo(() => {
                 'relative flex flex-row-reverse will-change-[width]',
                 isOpen ? 'w-[300px]' : 'w-[60px]'
             )}
-            style={{transition: 'width cubic-bezier(.4,0,.2,1) 0.3s'}}
+            style={{transition: `width cubic-bezier(.4,0,.2,1) ${!isOpen ?  '.2s' : '.3s'}`}}
             >
                 <section 
                     className={clsx(
