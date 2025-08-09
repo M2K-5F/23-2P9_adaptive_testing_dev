@@ -25,7 +25,7 @@ export const CreateTopicDialog: FC<{text: string, className?: string, variant?: 
                         Создание темы
                     </DialogTitle>
                     <DialogDescription>
-                        {`Создать новую тему в курсе ${createdCourses.find(c => c.id === courseId)?.title ?? ''}`}
+                        {`Создать новую тему в курсе: ${createdCourses.find(c => c.id === courseId)?.title ?? ''}`}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">

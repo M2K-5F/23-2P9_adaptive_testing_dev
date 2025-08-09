@@ -1,8 +1,6 @@
 import {create} from 'zustand'
 import { CreatedCourse, CreatedTopic, FetchedTopic } from '../../../types/interfaces'
 import { followCourse, getCourse, getTopics, unfollowCourse } from '../../../services/api.service'
-import { toast, ToastContainer } from "react-toastify";
-import { toastContainerIds } from '../../../config/toasts.constant';
 
 interface CourseViewStoreShema {
     isLoading: boolean
@@ -52,8 +50,6 @@ export const useCourseViewStore = create<CourseViewStoreShema>((set, get) => ({
         if (isFollowed) {
             try {
                 const response = await unfollowCourse(Number(courseId))
-                toast.success('Вы успешно отписались!', {containerId: toastContainerIds.courseViewPageContainer})
-                set({isFollowed: false})
             }
             catch {
                 set({isFollowed: true, isFollowError: true})
@@ -61,7 +57,6 @@ export const useCourseViewStore = create<CourseViewStoreShema>((set, get) => ({
         } else {
             try {
                 const response = await followCourse(Number(courseId))
-                toast.success('Вы успешно подписались!', {containerId: toastContainerIds.courseViewPageContainer})
                 set({isFollowed: true})
             }
             catch {

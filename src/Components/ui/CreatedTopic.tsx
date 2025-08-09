@@ -1,16 +1,13 @@
 import { useState, useEffect, memo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
-import { Button } from "@/Components/ui/button"
-import { CreatedTopic, CreatedQuestion } from "../../../../types/interfaces"
-import { getQuestions, archTopic } from "../../../../services/api.service"
-import { QuestionElement } from './QuestionElement'
-import { CreatedQuestionElement } from "./CreateQuestionElement"
-import { Badge } from "@/Components/ui/badge"
+import { Button, Badge, CreatedQuestion, QuestionConstructor } from "@/Components/ui"
+import { CreatedTopic as CT, CreatedQuestion as CQ } from "@/types/interfaces"
+import { getQuestions, archTopic } from "@/services/api.service"
 import clsx from "clsx"
 
-export const TopicElement = memo(({ topic, index }: {
-    topic: CreatedTopic, 
+export const CreatedTopic = memo(({ topic, index }: {
+    topic: CT, 
     index: number,
 }) => {
     const [params, setParams] = useSearchParams()
@@ -18,7 +15,7 @@ export const TopicElement = memo(({ topic, index }: {
     const expandedTopic = Number(params.get('expanded'))
     const isExpanded = expandedTopic === topic.id
     const fetchTopics = useTopicStore(s => s.fetchTopics)
-    const [questions, setQuestions] = useState<CreatedQuestion[]>([])
+    const [questions, setQuestions] = useState<CQ[]>([])
     const [isCreating, setIsCreating] = useState(false)
     
     const handleExpand = () => {
@@ -93,7 +90,7 @@ export const TopicElement = memo(({ topic, index }: {
 
                     {questions?.length ? 
                             questions.map(question => 
-                                <QuestionElement 
+                                <CreatedQuestion
                                     key={question.id} 
                                     question={question} 
                                     fetchQuestions={fetchQuestions}
@@ -113,7 +110,7 @@ export const TopicElement = memo(({ topic, index }: {
                         </Button>
                     ) : (
                         <>
-                            <CreatedQuestionElement 
+                            <QuestionConstructor
                                 topic_id={topic.id}
                                 createQuestionHandler={() => {setIsCreating(false), fetchQuestions()}}
                             />

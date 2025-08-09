@@ -20,5 +20,5 @@
 ### Фронтенд
 
  - `npm i vite@6.3.5`
- - `npm i react react-router-dom zustand sass-embedded react-toastify tailwindcss tailwindcss/vite use-immer`
+ - `npm i react react-router-dom zustand sass-embedded react-toastify tailwindcss tailwindcss/vite use-immer shadcn@latest`
  - `npx vite`

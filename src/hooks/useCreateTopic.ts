@@ -1,9 +1,8 @@
 import { toast } from "sonner"
 import { toastContainerIds } from "../config/toasts.constant"
-import { useEditCourseStore } from "../Pages/edit/course/api/editCourseStore"
+import { createTopic } from "@/services/api.service"
 
 export const useCreateTopic = () => {
-    const createTopic = useEditCourseStore(store => store.createTopic)
     return (courseId: number, titleId: string, descriptionId: string) => {
         const titleInput = document.getElementById(titleId) as HTMLInputElement
         const descInput = document.getElementById(descriptionId) as HTMLInputElement

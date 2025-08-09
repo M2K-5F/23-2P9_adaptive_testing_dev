@@ -1,10 +1,10 @@
-import { CreatedQuestion } from "../../../../types/interfaces"
+import { CreatedQuestion as CQ } from "@/types/interfaces"
 import { Dispatch, FC, SetStateAction, useState } from "react"
-import { archQuestion } from "../../../../services/api.service"
+import { archQuestion } from "@/services/api.service"
 import { Button } from "@/Components/ui/button"
 import { Badge } from "@/Components/ui/badge"
 
-export const QuestionElement:FC<{question: CreatedQuestion, fetchQuestions: () => void}> = ({question, fetchQuestions}) => {
+export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = ({question, fetchQuestions}) => {
     const [expanded, setExpanded] = useState(false)
 
     const handleArchive = () => {

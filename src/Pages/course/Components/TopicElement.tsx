@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useState } from "react"
 import { CreatedQuestion, CreatedTopic } from "../../../types/interfaces"
 import { useSearchParams } from "react-router-dom"
 import { archTopic, getQuestions } from "../../../services/api.service"
-import { QuestionElement } from "../../edit/course/components/QuestionElement"
+import { QuestionElement } from "../../edit/course/components/CreatedQuestion"
 import { Loader } from "../../../Components/ui/Loader"
 import { useFlexOrder } from '../../../hooks/useFlexOrder'
 

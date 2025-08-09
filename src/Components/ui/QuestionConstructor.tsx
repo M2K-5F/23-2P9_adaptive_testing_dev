@@ -1,14 +1,14 @@
 import { memo, ChangeEvent, FC } from "react"
-import { Answer, Question } from "../../../../types/interfaces"
+import { Answer, Question } from "../../types/interfaces"
 import { Updater, useImmer } from "use-immer"
-import { createQuestion } from "../../../../services/api.service"
+import { createQuestion } from "../../services/api.service"
 import { toast } from "sonner"
 import { Button } from '@/Components/ui/button'
 import { Input } from "@/Components/ui/input"
 import { Checkbox } from "@/Components/ui/checkbox"
 import { Label } from "@/Components/ui/label"
 
-export const CreatedQuestionElement:FC<{createQuestionHandler: () => void, topic_id: number, }> = memo((props) => {
+export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id: number, }> = memo((props) => {
     const [createdQuestion, setCreatedQuestion] = useImmer<Question>({
         text: '',
         question_type: 'single',

@@ -160,9 +160,9 @@ const AccordionCourseItem: React.FC<{course: CreatedCourse, expanded: number, se
             <AccordionContent 
                 className="m-1 border bg-muted rounded-md p-2 h-fit"
             >
-                <div className={clsx("grid grid-cols-7 w-full  border-b-2 mb-2")}>
+                <div className={clsx("grid grid-cols-7 w-full  border-b-2 pb-1 mb-2")}>
                     <Label className="col-end-5 col-start-1 p-2 ml-4 py-1 w-fit">Темы курса:</Label>
-                    <CreateTopicDialog className="col-start-5 col-end-8" text="+ создать" />
+                    <CreateTopicDialog variant='link' className="col-start-5 col-end-8" text="+ создать" />
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {topics

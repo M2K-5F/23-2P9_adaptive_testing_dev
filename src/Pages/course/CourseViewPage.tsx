@@ -2,12 +2,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { CreatedTopic, FollowedCourse } from "../../types/interfaces";
 import { Loader } from '../../Components/ui/Loader';
-import { toast, ToastContainer } from "react-toastify";
 import { TopicElement } from "./Components/TopicElement";
 import { followCourse, getFollowedCourses, getTopics, unfollowCourse } from "../../services/api.service";
 import { userStore } from "../../stores/userStore";
 import { useCourseViewStore } from "./store/CourseViewStore";
-import { toastContainerIds } from "../../config/toasts.constant";
 
 export const  CourseViewPage = () => {
     const nav = useNavigate();
@@ -31,14 +29,6 @@ export const  CourseViewPage = () => {
         }
         getData(courseId)
     }, [courseId]);
-
-    useEffect(() => {
-        if (isFollowError) toast.error('Не удалось осуществить операцию', {
-            containerId: toastContainerIds.courseViewPageContainer
-        })
-    })
-
-    
 
     if (isLoading) {
         return <Loader />;

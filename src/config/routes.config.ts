@@ -7,7 +7,7 @@ export const Paths = {
     'unauthorized': ['/401', '/users/autorize', '/users/registration'],
     'undefined': ['/users/autorize', '/users/registration', '/forstudent', '/showform', '/forteacher', '/createform', '/forteacher/results'],
     'serverunavailable': ['/users/autorize', '/users/registration', '/forstudent', '/showform', '/forteacher', '/createform', '/forteacher/results']
-}
+} as const
 
 
 export const isStatusPathAvailable = (status: status | role) => {
@@ -29,5 +29,4 @@ export const routes = {
     home: '/',
     editCourse: (courseId: number, expanded: number = 0) => `/edit/course?course_id=${courseId}&expanded=${expanded}`,
     viewCourse: (fcourseId: number) => `/course?fcourse_id=${fcourseId}`,
-    
 }
