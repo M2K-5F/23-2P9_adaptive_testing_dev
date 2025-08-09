@@ -38,6 +38,7 @@ export const AsidePanelLayout: React.FC<{}> = memo(() => {
             className={clsx(
                 'h-full bg-[var(--aside)] border-r-2 p-2 py-4',
                 'relative flex flex-row-reverse will-change-[width]',
+                'overflow-y-scroll',
                 isOpen ? 'w-[300px]' : 'w-[60px]'
             )}
             style={{transition: `width cubic-bezier(.4,0,.2,1) ${!isOpen ?  '.2s' : '.3s'}`}}

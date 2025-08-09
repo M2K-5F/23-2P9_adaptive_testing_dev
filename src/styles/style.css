@@ -137,3 +137,7 @@
   visibility: hidden;
   z-index: -infinity;
 }
+
+aside:has(.w-\[300px\]) > div.w-\[300px\], aside:has(.w-\[60px\]) > div.w-\[60px\] {
+    scrollbar-width: none !important;
+}
