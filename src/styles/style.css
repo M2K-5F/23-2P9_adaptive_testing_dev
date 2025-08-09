@@ -119,6 +119,13 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  div {
+    @apply font-medium;
+    & > * {
+      @apply font-normal
+    }
+  }
 }
 
 

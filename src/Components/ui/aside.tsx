@@ -1,19 +1,21 @@
-import { FC, memo, useContext, useLayoutEffect, useState } from "react";
+import { FC, memo, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { userStore } from "@/stores/userStore";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion";
 import { useCourseStore } from "@/stores/useCourseStore";
 import { Button } from "./button";
 import { ThemeSwitcher } from "./ThemeSwither";
 import { useTopicStore } from "@/stores/useTopicStore";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, SetURLSearchParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Skeleton } from "./skeleton";
 import { Label } from "./label";
 import { CreatedCourse } from "@/types/interfaces";
 import { SearchContainer } from "./SearchContainer";
-import { searchCourses } from "@/services/api.service";
+import { ApiService, searchCourses } from "@/services/api.service";
 import { routes } from "@/config/routes.config";
 import { OpenCloseSvg } from "./aside-close";
 import { useAsideVisibilityStore } from "@/Layouts/AppLayout";
+import { CreateTopicDialog } from "./create-topic-dialog";
+import clsx from "clsx";
 
 
 export const AsidePanelLayout: React.FC<{}> = memo(() => {
@@ -25,37 +27,39 @@ export const AsidePanelLayout: React.FC<{}> = memo(() => {
 
     return(
         <aside 
-        className={`
-            h-dvh shrink-0
-            max-lg:absolute 
-            ${ isOpen ? 'w-[300px]' : 'w-[60px]'}`
-        }
+        className={clsx(
+            'max-lg:absolute will-change-[width]',
+            'h-dvh shrink-0 z-10',
+            isOpen ? 'w-[300px]' : 'w-[60px]'
+        )}
         style={{transition: 'width cubic-bezier(.4,0,.2,1) 0.2s'}}
         >
             <div 
-            className={`h-full bg-[var(--aside)] border-r-2 p-2 py-4
-                relative flex flex-row-reverse
-                ${ isOpen ? 'w-[300px]' : 'w-[60px]'}
-            `}
+            className={clsx(
+                'h-full bg-[var(--aside)] border-r-2 p-2 py-4',
+                'relative flex flex-row-reverse will-change-[width]',
+                isOpen ? 'w-[300px]' : 'w-[60px]'
+            )}
             style={{transition: 'width cubic-bezier(.4,0,.2,1) 0.3s'}}
             >
                 <section 
-                    className={`
-                        absolute w-[284px]
-                        ${!isOpen ? 'opacity-0': 'opacity-100'}
-                    `} 
-                    style={{transition: 'opacity .3s linear'}}
+                    className={clsx(
+                        'absolute w-[284px]',
+                        !isOpen ? 'opacity-0': 'opacity-100'
+                    )} 
+                    style={{transition: 'opacity .25s cubic-bezier(.97,-0.01,.4,1.02)'}}
                 >   
                     {isDetailVisible && 
                         <AsideDetail />
                     }
                 </section>
             
-                <section className={`
-                    absolute w-[60px] flex 
-                    items-center flex-col h-fit left-0
-                    ${isOpen ? 'opacity-0': 'opacity-100'}
-                `} style={{transition: 'opacity .3s linear'}}
+                <section className={clsx(
+                    'absolute w-[60px] flex',
+                    'items-center flex-col h-fit left-0',
+                    isOpen ? 'opacity-0': 'opacity-100'
+                )} 
+                style={{transition: 'opacity .25s cubic-bezier(.97,-0.01,.4,1.02)'}}
                 >
                     {isSummaryVisible && 
                         <AsideSummary />
@@ -83,8 +87,9 @@ const AsideDetail = () => {
     return(
         <>
             <OpenCloseSvg className="ml-auto rotate-180" onClick={() => {setIsOpen(false)}} />
+            <Link to='' className="font-normal border-b w-fit border-white">{'<- на главную'}</Link>
             <SearchContainer
-                className="mb-4"
+                className="my-4"
                 searchfn={(query, callbackfn) => {
                     searchCourses(query)
                     .then(data => callbackfn(data))
@@ -104,65 +109,91 @@ const AsideDetail = () => {
 const AsideTeacherCourses = () => {
     const [params, setSearch] = useSearchParams()
     const courseId = params.get('course_id')
+    const expanded = Number(params.get('expanded'))
     const createdCourses = useCourseStore(s => s.createdCourses)
+
 
     return(
         <div className="w-full" >
-            <Label className="mb-2 mt-4 border-b-2 justify-center w-fit ml-7 text-[16px]" >Созданные курсы:</Label>
+            <Label 
+                className={clsx(
+                    "mb-2 mt-4 border-b-2 justify-center", 
+                    "w-fit ml-7 text-[16px]"
+                )} 
+            >Созданные курсы:
+            </Label>
+
             <Accordion className="bg-card rounded-md p-3" value={courseId ?? ''} type='single'>
-                {createdCourses.map((course, index) => <AccordionCourseItem course={course} key={index} /> )}
+                {createdCourses.map((course, index) => 
+                    <AccordionCourseItem setParams={setSearch} expanded={expanded} course={course} key={index} />
+                )}
             </Accordion>
         </div>
     )
 }
 
 
-const AccordionCourseItem: React.FC<{course: CreatedCourse}> = ({course}) => {
-    const [params, setParams] = useSearchParams()
-    const courseId = Number(params.get('course_id'))
-    const expandedTopic = Number(params.get('expanded'))
+const AccordionCourseItem: React.FC<{course: CreatedCourse, expanded: number, setParams: SetURLSearchParams}> = memo(({course, expanded, setParams}) => {
     const navigate = useNavigate()
     const topics = useTopicStore(s => s.createdTopics[course.id])
-
+    
 
     return(
-        <AccordionItem className={`p-1 `} value={String(course.id)}>
+        <AccordionItem 
+            className={`p-1 `} 
+            value={String(course.id)}
+            >
             <AccordionTrigger 
                 onClick={() => {
                     if (window.location.pathname !== '/edit/course') {
                         navigate(`/edit/course?course_id=${course.id}&expanded=0`)
                     } else {
-                        setParams({'course_id': `${course.id}`, 'expanded': '0'})
+                        setParams(p => {
+                            p.set('course_id', `${course.id}`)
+                            return p
+                        })
                     }
                 }}
-            >{
-                course.title
-            }</AccordionTrigger>
+            >{course.title}
+            </AccordionTrigger>
 
-            <AccordionContent className="m-1 border  bg-input rounded-md p-2 h-fit">
-                <Label className="m-2 p-2 ml-4 border-b-2 py-1 w-fit">Темы курса:</Label>
-                <div className="flex flex-wrap gap-2 justify-center">
+            <AccordionContent 
+                className="m-1 border bg-muted rounded-md p-2 h-fit"
+            >
+                <div className={clsx("grid grid-cols-7 w-full  border-b-2 mb-2")}>
+                    <Label className="col-end-5 col-start-1 p-2 ml-4 py-1 w-fit">Темы курса:</Label>
+                    <CreateTopicDialog className="col-start-5 col-end-8" text="+ создать" />
+                </div>
+                <div className="flex flex-wrap gap-2">
                     {topics
                     ?   topics.length
                         ?   topics.map((topic, index) => 
                                     <Button key={index}
-                                        variant={expandedTopic === topic.id ? 'default' : 'link'}
+                                        className="min-w-[calc(50%-5px)] whitespace-normal max-w-full py-5 overflow-hidden justify-baselin"
+                                        variant={expanded === topic.id ? 'default' : 'outline'}
                                         onClick={() => {
                                             if (window.location.pathname === '/edit/course') {
-                                                params.set('expanded', `${topic.id === expandedTopic ? '0' : topic.id}`)
-                                                setParams(params)
+                                                setParams(params => {
+                                                    params.set('expanded', `${topic.id === expanded ? '0' : topic.id}`)
+                                                    return params
+                                                })
                                             }
                                         }}
                                         >{topic.title}</Button>
                             )
-                        :   <Label className="h-9">Нет созданных тем</Label>
-                    : <div className="h-fit w-full grid grid-cols-3 gap-2">{Array.from({length: 3}).map(() => <Skeleton className="w- h-9" />)}</div> 
+                        :   <Label className="h-9 w-full text-center justify-center">Нет созданных тем</Label>
+                    :   <div 
+                            className="h-fit w-full grid grid-cols-3 gap-2"
+                        >{Array.from({length: 3}).map(() => 
+                                <Skeleton className="w- h-9" />)
+                        }
+                        </div> 
                     }
                 </div>
             </AccordionContent>
         </AccordionItem>
     )
-}
+})
 
 
 const AsideStudentCourses: React.FC<{}> = () => {

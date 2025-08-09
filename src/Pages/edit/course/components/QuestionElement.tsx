@@ -4,11 +4,11 @@ import { archQuestion } from "../../../../services/api.service"
 import { Button } from "@/Components/ui/button"
 import { Badge } from "@/Components/ui/badge"
 
-export const QuestionElement:FC<{question: CreatedQuestion, fetchQuestions: () => void}> = ({question}) => {
+export const QuestionElement:FC<{question: CreatedQuestion, fetchQuestions: () => void}> = ({question, fetchQuestions}) => {
     const [expanded, setExpanded] = useState(false)
 
     const handleArchive = () => {
-        archQuestion(question.id).then()
+        archQuestion(question.id).then(() => fetchQuestions())
     }
 
     return (

@@ -7,6 +7,7 @@ import { getQuestions, archTopic } from "../../../../services/api.service"
 import { QuestionElement } from './QuestionElement'
 import { CreatedQuestionElement } from "./CreateQuestionElement"
 import { Badge } from "@/Components/ui/badge"
+import clsx from "clsx"
 
 export const TopicElement = memo(({ topic, index }: {
     topic: CreatedTopic, 
@@ -40,7 +41,12 @@ export const TopicElement = memo(({ topic, index }: {
 
 
     return (
-        <article className={`border border-foreground overflow-hidden rounded-lg shadow-sm mb-4 ${isExpanded ? 'col-span-2' : ''} ${topic.is_active ? '' : 'opacity-70'} `}>
+        <article className={clsx(
+            `border border-foreground overflow-hidden`,
+            'rounded-lg shadow-sm mb-4',
+            isExpanded && 'sm:col-span-2',
+            !topic.is_active &&  'opacity-70'
+        )}>
             <section className="p-4 bg-muted">
                 <div className="flex justify-between items-center mb-2">
                     <h3 className="text-lg font-medium cursor-pointer" onClick={handleExpand}>
@@ -57,16 +63,19 @@ export const TopicElement = memo(({ topic, index }: {
                     </Button>
                 </div>
 
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-sm text-wrap text-muted-foreground wrap-break-word mb-2">
                     {topic.description || "Нет описания"}
                 </p>
 
                 <div className="flex items-center gap-2 mb-3">
                     <span className="text-sm">Статус:</span>
-                    {topic.is_active ?
-                        <Badge className="cursor-pointer" onClick={() => handleArchTopic(topic.id)} variant='default'>Активный</Badge> :
-                        <Badge className="cursor-pointer" onClick={() => handleArchTopic(topic.id)} variant="outline">В архиве</Badge>
-                    }
+                    <Badge 
+                        className="cursor-pointer" 
+                        onClick={() => handleArchTopic(topic.id)} 
+                        variant={topic.is_active ? 'default' : 'outline'}
+                        >{
+                            topic.is_active ? 'Активный' : 'В архиве'
+                        }</Badge>
                 </div>
 
                 <Button

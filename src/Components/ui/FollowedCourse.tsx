@@ -1,19 +1,17 @@
-import { CreatedCourse } from "../../../types/interfaces"
-import { Dispatch, SetStateAction } from "react"
-import { archCourse } from "../../../services/api.service"
-import { useHomeStore } from "../stores/homeStore"
+import { CreatedCourse } from "../../types/interfaces"
+import { Dispatch, FC, SetStateAction } from "react"
+import { archCourse } from "../../services/api.service"
 import { useNavigate } from "react-router-dom"
+import clsx from "clsx"
 
-export const FollowedCourseElement = ({ course, courseProgress } : 
-    {
-        course: CreatedCourse,
-        courseProgress: number
-    }
-) => {
-    const {init} = useHomeStore()
+export const FollowedCourse: FC<{course: CreatedCourse,courseProgress: number}> = ({course, courseProgress}) => {
     const navigate = useNavigate()
     return (
-        <div key={course.title} className={`course-card ${!course.is_active ? 'archived' : ''}`}>
+        <div className={clsx(
+            `border border-foreground overflow-hidden`,
+            'rounded-lg shadow-sm mb-4',
+            !course.is_active &&  'opacity-70'
+        )}>
             <div className="course-header">
                 <h3>{course.title}</h3>
             </div>

@@ -1,43 +1,77 @@
-import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
-import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { CreatedCourse, FollowedCourse } from "../../types/interfaces";
-import { Loader } from '../../Components/ui/Loader'
-import {SearchContainer} from '../../Components/ui/SearchContainer'
-import { toast, ToastContainer } from "react-toastify";
-import { userStore } from "../../stores/userStore";
-import { useHomeStore } from "./stores/homeStore";
-import { toastContainerIds } from "../../config/toasts.constant";
-import { CreatedCoursesSection } from "./Components/CreatedCourseSection";
-import { FollowedCourseSection } from "./Components/FollowedCourseSection";
+import { CreatedCourse } from "@/Components/ui/CreatedCourse";
+import { userStore } from "@/stores/userStore";
+import { CreateCourseDialog } from "@/Components/ui/create-course-dialog"
+import { useCourseStore } from "@/stores/useCourseStore";
+import { FollowedCourse } from "@/Components/ui/FollowedCourse";
+import clsx from "clsx";
 
 
 export default function HomePage() {
-    const {nick, role} = userStore()
-    const {
-        init,
-        isLoading,
-        createStatus,
-    } = useHomeStore()
-
-    useLayoutEffect(() => {
-        init()
-    }, [])
-
-    useEffect(() => { if (createStatus.isCreated) toast.success('Курс успешно создан', {containerId: toastContainerIds.homeContainer})
-    }, [createStatus.isCreating])
+    const role = userStore(s => s.role)
 
 
-    if (isLoading) {
-        return <Loader /> 
-    }
-    
     return (
         <div className="teacher-portal">
-            <ToastContainer containerId={toastContainerIds.homeContainer} theme='dark' style={{top: "250px",marginLeft: 'auto', right: '100px'}} position='top-right' />
-
             {role.includes('teacher') && <CreatedCoursesSection /> }
 
             {role.includes('student') && <FollowedCourseSection /> }
-    </div>
+        </div>
+    )
+}
+
+
+export function CreatedCoursesSection() {
+    const createdCourses = useCourseStore(s => s.createdCourses)
+
+    
+    return(
+        <>
+            <header className="portal-header">
+                <h1>Курсы созданные мной</h1>
+                <CreateCourseDialog text="+ Создать курс" variant='outline' />
+            </header>
+
+            {createdCourses.length 
+                ? <div className="courses-flex">
+                    {
+                        createdCourses.map(course => 
+                            <CreatedCourse
+                            key={course.id}
+                            course={course} 
+                            />
+                        )
+                    }
+                    </div> 
+                : <p className={clsx()}>Нет созданных курсов</p>
+            }
+        </>
+    )
+}
+
+
+export function FollowedCourseSection() {
+    const followedCourses = useCourseStore(s => s.followedCoures)
+
+
+    return(
+        <>
+            <header className="portal-header">
+                <h1>Мои курсы</h1>
+            </header>
+
+            {followedCourses.length > 0
+                ?   <div className="courses-flex">
+                        {followedCourses.map(userCourse =>
+                                <FollowedCourse
+                                key={userCourse.course.id}
+                                course={userCourse.course}
+                                courseProgress={userCourse.course_progress}
+                                />
+                            )
+                        }
+                    </div>
+                :   <p className={clsx('')} >Нет доступных курсов для прохождения</p>
+            }
+        </>
     )
 }
