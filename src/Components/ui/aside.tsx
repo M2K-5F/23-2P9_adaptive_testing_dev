@@ -258,11 +258,11 @@ const AsideStudentCourses: React.FC = () => {
 
     return (
         <div className="mt-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-2 my-2">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-2 my-4">
                 Мои курсы:
             </h3>
 
-            <div className="">
+            <div className="flex flex-col gap-3">
                 {followedCourses.length > 0 ? (
                     followedCourses.map((course) => (
                         <Button
