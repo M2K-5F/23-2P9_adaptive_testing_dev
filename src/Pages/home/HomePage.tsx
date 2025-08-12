@@ -4,74 +4,95 @@ import { CreateCourseDialog } from "@/Components/ui/create-course-dialog"
 import { useCourseStore } from "@/stores/useCourseStore";
 import { FollowedCourse } from "@/Components/ui/FollowedCourse";
 import clsx from "clsx";
-
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/Components/ui";
 
 export default function HomePage() {
     const role = userStore(s => s.role)
 
-
     return (
-        <div className="teacher-portal">
-            {role.includes('teacher') && <CreatedCoursesSection /> }
-
-            {role.includes('student') && <FollowedCourseSection /> }
+        <div className="p-8 min-h-screen">
+            <Accordion defaultValue={['followed', 'created']} type='multiple' >
+                {role.includes('teacher') && <CreatedCoursesSection />}
+                {role.includes('student') && <FollowedCourseSection />}
+            </Accordion>
         </div>
     )
 }
 
-
 export function CreatedCoursesSection() {
     const createdCourses = useCourseStore(s => s.createdCourses)
 
-    
     return(
-        <>
-            <header className="portal-header">
-                <h1>Курсы созданные мной</h1>
-                <CreateCourseDialog text="+ Создать курс" variant='outline' />
-            </header>
-
-            {createdCourses.length 
-                ? <div className="courses-flex">
-                    {
-                        createdCourses.map(course => 
+        <AccordionItem value="created">
+            <AccordionTrigger className="mb-8">
+                <h1 className="text-2xl font-bold">Курсы созданные мной</h1>
+            </AccordionTrigger>
+            <AccordionContent>
+                {createdCourses.length 
+                ?   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <CreateCourseDialog 
+                            className={clsx(
+                                'h-full flex items-center text-md',
+                                'justify-center border-2 border-dashed border-gray-300',
+                                'rounded-lg hover:border-gray-400 transition-colors'
+                            )}  
+                            text="+ Создать курс" 
+                            variant='outline' 
+                        />
+                        {createdCourses.map(course => 
                             <CreatedCourse
-                            key={course.id}
-                            course={course} 
+                                key={course.id}
+                                course={course} 
                             />
-                        )
-                    }
+                        )}
                     </div> 
-                : <p className={clsx()}>Нет созданных курсов</p>
+                :   <div className="flex flex-col items-center justify-center py-12  rounded-lg shadow-sm">
+                        <p className=" mb-4">Нет созданных курсов</p>
+                        <CreateCourseDialog 
+                            text="Создать первый курс" 
+                            variant='default'
+                        />
+                    </div>
             }
-        </>
+            </AccordionContent>
+        </AccordionItem>
     )
 }
-
 
 export function FollowedCourseSection() {
     const followedCourses = useCourseStore(s => s.followedCoures)
 
-
     return(
-        <>
-            <header className="portal-header">
-                <h1>Мои курсы</h1>
-            </header>
+        <AccordionItem value="followed">
+            <AccordionTrigger className="mb-8">
+                <h1 className="text-2xl font-bold">Мои курсы</h1>
+            </AccordionTrigger>
 
             {followedCourses.length > 0
-                ?   <div className="courses-flex">
+                ?   <AccordionContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {followedCourses.map(userCourse =>
-                                <FollowedCourse
+                            <FollowedCourse
                                 key={userCourse.course.id}
                                 course={userCourse.course}
                                 courseProgress={userCourse.course_progress}
-                                />
-                            )
-                        }
-                    </div>
-                :   <p className={clsx('')} >Нет доступных курсов для прохождения</p>
+                            />
+                        )}
+                    </AccordionContent>
+                :   <AccordionContent className="flex items-center justify-center py-12 rounded-lg shadow-sm">
+                        <div className="scale-120 text-center py-4 text-sm text-gray-500">
+                            <p>Вы не подписаны ни на один курс.</p>
+                            <p className="mt-1">
+                                Нажмите 
+                                <kbd className={clsx(
+                                    "kbd kbd-sm h-4.5 w-4.5 mx-1",
+                                    "border-gray-500 border inline-grid",
+                                    "content-end rounded-sm justify-center text-[12px]"
+                                )}>/</kbd> 
+                                для поиска
+                            </p>
+                        </div>
+                    </AccordionContent>
             }
-        </>
+        </AccordionItem>
     )
 }

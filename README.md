@@ -1,24 +1,29 @@
-### Первичное развертывание
+# Первичное развертывание
+### Бэк
 
 - `py -3.8 -m venv .venv`
 - `.venv\Scripts\activate`
 - ` py -m pip install -U pip`
 - `pip install -e .`
-- создать папку /API/certs/ с файлами для ключей jwt_private.pem | jwt_public.pem
+- создать папку `/API/certs/` с файлами для ключей `jwt_private.pem` | `jwt_public.pem`
 - `cd API`
 - `py db.py`
 
-### Очистка БД
+### Фронт
+
+ - `npm i`
+
+## Очистка БД
 
 - удалить файл `my_database.db`
 - `py db.py`
 
-### Запуск
+# Запуск
+
+### Бэк 
 
 - `py main.py`
 
-### Фронтенд
+### Фронт
 
- - `npm i vite@6.3.5`
- - `npm i react react-router-dom zustand sass-embedded tailwindcss tailwindcss/vite use-immer shadcn@latest @vitejs/plugin-react`
  - `npx vite`

@@ -6,7 +6,8 @@ import { Input } from "./input"
 import { FC, memo, useId, useState } from "react"
 import { userStore } from "@/stores/userStore"
 import { useCreateCourse } from "@/hooks/useCreateCourse"
-type PropsVariant = "link" | "default" | "destructive" | "outline" | "secondary" | "ghost"
+import { PropsVariant } from "@/types/types"
+
 
 export const CreateCourseDialog: FC<{text: string, className?: string, variant?: PropsVariant}> = memo(({text, className, variant}) => {
     const nick = userStore(s => s.nick)

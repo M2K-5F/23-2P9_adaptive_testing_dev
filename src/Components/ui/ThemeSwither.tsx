@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { themeStore } from "../../stores/themeStore";
 
-export function ThemeSwitcher () {
+export const  ThemeSwitcher = memo(() => {
     const {theme, toggleTheme} = themeStore()
 
     return(
@@ -12,4 +12,4 @@ export function ThemeSwitcher () {
             </div>
         </>
     )
-}
+})

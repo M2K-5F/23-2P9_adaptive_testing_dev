@@ -20,7 +20,7 @@ export const CreatedCourse: FC<{course: CC}> = ({course}) => {
     return (
         <div className={clsx(
             `border border-foreground overflow-hidden`,
-            'rounded-lg shadow-sm mb-4 p-4 bg-muted',
+            'rounded-lg shadow-sm p-4 bg-muted min-h-42',
             !course.is_active &&  'opacity-70'
         )}>
             <div className="flex justify-between items-center mb-2">

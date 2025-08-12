@@ -42,6 +42,7 @@
 }
 
 :root {
+  --ds-bg: rgb(255, 255, 255);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.13 0.028 261.692);
@@ -78,7 +79,8 @@
 }
 
 .dark {
-  --aside: oklch(0.278 0.033 256.848);
+  --aside: rgb(9, 15, 29);
+  --ds-bg: rgb(41, 42, 45);
   --background: oklch(0.13 0.028 261.692);
   --foreground: oklch(0.985 0.002 247.839);
   --card: oklch(0.21 0.034 264.665);

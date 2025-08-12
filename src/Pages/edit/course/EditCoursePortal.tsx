@@ -26,11 +26,6 @@ export function TopicsPortal() {
             <header className={clsx(
                 'w-full grid grid-cols-3 justify-center justify-items-center mb-4 grid-rows-2'
             )}>
-                <CreateTopicDialog 
-                    text="+ Создать новую тему" 
-                    variant='secondary' 
-                    className="w-fit mr-auto row-start-2"
-                />
 
                 <div 
                     onClick={() => setParams(p => {
@@ -47,7 +42,16 @@ export function TopicsPortal() {
             </header>
 
             {createdTopics[courseId] 
-                ?   <div className="grid grid-flow-row grid-cols-4 gap-x-3 max-2xl:grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1 items-baseline">
+                ?   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <CreateTopicDialog 
+                            className={clsx(
+                                'h-42 flex items-center text-md',
+                                'justify-center border-2 border-dashed border-gray-300',
+                                'rounded-lg hover:border-gray-400'
+                            )}  
+                            text="+ Создать тему" 
+                            variant='outline' 
+                        />
                         {createdTopics[Number(courseId)].map((topic, index) => 
                             <CreatedTopic
                                 key={topic.id}

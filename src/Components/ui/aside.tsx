@@ -1,4 +1,4 @@
-import { FC, memo, useContext, useEffect, useLayoutEffect, useState } from "react";
+import React, { FC, memo, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { userStore } from "@/stores/userStore";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion";
 import { useCourseStore } from "@/stores/useCourseStore";
@@ -16,6 +16,7 @@ import { OpenCloseSvg } from "./aside-close";
 import { useAsideVisibilityStore } from "@/Layouts/AppLayout";
 import { CreateTopicDialog } from "./create-topic-dialog";
 import clsx from "clsx";
+import { UserMenu } from "./user-menu";
 
 
 export const AsidePanelLayout: React.FC<{}> = memo(() => {
@@ -23,6 +24,18 @@ export const AsidePanelLayout: React.FC<{}> = memo(() => {
     const {isOpen, isDetailVisible, isSummaryVisible} = useAsideVisibilityStore()
 
     useLayoutEffect(() => {(fetchCourses())}, [])
+
+    useEffect(() => {
+            const handle = (e: KeyboardEvent) => {
+                if (e.key === '/') {
+                    const {isOpen, setIsOpen} = useAsideVisibilityStore.getState()
+                    !isOpen && setIsOpen(true)
+                }
+            }
+    
+            document.addEventListener('keypress', handle)
+            return () => document.removeEventListener('keypress', handle)
+        }, [])
 
 
     return(
@@ -45,7 +58,7 @@ export const AsidePanelLayout: React.FC<{}> = memo(() => {
             >
                 <section 
                     className={clsx(
-                        'absolute w-[284px]',
+                        'absolute w-[284px] px-2',
                         !isOpen ? 'opacity-0': 'opacity-100'
                     )} 
                     style={{transition: 'opacity .25s cubic-bezier(.97,-0.01,.4,1.02)'}}
@@ -85,10 +98,25 @@ const AsideDetail = () => {
     const setIsOpen = useAsideVisibilityStore(s => s.setIsOpen)
     const role = userStore(s => s.role)
     const navigate = useNavigate()
+
+    
     return(
         <>
-            <OpenCloseSvg className="ml-auto rotate-180" onClick={() => {setIsOpen(false)}} />
-            <Link to='' className="font-normal border-b w-fit border-white">{'<- на главную'}</Link>
+            <div className="flex justify-between items-center">
+                <Link 
+                    to="/" 
+                    className="text-sm font-medium text-primary hover:underline flex items-center"
+                >
+                    ← На главную
+                </Link>
+                <OpenCloseSvg 
+                    className=" rounded hover:bg-gray-100 dark:hover:bg-gray-700 rotate-180 cursor-pointer" 
+                    onClick={() => setIsOpen(false)} 
+                />
+            </div>
+            <div className={clsx('flex flex-row my-4 gap-4')} >
+                <UserMenu />
+            </div>
             <SearchContainer
                 className="my-4"
                 searchfn={(query, callbackfn) => {
@@ -101,7 +129,7 @@ const AsideDetail = () => {
             {role.includes('teacher') && <AsideTeacherCourses /> }
             {role.includes('student') && <AsideStudentCourses /> }
             
-            <ThemeSwitcher />
+            
         </>
     )
 }
@@ -115,16 +143,13 @@ const AsideTeacherCourses = () => {
 
 
     return(
-        <div className="w-full" >
-            <Label 
-                className={clsx(
-                    "mb-2 mt-4 border-b-2 justify-center", 
-                    "w-fit ml-7 text-[16px]"
-                )} 
+        <div className="w-full space-y-3" >
+            <span 
+                className={clsx('text-sm font-semibold text-gray-700 dark:text-gray-300 px-2 mb-2 mt-6 block')} 
             >Созданные курсы:
-            </Label>
+            </span>
 
-            <Accordion className="bg-card rounded-md p-3" value={courseId ?? ''} type='single'>
+            <Accordion className="space-y-2" value={courseId ?? ''} type='single'>
                 {createdCourses.map((course, index) => 
                     <AccordionCourseItem setParams={setSearch} expanded={expanded} course={course} key={index} />
                 )}
@@ -133,96 +158,154 @@ const AsideTeacherCourses = () => {
     )
 }
 
+interface ItemProps {course: CreatedCourse, expanded: number, setParams: SetURLSearchParams}
 
-const AccordionCourseItem: React.FC<{course: CreatedCourse, expanded: number, setParams: SetURLSearchParams}> = memo(({course, expanded, setParams}) => {
+const AccordionCourseItem: React.FC<ItemProps> = memo((props) => {
     const navigate = useNavigate()
-    const topics = useTopicStore(s => s.createdTopics[course.id])
-    
 
     return(
         <AccordionItem 
-            className={`p-1 `} 
-            value={String(course.id)}
+            className={clsx(
+                'border-1 rounded-lg overflow-hidden border-b-1',
+                'border-primary',
+            )}  
+            value={String(props.course.id)}
+            ignoreLastChildBorder
             >
             <AccordionTrigger 
+                className={clsx(
+                    "px-3 py-2.5 w-full text-left dark:bg-gray-800 rounded-b-none",
+                    "flex items-center justify-between transition-colors",
+                    "hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800",
+                )}
                 onClick={() => {
+                    const p = Number((new URLSearchParams(window.location.search)).get('course_id'))
                     if (window.location.pathname !== '/edit/course') {
-                        navigate(`/edit/course?course_id=${course.id}&expanded=0`)
+                        navigate(`/edit/course?course_id=${props.course.id}&expanded=0`)
+                    } else if (p === props.course.id) {
+                        navigate('/')
                     } else {
-                        setParams(p => {
-                            p.set('course_id', `${course.id}`)
+                        props.setParams(p => {
+                            
+                            p.set('course_id', `${props.course.id}`)
                             return p
                         })
                     }
                 }}
-            >{course.title}
+            >{props.course.title}
             </AccordionTrigger>
-
-            <AccordionContent 
-                className="m-1 border bg-muted rounded-md p-2 h-fit"
-            >
-                <div className={clsx("grid grid-cols-7 w-full  border-b-2 pb-1 mb-2")}>
-                    <Label className="col-end-5 col-start-1 p-2 ml-4 py-1 w-fit">Темы курса:</Label>
-                    <CreateTopicDialog variant='link' className="col-start-5 col-end-8" text="+ создать" />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    {topics
-                    ?   topics.length
-                        ?   topics.map((topic, index) => 
-                                    <Button key={index}
-                                        className="min-w-[calc(50%-5px)] whitespace-normal max-w-full py-5 overflow-hidden justify-baselin"
-                                        variant={expanded === topic.id ? 'default' : 'outline'}
-                                        onClick={() => {
-                                            if (window.location.pathname === '/edit/course') {
-                                                setParams(params => {
-                                                    params.set('expanded', `${topic.id === expanded ? '0' : topic.id}`)
-                                                    return params
-                                                })
-                                            }
-                                        }}
-                                        >{topic.title}</Button>
-                            )
-                        :   <Label className="h-9 w-full text-center justify-center">Нет созданных тем</Label>
-                    :   <div 
-                            className="h-fit w-full grid grid-cols-3 gap-2"
-                        >{Array.from({length: 3}).map(() => 
-                                <Skeleton className="w- h-9" />)
-                        }
-                        </div> 
-                    }
-                </div>
-            </AccordionContent>
+            <AccordionCourseContent {...props} />
+            
         </AccordionItem>
     )
 })
 
-
-const AsideStudentCourses: React.FC<{}> = () => {
-    const navigate = useNavigate()
-    const followedCourses = useCourseStore(s => s.followedCoures)
-    const [params, setSearch] = useSearchParams()
-    const fcourseId = Number(params.get('fcourse_id'))           
+const AccordionCourseContent: FC<ItemProps> = ({setParams, course, expanded}) => {
+    const topics = useTopicStore(s => s.createdTopics[course.id])
 
     return(
-        <div className="mb-4 w-full" >
-            <Label className="mb-2 mt-4 border-b-2 justify-center w-fit ml-7 text-[16px]" >Прохожу сейчас:</Label>
-            <div className="gap-2 flex flex-col w-full bg-card rounded-md p-3">
-                {followedCourses.map((course, index) => 
-                    <Button 
-                        key={index}
-                        onClick={() => 
-                            window.location.pathname !== '/course'
-                                ?   navigate(`/course?fcourse_id=${course.course.id}`)
-                                :   setSearch(s => {s.set('fcourse_id', `${course.course.id}`);return s})
-                        } 
-                        className="block w-fit h-fit" 
-                        variant={ fcourseId === course.course.id ? 'default' : 'outline'}
-                    > 
-                        <Label className="border-b-2 w-fit">{course.course.title}</Label>
-                        <span className="text-xs">Создан: {course.course.created_by}</span> 
-                    </Button>
+        <AccordionContent 
+            className={clsx(
+                "px-3 py-2 bg-gray-50 dark:bg-muted/50",
+                "animate-accordion border-t border-gray-200", 
+                "dark:border-gray-700"
+            )}
+        >
+            <div className={clsx("flex items-center justify-between mb-1")}>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Темы курса:</span>
+                <CreateTopicDialog variant='link' className="col-start-5 col-end-8" text="+ создать" />
+            </div>
+
+            <div className="flex mb-1 flex-wrap gap-2">
+                {topics
+                ?   topics.length
+                    ?   topics.map((topic, index) => 
+                                <Button key={index}
+                                    className={clsx(
+                                        'min-w-[calc(50%-5px)] whitespace-normal',
+                                        'max-w-full py-5 overflow-hidden justify-baseline'
+                                    )} 
+                                    variant={expanded === topic.id ? 'default' : 'outline'}
+                                    onClick={() => {
+                                        if (window.location.pathname === '/edit/course') {
+                                            setParams(params => {
+                                                params.set('expanded', `${topic.id === expanded ? '0' : topic.id}`)
+                                                return params
+                                            })
+                                        }
+                                    }}
+                                    >{topic.title}</Button>
+                        )
+                    :   <Label className="h-9 w-full text-center justify-center">Нет созданных тем</Label>
+                :   <div 
+                        className="h-fit w-full grid grid-cols-3 gap-2"
+                    >{Array.from({length: 3}).map(() => 
+                            <Skeleton className="w- h-9" />)
+                    }
+                    </div> 
+                }
+            </div>
+        </AccordionContent>
+    )
+}
+
+
+const AsideStudentCourses: React.FC = () => {
+    const navigate = useNavigate();
+    const followedCourses = useCourseStore(s => s.followedCoures);
+    const [params, setSearch] = useSearchParams();
+    const fcourseId = Number(params.get('fcourse_id'));
+
+    return (
+        <div className="mt-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 px-2 my-2">
+                Мои курсы:
+            </h3>
+
+            <div className="">
+                {followedCourses.length > 0 ? (
+                    followedCourses.map((course) => (
+                        <Button
+                            key={course.course.id}
+                            variant={fcourseId === course.course.id ? 'default' : 'outline'}
+                            size="sm"
+                            className={clsx(
+                                "w-full h-auto flex gap-0 py-2 flex-col items-start",
+                                "text-left justify-baseline",
+
+                            )}
+                            onClick={() => {
+                                if (window.location.pathname !== '/course') {
+                                    navigate(`/course?fcourse_id=${course.course.id}`);
+                                } else {
+                                    setSearch(s => {
+                                        s.set('fcourse_id', `${course.course.id}`);
+                                        return s;
+                                    });
+                                }
+                            }}
+                        >
+                            <span className="font-medium text-sm">{course.course.title}</span>
+                            <span className="ml-1 text-xs">
+                                Создан: {course.course.created_by}
+                            </span>
+                        </Button>
+                    ))
+                ) : (
+                    <div className="text-center py-4 text-sm text-gray-500">
+                        <p>Вы не подписаны ни на один курс.</p>
+                        <p className="mt-1">
+                            Нажмите 
+                            <kbd className={clsx(
+                                "kbd kbd-sm h-4.5 w-4.5 mx-1",
+                                "border-gray-500 border inline-grid",
+                                "content-end rounded-sm justify-center text-[12px]"
+                            )}>/</kbd> 
+                            для поиска
+                        </p>
+                    </div>
                 )}
             </div>
         </div>
-    )
-}
+    );
+};

@@ -4,18 +4,23 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { useSearchParams } from "react-router-dom"
 import { Label } from "./label"
 import { Input } from "./input"
-import { FC, memo, useId } from "react"
+import { FC, memo, useId, useState } from "react"
 import { useCreateTopic } from "@/hooks/useCreateTopic"
+import { useTopicStore } from "@/stores/useTopicStore"
+import { Flashlight } from "lucide-react"
+import { PropsVariant } from "@/types/types"
 
-export const CreateTopicDialog: FC<{text: string, className?: string, variant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost"}> = memo(({text, className, variant}) => {
+export const CreateTopicDialog: FC<{text: string, className?: string, variant?: PropsVariant}> = memo(({text, className, variant}) => {
     const createdCourses = useCourseStore(s => s.createdCourses)
+    const fetchTopics = useTopicStore(s => s.fetchTopics)
     const courseId = Number(useSearchParams()[0].get('course_id'))
     const [titleId, descriptionId] = [useId(), useId()]
     const createHandler = useCreateTopic()
+    const [isOpen, setIsOpen] = useState<boolean>(false)
 
 
     return(
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button className={className} variant={variant ?? 'ghost'}>{text}</Button>
             </DialogTrigger>
@@ -42,7 +47,7 @@ export const CreateTopicDialog: FC<{text: string, className?: string, variant?: 
                     <DialogClose asChild>
                         <Button variant={'outline'}>Закрыть</Button>
                     </DialogClose>
-                    <Button onClick={() => createHandler(courseId, titleId, descriptionId)} >Создать</Button>
+                    <Button onClick={() => createHandler(courseId, titleId, descriptionId, () => {fetchTopics(courseId), setIsOpen(false)})} >Создать</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

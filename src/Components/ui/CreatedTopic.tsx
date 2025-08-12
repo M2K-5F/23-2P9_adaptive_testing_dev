@@ -40,7 +40,7 @@ export const CreatedTopic = memo(({ topic, index }: {
     return (
         <article className={clsx(
             `border border-foreground overflow-hidden`,
-            'rounded-lg shadow-sm mb-4',
+            'rounded-lg shadow-sm mb-4 min-h-42',
             isExpanded && 'sm:col-span-2',
             !topic.is_active &&  'opacity-70'
         )}>
