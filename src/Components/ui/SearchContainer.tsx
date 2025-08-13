@@ -29,15 +29,25 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
 
 
     useEffect(() => {
-        const handle = (e: KeyboardEvent) => {
+        const handleKB = (e: KeyboardEvent) => {
             if (e.key === '/' && document.activeElement !== input.current) {
                 e.preventDefault()
                 input.current?.focus()
             }
         }
+        const handleEvent = (e: Event) => {
+            if (document.activeElement === input.current) return
 
-        document.addEventListener('keypress', handle)
-        return () => document.removeEventListener('keypress', handle)
+            e.preventDefault()
+            input.current?.focus()
+        }
+
+        document.addEventListener('keypress', handleKB)
+        document.addEventListener('searchactivate', handleEvent)
+        return () => {
+            document.removeEventListener('keypress', handleKB)
+            document.removeEventListener('searchactivate', handleEvent)
+        }
     }, [])
 
     useEffect(() => {

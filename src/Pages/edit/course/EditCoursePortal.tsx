@@ -43,6 +43,13 @@ export function TopicsPortal() {
 
             {createdTopics[courseId] 
                 ?   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {createdTopics[Number(courseId)].map((topic, index) => 
+                            <CreatedTopic
+                                key={topic.id}
+                                topic={topic}
+                                index={index}
+                            />
+                        )}
                         <CreateTopicDialog 
                             className={clsx(
                                 'h-42 flex items-center text-md',
@@ -52,13 +59,6 @@ export function TopicsPortal() {
                             text="+ Создать тему" 
                             variant='outline' 
                         />
-                        {createdTopics[Number(courseId)].map((topic, index) => 
-                            <CreatedTopic
-                                key={topic.id}
-                                topic={topic}
-                                index={index}
-                            />
-                        )}
                     </div> 
                 :   <p className="no-courses-message"> 
                         "Нет созданных тем"

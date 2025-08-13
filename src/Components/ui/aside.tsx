@@ -17,6 +17,7 @@ import { useAsideVisibilityStore } from "@/Layouts/AppLayout";
 import { CreateTopicDialog } from "./create-topic-dialog";
 import clsx from "clsx";
 import { UserMenu } from "./user-menu";
+import { CreateCourseDialog } from "./create-course-dialog";
 
 
 export const AsidePanelLayout: React.FC<{}> = memo(() => {
@@ -114,7 +115,7 @@ const AsideDetail = () => {
                     onClick={() => setIsOpen(false)} 
                 />
             </div>
-            <div className={clsx('flex flex-row my-4 gap-4')} >
+            <div className={clsx('flex flex-row my-4 gap-4 border-y py-2')} >
                 <UserMenu />
             </div>
             <SearchContainer
@@ -149,11 +150,21 @@ const AsideTeacherCourses = () => {
             >Созданные курсы:
             </span>
 
-            <Accordion className="space-y-2" value={courseId ?? ''} type='single'>
-                {createdCourses.map((course, index) => 
-                    <AccordionCourseItem setParams={setSearch} expanded={expanded} course={course} key={index} />
-                )}
-            </Accordion>
+            {createdCourses.length
+                ?   <Accordion className="space-y-2" value={courseId ?? ''} type='single'>
+                        {createdCourses.map((course, index) => 
+                            <AccordionCourseItem setParams={setSearch} expanded={expanded} course={course} key={index} />
+                        )}
+                    </Accordion>
+                :   <div className="text-center flex items-center flex-col py-4 text-sm text-gray-500">
+                        <p className=" mb-4">Нет созданных курсов</p>
+                        <CreateCourseDialog 
+                        className={clsx('w-fit')} 
+                            text="Создать первый курс" 
+                            variant='outline'
+                        />
+                    </div>
+            }
         </div>
     )
 }
@@ -296,11 +307,17 @@ const AsideStudentCourses: React.FC = () => {
                         <p>Вы не подписаны ни на один курс.</p>
                         <p className="mt-1">
                             Нажмите 
-                            <kbd className={clsx(
-                                "kbd kbd-sm h-4.5 w-4.5 mx-1",
-                                "border-gray-500 border inline-grid",
-                                "content-end rounded-sm justify-center text-[12px]"
-                            )}>/</kbd> 
+                            <kbd 
+                                onClick={() => {
+                                    document.dispatchEvent(new CustomEvent('searchactivate'))
+                                }}
+                                className={clsx(
+                                    "kbd kbd-sm h-4.5 w-4.5 mx-1 cursor-pointer",
+                                    "border-gray-500 border inline-grid select-none",
+                                    "content-end rounded-sm justify-center text-[12px]"
+                                )}
+                            >/
+                            </kbd> 
                             для поиска
                         </p>
                     </div>
