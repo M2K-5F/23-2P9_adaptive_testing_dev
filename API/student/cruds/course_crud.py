@@ -88,5 +88,5 @@ def get_course_by_id(user: UserOut, courseId: int):
             status_code=status.HTTP_404_NOT_FOUND
         )
     
-    followed_course = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
-    return JSONResponse({'course_data': current_course.__data__, 'isFollowed': True if followed_course else False, })
+    followed_course: UserCourse = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
+    return JSONResponse({**current_course.__data__, 'user_course': ({**followed_course.__data__} if followed_course else False)})

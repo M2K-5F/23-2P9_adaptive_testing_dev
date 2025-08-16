@@ -14,7 +14,7 @@ export const CreatedTopic = memo(({ topic, index }: {
     const courseId = Number(params.get('course_id'))
     const expandedTopic = Number(params.get('expanded'))
     const isExpanded = expandedTopic === topic.id
-    const fetchTopics = useTopicStore(s => s.fetchTopics)
+    const fetchTopics = useTopicStore(s => s.fetchCreatedTopics)
     const [questions, setQuestions] = useState<CQ[]>([])
     const [isCreating, setIsCreating] = useState(false)
     
@@ -40,7 +40,7 @@ export const CreatedTopic = memo(({ topic, index }: {
     return (
         <article className={clsx(
             `border border-foreground overflow-hidden`,
-            'rounded-lg shadow-sm mb-4 min-h-42',
+            'rounded-lg shadow-sm mb-4 min-h-42 h-fit',
             isExpanded && 'sm:col-span-2',
             !topic.is_active &&  'opacity-70'
         )}>

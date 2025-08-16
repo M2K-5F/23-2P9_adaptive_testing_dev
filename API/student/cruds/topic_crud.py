@@ -153,7 +153,6 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
 
     user_topic.topic_progress = round(score, 3)
     user_topic.is_completed = True
-    user_topic.ready_to_pass = False
     user_topic.save()
 
     ut = (UserTopic

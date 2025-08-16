@@ -5,7 +5,7 @@ export interface userStoreShema {
     nick: string ,
     status: status,
     role: role[]
-    regUser: (userShema) => void
+    regUser: (_: userShema) => void
     DelUser: Function
     pingUser: () => void
 }
@@ -62,20 +62,34 @@ export interface CreatedCourse {
 }
 
 
-export interface FollowedCourse {
+export interface UserCourse {
     id: number,
     user: string,
     course: CreatedCourse,
     course_progress: number
+    is_active: boolean
+    completed_topic_number: number
 }
+
+
+export interface FetchedCourse extends CreatedCourse {
+    user_course: UserCourse | false
+}
+
 
 export interface CreatedTopic extends CreatedCourse {
     description: string
+    number_in_course: number
+    question_count: number
 }
 
-export interface FetchedTopic extends CreatedTopic {
-    number_in_course: number
-    count: number
+export interface UserTopic {
+    id: number
+    topic: CreatedTopic
+    by_user_course: UserCourse
+    ready_to_pass: boolean
+    is_completed: boolean
+    topic_progress: number
 }
 
 export interface AnswerOption {

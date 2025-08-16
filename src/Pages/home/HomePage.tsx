@@ -28,32 +28,32 @@ export function CreatedCoursesSection() {
                 <h1 className="text-2xl font-bold">Курсы созданные мной</h1>
             </AccordionTrigger>
             <AccordionContent>
-                {createdCourses.length 
-                ?   <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">    
-                        {createdCourses.map(course => 
-                            <CreatedCourse
-                                key={course.id}
-                                course={course} 
+                {createdCourses.length
+                    ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            {createdCourses.map(course =>
+                                <CreatedCourse
+                                    key={course.id}
+                                    course={course}
+                                />
+                            )}
+                            <CreateCourseDialog
+                                className={clsx(
+                                    'h-full flex items-center text-md',
+                                    'justify-center border-2 border-dashed border-gray-300',
+                                    'rounded-lg hover:border-gray-400 transition-colors'
+                                )}
+                                text="+ Создать курс" 
+                                variant='outline'
                             />
-                        )}
-                        <CreateCourseDialog 
-                            className={clsx(
-                                'h-full flex items-center text-md',
-                                'justify-center border-2 border-dashed border-gray-300',
-                                'rounded-lg hover:border-gray-400 transition-colors'
-                            )}  
-                            text="+ Создать курс" 
-                            variant='outline' 
-                        />
-                    </div> 
-                :   <div className="flex flex-col items-center justify-center py-12  rounded-lg shadow-sm">
-                        <p className=" mb-4">Нет созданных курсов</p>
-                        <CreateCourseDialog 
-                            text="Создать первый курс" 
-                            variant='default'
-                        />
-                    </div>
-            }
+                        </div>
+                    :   <div className="flex flex-col items-center justify-center py-12  rounded-lg shadow-sm">
+                            <p className=" mb-4">Нет созданных курсов</p>
+                            <CreateCourseDialog
+                                text="Создать первый курс"
+                                variant='default'
+                            />
+                        </div>
+                }
             </AccordionContent>
         </AccordionItem>
     )
@@ -69,12 +69,11 @@ export function FollowedCourseSection() {
             </AccordionTrigger>
 
             {followedCourses.length > 0
-                ?   <AccordionContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ?   <AccordionContent className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
                         {followedCourses.map(userCourse =>
                             <FollowedCourse
                                 key={userCourse.course.id}
-                                course={userCourse.course}
-                                courseProgress={userCourse.course_progress}
+                                userCourse={userCourse}
                             />
                         )}
                     </AccordionContent>

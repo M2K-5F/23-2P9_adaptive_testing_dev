@@ -10,14 +10,14 @@ export function TopicsPortal() {
     const [params, setParams] = useSearchParams()
     const courseId = Number(params.get('course_id'))
     const createdCourses = useCourseStore(s => s.createdCourses)
-    const {createdTopics, fetchTopics} = useTopicStore()
+    const {createdTopics, fetchCreatedTopics} = useTopicStore()
     
     useLayoutEffect(() => {
         if (!courseId) {
             navigate('/')
             return 
         }
-        fetchTopics(courseId)
+        fetchCreatedTopics(courseId)
     }, [courseId])
 
 
@@ -42,7 +42,7 @@ export function TopicsPortal() {
             </header>
 
             {createdTopics[courseId] 
-                ?   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {createdTopics[Number(courseId)].map((topic, index) => 
                             <CreatedTopic
                                 key={topic.id}

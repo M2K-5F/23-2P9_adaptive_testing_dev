@@ -9,9 +9,8 @@ export const Paths = {
     'serverunavailable': ['/users/autorize', '/users/registration', '/forstudent', '/showform', '/forteacher', '/createform', '/forteacher/results']
 } as const
 
-
-export const isStatusPathAvailable = (status: status | role) => {
-    return Paths[status].includes(window.location.pathname)
+export const isStatusPathAvailable = (status: status | role) => { 
+    return Paths[status].includes(window.location.pathname) 
 }
 
 export const isRolePathAvailable = (roles: role[]) => {

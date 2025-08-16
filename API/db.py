@@ -49,6 +49,7 @@ class Topic(Table):
     description = CharField(max_length=120)
     is_active = BooleanField(default=True)
     number_in_course = IntegerField()
+    question_count = IntegerField(default=0)
 
 
 class Question(Table):
@@ -142,3 +143,4 @@ if __name__ == "__main__":
         user = base_teacher,
         role = student_role
     )
+    

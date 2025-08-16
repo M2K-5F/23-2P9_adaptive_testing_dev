@@ -178,10 +178,9 @@ const AccordionCourseItem: React.FC<ItemProps> = memo((props) => {
         <AccordionItem 
             className={clsx(
                 'border-1 rounded-lg overflow-hidden border-b-1',
-                'border-primary',
+                'border-primary last:border-b-1',
             )}  
             value={String(props.course.id)}
-            ignoreLastChildBorder
             >
             <AccordionTrigger 
                 className={clsx(
@@ -250,8 +249,8 @@ const AccordionCourseContent: FC<ItemProps> = ({setParams, course, expanded}) =>
                     :   <Label className="h-9 w-full text-center justify-center">Нет созданных тем</Label>
                 :   <div 
                         className="h-fit w-full grid grid-cols-3 gap-2"
-                    >{Array.from({length: 3}).map(() => 
-                            <Skeleton className="w- h-9" />)
+                    >{Array.from({length: 3}).map((_, index) => 
+                            <Skeleton key={index} className="w- h-9" />)
                     }
                     </div> 
                 }
@@ -287,10 +286,10 @@ const AsideStudentCourses: React.FC = () => {
                             )}
                             onClick={() => {
                                 if (window.location.pathname !== '/course') {
-                                    navigate(`/course?fcourse_id=${course.course.id}`);
+                                    navigate(routes.viewCourse(course.course.id))
                                 } else {
                                     setSearch(s => {
-                                        s.set('fcourse_id', `${course.course.id}`);
+                                        s.set('fcourse_id', `${course.course.id}`)
                                         return s;
                                     });
                                 }

@@ -53,7 +53,7 @@ export const AppLayout: FC = memo(() => {
             <Toaster position='top-center' />
             <div className='flex h-dvh overflow-hidden scroll-auto w-dvw'>
                 <AsidePanelLayout /> 
-                <main className="p-4 grow will-change-transform overflow-y-scroll max-lg:ml-[60px] h-dvh" style={{willChange: 'width'}}>    
+                <main className="p-1 md:p-4 grow will-change-transform overflow-y-scroll max-lg:ml-[60px] h-dvh" style={{willChange: 'width'}}>    
                     <Outlet />
                 </main>
             </div>

@@ -2,7 +2,7 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { CreatedCourse, Form, Question } from '../types/interfaces'
+import { CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, UserTopic } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -185,7 +185,7 @@ export const createTopic = (topic_title: string, description: string, course_id:
 }
 
 
-export const getTopics = (course_id: number) => {
+export const getTopics = (course_id: number): Promise<CreatedTopic[]> => {
     return ApiService.requestToServer(
         APIUrls.getTopicsURL,
         {
@@ -198,14 +198,14 @@ export const getTopics = (course_id: number) => {
 }
 
 
-export const getFollowedTopics = (course_id: number) => {
+export const getFollowedTopics = (course_id: number): Promise<UserTopic[]> => {
     return ApiService.requestToServer(
         APIUrls.getFollowedTopicsURL,
         {
             credentials: 'include',
         },
         {
-            "course_id": course_id,
+            "user_course_id": course_id,
         }
     )
 }
@@ -311,7 +311,7 @@ export const searchCourses = (searchQuery: string) => {
 }
 
 
-export const getCourse = (courseId: string): Promise<{course_data: CreatedCourse, isFollowed: boolean}> => {
+export const getCourse = (courseId: number): Promise<FetchedCourse> => {
     return ApiService.requestToServer(
         APIUrls.getCourseURL,
         {

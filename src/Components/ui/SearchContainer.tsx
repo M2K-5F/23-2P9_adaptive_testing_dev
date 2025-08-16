@@ -99,10 +99,17 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
                     <h4 className="text-xs text-gray-500 dark:text-gray-400">Найденные курсы:</h4>
                     {searchedCourses.length
                         ?   searchedCourses.map(course => 
-                                <>
+                                <React.Fragment key={course.id}>
                                     <Separator  className="my-1 bg-input w-full h-px"/>
-                                    <div onClick={() => props.callbackfn(course)} className=" min-h-8 content-center rounded-sm cursor-pointer w-5/6 pl-3 text-md border border-transparent font-medium ml-2 hover:border-border hover:bg-border">{course.title}</div> 
-                                </>
+                                    <div 
+                                        onClick={() => props.callbackfn(course)} 
+                                        className={clsx(
+                                            "min-h-8 content-center rounded-sm cursor-pointer", 
+                                            "w-5/6 pl-3 border border-transparent", 
+                                            "font-normal ml-2 hover:border-border hover:bg-border"
+                                        )}>{course.title}
+                                        </div> 
+                                </React.Fragment>
                             )   
                         :   <h5 className={clsx('text-normal w-full text-center')}>не найдено</h5>
                     }
