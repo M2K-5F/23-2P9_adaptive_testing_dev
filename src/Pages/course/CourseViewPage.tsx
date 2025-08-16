@@ -1,8 +1,8 @@
-import { use, useEffect, useLayoutEffect, useState } from "react"
+import { Fragment, use, useEffect, useLayoutEffect, useState } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
 import { useCourseStore } from "@/stores/useCourseStore"
-import { followCourse, followTopic, getCourse, unfollowCourse } from "@/services/api.service"
+import { followCourse, getCourse, unfollowCourse } from "@/services/api.service"
 import { 
     Card,
     CardHeader,
@@ -16,10 +16,10 @@ import {
     AccordionTrigger,
     CardFooter,
     Loader,
+    FollowedTopic
 } from "@/Components/ui"
-import { CreatedCourse, CreatedTopic, FetchedCourse, UserTopic } from "@/types/interfaces"
-import { FollowedTopic } from "@/Components/ui/FollowedTopic"
-import { GitCommitVertical, GitCommitVerticalIcon } from "lucide-react"
+import { FetchedCourse } from "@/types/interfaces"
+import { GitCommitVerticalIcon } from "lucide-react"
 import clsx from "clsx"
 
 
@@ -36,13 +36,16 @@ export function FollowedCoursePage() {
     const followedTopics = course?.user_course ? allFollowedTopics[course.user_course.id] : []
 
     const handleFollowToggle = async () => {
+        setIsLoading(true)
         if (course && course.user_course) {
             await unfollowCourse(courseId)
         } else {
             await followCourse(courseId)
         }
         setCourse(await getCourse(courseId))
+        setIsLoading(false)
         await fetchCourses()
+
     }
 
 
@@ -64,8 +67,8 @@ export function FollowedCoursePage() {
     if (isLoading || !course || !createdTopics || !followedTopics) return <Loader variant='success'/>
 
     return (
-        <div className="p-6 min-h-screen">
-            <div className="max-w-3xl mx-auto space-y-6">
+        <div className=" p-6 h-full">
+            <div className="max-w-3xl mx-auto">
                 <Card className="border-foreground">
                     <CardHeader className="flex-row justify-between items-start gap-4">
                         <div>
@@ -123,14 +126,14 @@ export function FollowedCoursePage() {
                                 {createdTopics.map((topic, index) => {
                                     const userTopic = (followedTopics.find(ft => ft.topic.id === topic.id))
                                     return (
-                                        <>
+                                        <Fragment key={topic.id}>
                                             {index > 0 && 
                                                 <div className={clsx('p-0 m-0 ml-3.5 flex justify-center items-center w-fit h-7.5 overflow-hidden ')} >
                                                     <GitCommitVerticalIcon size={40} className="" />
                                                 </div>
                                             }
-                                            <FollowedTopic key={topic.id} topic={topic} index={index} userTopic={userTopic} /> 
-                                        </>
+                                            <FollowedTopic topic={topic} index={index} userTopic={userTopic} /> 
+                                        </Fragment>
                                     )
                                 })}
                             </div>

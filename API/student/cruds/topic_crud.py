@@ -42,12 +42,12 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
                                     .select()
                                     .join(Topic)
                                     .where(UserTopic.by_user_course == user_course)
-                                    .order_by(UserTopic.topic.number_in_course)
+                                    .order_by(UserTopic.topic.number_in_course.asc())
     )
 
 
     return JSONResponse([
-        model_to_dict(topic, exclude=[UserTopic.user], max_depth=1) 
+        model_to_dict(topic, exclude=[UserTopic.user], max_depth=1)
         for topic in user_topics
     ])
 
@@ -92,7 +92,7 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
     if not user_topic:
         raise HTTPException(400, 'topic not found or u not followed at course')
 
-    if not user_topic.ready_to_pass or user_topic.is_completed:
+    if not user_topic.ready_to_pass:
         raise HTTPException(400, 'u cannot pass this topic')
 
     score = 0
@@ -152,10 +152,14 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
             uk.save()
 
     user_topic.topic_progress = round(score, 3)
-    user_topic.is_completed = True
-    user_topic.save()
+    user_course = user_topic.by_user_course
+    if user_topic.topic_progress > 0.8 and not user_topic.is_completed:
+        user_course.completed_topic_number += 1
+        user_topic.is_completed = True
+        print(user_course.completed_topic_number / len(Topic.select().where(Topic.by_course == user_course.course, Topic.is_active)))
+        user_course.course_progress = (user_course.completed_topic_number / len(Topic.select().where(Topic.by_course == user_course.course, Topic.is_active))) * 100
 
-    ut = (UserTopic
+        ut = (UserTopic
             .select()
             .join(Topic)
             .where(
@@ -163,14 +167,49 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
                 UserTopic.by_user_course == user_topic.by_user_course
             )
             .first()
-    )
-    print(ut)
-    if ut:
-        ut.ready_to_pass = True
-        ut.save()
-    
-    else: 
-        return JSONResponse({'score': round(score, 3), 'it the': 'last'})
+        )
+        if ut:
+            ut.ready_to_pass = True
+            ut.save()
+    user_course.save()
+    user_topic.save()
 
 
     return JSONResponse({'score': round(score, 3)})
+
+@database.atomic()
+def add_topic_to_user_course(user: UserOut, topic_id: str):
+    current_topic: Topic = Topic.get_or_none(Topic.id == topic_id)
+    if not current_topic:
+        raise HTTPException(404)
+
+    user_course = UserCourse.get_or_none(
+        UserCourse.user == user.username,
+        UserCourse.course == current_topic.by_course,
+        UserCourse.is_active
+    )
+    if not user_course:
+        raise HTTPException(400)
+    ut: UserTopic = (UserTopic
+            .select()
+            .join(Topic)
+            .where(
+                UserTopic.topic.number_in_course == current_topic.number_in_course - 1, 
+                UserTopic.by_user_course == user_course
+            )
+            .first()
+    )
+
+    user_topic, is_created = UserTopic.get_or_create(
+        user = user.username,
+        topic = current_topic,
+        by_user_course = user_course,
+        defaults = {
+            'ready_to_pass': True if current_topic.number_in_course == 0 else ut.is_completed
+        }
+    )
+
+    if not is_created:
+        raise HTTPException(400, 'already added')
+
+    return JSONResponse(model_to_dict(user_topic, exclude=[UserTopic.user], max_depth=1))

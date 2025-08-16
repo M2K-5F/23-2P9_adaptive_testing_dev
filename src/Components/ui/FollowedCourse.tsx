@@ -51,7 +51,7 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                 <div className="flex items-center gap-2 mb-3">
                     <span className="text-sm">Прогресс:</span>
                     <Badge variant="secondary">
-                        {Math.round(userCourse.course_progress * 100)}%
+                        {Math.round(userCourse.course_progress)}%
                     </Badge>
                 </div>
 

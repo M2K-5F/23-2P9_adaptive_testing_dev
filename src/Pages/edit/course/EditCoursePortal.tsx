@@ -22,7 +22,7 @@ export function TopicsPortal() {
 
 
     return (
-        <Fragment>
+        <div className={clsx('p-3')} >
             <header className={clsx(
                 'w-full grid grid-cols-3 justify-center justify-items-center mb-4 grid-rows-2'
             )}>
@@ -64,6 +64,6 @@ export function TopicsPortal() {
                         "Нет созданных тем"
                     </p>
             }
-        </Fragment>
+        </div>
     )
 }

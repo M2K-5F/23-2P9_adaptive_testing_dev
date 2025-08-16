@@ -73,8 +73,8 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
     }
 
     return (
-        <article className=" rounded-lg p-6 pt-4 shadow-md mb-6 border border-gray-200">
-            <Label className="text-md mb-3">Создание вопроса:</Label>
+        <article className="p-4 w-auto shadow-md mb-6 border-b border-t  border-gray-200">
+            <Label className="text-md w-full justify-center content-center mb-3">Создание вопроса:</Label>
             <Input
                 placeholder="Текст вопроса"
                 className="max-w-100 w-full mb-4 h-10  overflow-ellipsis focus-visible:ring-2 focus-visible:ring-offset-2 border-gray-300"

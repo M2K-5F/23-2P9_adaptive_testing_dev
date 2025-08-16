@@ -85,8 +85,8 @@ export const CreatedTopic = memo(({ topic, index }: {
             </section>
 
             {isExpanded && 
-                <section className="border-t p-4 bg-muted/50">
-                    <h4 className="text-md font-medium mb-3">Вопросы темы:</h4>
+                <section className="border-t py-4 bg-muted/50">
+                    <h4 className="text-md font-medium mx-4 mt-2 mb-3">Вопросы темы:</h4>
 
                     {questions?.length ? 
                             questions.map(question => 
@@ -103,7 +103,7 @@ export const CreatedTopic = memo(({ topic, index }: {
                     {!isCreating ? (
                         <Button 
                             variant='default'
-                            className="mt-3 ml-2 h-9 bg-green-400 hover:bg-green-300"
+                            className="mt-3 mx-4 h-9 bg-green-400 hover:bg-green-300"
                             onClick={() => setIsCreating(true)}
                         >
                             + Создать вопрос
@@ -119,6 +119,7 @@ export const CreatedTopic = memo(({ topic, index }: {
                                 <Button
                                     variant="destructive"
                                     size="sm"
+                                    className={clsx('mx-4')} 
                                     onClick={() => setIsCreating(false)}
                                 >
                                     Отменить создание

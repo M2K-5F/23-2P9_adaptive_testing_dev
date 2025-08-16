@@ -12,7 +12,7 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
     }
 
     return (
-        <article className={` rounded-lg p-4 mb-4 shadow-sm border transition-all ${!question.is_active ? 'opacity-70' : ''}`}>
+        <article className={` rounded-lg p-4 mx-4 mb-4  shadow-sm border transition-all ${!question.is_active ? 'opacity-70' : ''}`}>
             <div className="flex justify-between items-start mb-3">
                 <h4
                     className="text-md max-w-3/4 font-medium overflow-hidden cursor-pointer hover:text-primary"

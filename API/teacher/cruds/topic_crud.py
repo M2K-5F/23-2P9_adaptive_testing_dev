@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from typing import Union, Tuple
 from peewee import fn
 
-from db import database, Course, Topic
+from db import database, Course, Topic, UserCourse
 from shemas import  UserOut
 
 
@@ -20,16 +20,6 @@ def create_topic(user: UserOut, title: str, description: str, course_id: str):
 
     topics_by_course = Topic.select().where(Topic.by_course == current_course)
     count_topics = len(topics_by_course)
-    if not count_topics:
-        topic = Topic.create(
-            by_course = current_course,
-            created_by = user.username,
-            title = title,
-            description = description,
-            number_in_course = 0
-        )
-
-        return JSONResponse(topic.__data__)
 
     current_topic, is_created = Topic.get_or_create(
         by_course = current_course,
@@ -43,6 +33,7 @@ def create_topic(user: UserOut, title: str, description: str, course_id: str):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Topic with this title and description already created"
         )
+
     
     return JSONResponse(current_topic.__data__)
 
@@ -56,3 +47,5 @@ def change_activity_of_topic(user: UserOut, topic_id: str):
     current_topic.is_active = not current_topic.is_active
     current_topic.save()
     return JSONResponse(current_topic.__data__)
+
+

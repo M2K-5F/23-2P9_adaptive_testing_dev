@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"] 
+      "@/*": ["src/*"],
+      "@/ui/*": ["src/Components/ui/*"]
     }
   },
   "include": ["src"]
