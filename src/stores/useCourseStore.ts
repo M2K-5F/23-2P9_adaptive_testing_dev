@@ -37,6 +37,7 @@ export const useCourseStore = create<States & Actions>()(immer((set, get) => ({
             draft.createdCourses = states.created       
             draft.followedCoures = states.followed
         })    
+        return
     },
     fetchFollowedCourses: async () => {
         let followed: UserCourse[];
@@ -44,6 +45,7 @@ export const useCourseStore = create<States & Actions>()(immer((set, get) => ({
             followed = await getFollowedCourses()
         } catch {}
         set(d => {d.followedCoures = followed})
+        return
     }
     
 })))

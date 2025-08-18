@@ -1,14 +1,16 @@
-import { memo, ChangeEvent, FC } from "react"
+import { memo, ChangeEvent, FC, useState, useEffect } from "react"
 import { Answer, Question } from "../../types/interfaces"
 import { Updater, useImmer } from "use-immer"
-import { createQuestion } from "../../services/api.service"
-import { toast } from "sonner"
 import { Button } from '@/Components/ui/button'
 import { Input } from "@/Components/ui/input"
 import { Checkbox } from "@/Components/ui/checkbox"
 import { Label } from "@/Components/ui/label"
+import { useCreateQuestion } from "@/hooks/useCreateQuestion"
+import { toast } from "sonner"
 
 export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id: number, }> = memo((props) => {
+    const [isCreating, setIsCreating] = useState<boolean>(false)
+    const handler = useCreateQuestion()
     const [createdQuestion, setCreatedQuestion] = useImmer<Question>({
         text: '',
         question_type: 'single',
@@ -19,61 +21,21 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
         }]
     })
 
-    const createQuestionFromDraft = () => {
-        const question = createdQuestion
-        let description: string | undefined
-        const correctAnswersCount = question.answer_options.filter(answer => answer.is_correct).length
 
-        if (!question.text ) {
-            description = 'Введите текст вопроса'
-        }
-        else if (!question.answer_options.length) {
-            description = 'Как тебе удалось удалить первый вариант ответа!?'
-        }
-        else if (question.answer_options.filter(answer => answer.text).length !== question.answer_options.length) {
-            description = 'Вы заполнили не все поля с ответами'
-        }
-        else if (correctAnswersCount === 0) {
-            description = 'Выберите хотя бы один верный вариант ответа'
-        }
-        else if (correctAnswersCount === question.answer_options.length) {
-            description = 'Верными не могут быть все ответы'
-        }
+    useEffect(() => {
+        isCreating && handler(createdQuestion, props.topic_id, 
+            () => {
+                toast('Вопрос в теме успешно создан!')
+                props.createQuestionHandler()
+            }, 
+            () => {
+                setIsCreating(false)
+            })
+    }, [isCreating])
 
-        if (description) {
-            toast('Ошибка при создании вопроса:', {description: description})
-            return
-        }
-
-        const toCreate: Question = {
-            text: question.text, 
-            question_type: question.question_type, 
-            answer_options: question.answer_options.map(answer => ({
-                text: answer.text, is_correct: answer.is_correct
-            }))
-        }
-
-        createQuestion(props.topic_id, toCreate)
-        .then(() => {
-            toast('Вопрос в теме успешно создан!')
-            props.createQuestionHandler()
-        })
-        .catch((error: Error) => {
-            switch (error.message) {
-                case '404': 
-                    toast('Ошибка')
-                    break
-
-                case '400':
-                    toast('Вопрос с таким текстом уже создан в этой теме!')
-                    break
-            }
-        })
-        
-    }
 
     return (
-        <article className="p-4 w-auto shadow-md mb-6 border-b border-t  border-gray-200">
+        <article className="p-4 w-auto shadow-md bg-muted/60 mb-6">
             <Label className="text-md w-full justify-center content-center mb-3">Создание вопроса:</Label>
             <Input
                 placeholder="Текст вопроса"
@@ -116,7 +78,12 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
                     + Добавить вариант ответа
                 </Button>
 
-                <Button className="bg-green-500 hover:bg-green-400" onClick={createQuestionFromDraft}>
+                <Button 
+                    disabled={isCreating} 
+                    className="bg-green-500 hover:bg-green-400" 
+                    onClick={() => {
+                        setIsCreating(true)   
+                    }}>
                     ✔ Создать вопрос
                 </Button>
             </div>

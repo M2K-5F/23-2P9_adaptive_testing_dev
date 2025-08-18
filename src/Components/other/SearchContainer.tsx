@@ -1,10 +1,10 @@
 import React, { ChangeEvent, RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useDebounce } from "../../hooks/useDebounce"
 import { CreatedCourse } from "../../types/interfaces"
-import { Input } from "./input"
+import { Input } from "../ui/input"
 import { Flashlight, Key } from "lucide-react"
-import { SelectGroup, SelectItem } from "./select"
-import { ScrollArea } from "./scroll-area"
+import { SelectGroup, SelectItem } from "../ui/select"
+import { ScrollArea } from "../ui/scroll-area"
 import { Separator } from "@radix-ui/react-select"
 import clsx from "clsx"
 import { useAsideVisibilityStore } from "@/Layouts/AppLayout"
@@ -24,7 +24,7 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
     const input = useRef<null | HTMLInputElement>(null)
     
     const searchCourses = useDebounce((query: string) => {
-        props.searchfn(query, (courses) => setSearchedCourses(courses))
+        props.searchfn(query.trim(), (courses) => setSearchedCourses(courses))
     }, props.delay)
 
 
@@ -67,7 +67,7 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
                     max={props.maxlengh ?? 60}
                     value={searchQuery}
                     onChange={e => {
-                        setSearchQuery(e.currentTarget.value)
+                        setSearchQuery(e.currentTarget.value.trimStart())
                     }}
                 />
                 <div onClick={() => input.current?.focus()} className=" select-none w-fit h-full cursor-text items-center pl-2 flex top-0 gap-1 absolute text-[14px]">

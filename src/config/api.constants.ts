@@ -1,4 +1,4 @@
-const host = 'http://localhost' as const;
+const host = 'http://26.94.89.32' as const;
 const port = '8001' as const;
 
 export const URL = `${host}:${port}` as const;
@@ -22,6 +22,7 @@ export const APIUrls = {
     getCourseURL: `${sURL}/course/get_by_id`,
 
     createTopicURL: `${tURL}/topic/create`,
+    addTopicToUCURL: `${sURL}/topic/add_topic_to_user_course`,
     getTopicsURL: `${sURL}/topic/get`,
     getFollowedTopicsURL: `${sURL}/topic/get_followed`,
     archTopicURL: `${tURL}/topic/arch`,

@@ -322,3 +322,16 @@ export const getCourse = (courseId: number): Promise<FetchedCourse> => {
         }
     )
 }
+
+export const addTopicToUC = (topicId: number): Promise<UserTopic> => {
+    return ApiService.requestToServer(
+        APIUrls.addTopicToUCURL,
+        {
+            method: 'post',
+            credentials: 'include'
+        },
+        {   
+            "topic_id": topicId
+        }
+    )
+}

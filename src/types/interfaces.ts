@@ -81,6 +81,7 @@ export interface CreatedTopic extends CreatedCourse {
     description: string
     number_in_course: number
     question_count: number
+    by_course: number
 }
 
 export interface UserTopic {

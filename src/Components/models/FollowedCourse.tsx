@@ -1,11 +1,12 @@
 import { useState, useEffect, memo, FC } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { CreatedCourse, UserCourse, UserTopic } from "../../types/interfaces"
-import { Button, Badge } from "@/Components/ui"
+import { Button, Badge } from "@/Components"
 import clsx from "clsx"
 import { getTopics } from "@/services/api.service"
 import { useTopicStore } from "@/stores/useTopicStore"
 import { routes } from "@/config/routes.config"
+import { Check, X } from "lucide-react"
 
 export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) => {
     const navigate = useNavigate()
@@ -88,8 +89,22 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                                                 {topic.topic.description || "Нет описания"}
                                             </p>
                                             <span>{topic.topic.question_count ? `Количество вопросов: ${topic.topic.question_count}` : 'Нет созданных вопросов'}</span>
-                                            {topic.is_completed && <span className={clsx('block w-fit mt-2 text-xs border-green-600 border p-0.5 bg-green-950 rounded-sm')} >Пройдено</span>}
-                                            {/* TODO: Добавить статус прохождения темы */}
+                                            {topic.topic_progress > 0 && (topic.is_completed 
+                                                ?   <Badge variant='default' className= "border-green-500 mt-2 block border p-0 pr-2">
+                                                        <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-green-500 mr-2">
+                                                            <Check className="h-3 w-3" />
+                                                            Пройдено
+                                                        </Badge>
+                                                        Баллы: {topic.topic_progress.toFixed(1)}/1
+                                                    </Badge>
+                                                :   <Badge variant='default' className= "border-red-500 block mt-2 border p-0 pr-2">
+                                                        <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-red-500 mr-2">
+                                                            <X className="h-3 w-3" />
+                                                            Не пройдено
+                                                        </Badge>
+                                                        Баллы: {topic.topic_progress.toFixed(1)}/1
+                                                    </Badge>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

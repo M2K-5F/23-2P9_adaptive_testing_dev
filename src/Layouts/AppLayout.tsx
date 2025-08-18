@@ -1,4 +1,4 @@
-import { AsidePanelLayout } from "@/Components/ui/aside"
+import { AsidePanelLayout } from "@/Components/layout/aside"
 import useWindowSize from "@/hooks/useWindowSize";
 import React, { createContext, FC, memo, RefObject, useLayoutEffect, useState } from "react"
 import { Outlet } from "react-router-dom"

@@ -1,4 +1,4 @@
-import { ThemeSwitcher } from "@/Components/ui/ThemeSwither";
+import { ThemeSwitcher } from "@/Components/other/ThemeSwither";
 import { ToggleGroup, ToggleGroupItem } from "@/Components/ui/toggle-group";
 import { createContext, Dispatch, FC, SetStateAction, useEffect, useLayoutEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";

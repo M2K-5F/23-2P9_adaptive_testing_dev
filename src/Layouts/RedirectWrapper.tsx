@@ -1,10 +1,10 @@
 import { Outlet, useNavigate } from "react-router-dom"
 import {userStore} from "../stores/userStore"
 import { useRef, useLayoutEffect, FC, memo, useEffect } from "react"
-import {Loader} from '../Components/ui/Loader'
+import {Loader} from '../Components/other/Loader'
 import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
-import { ThemeSwitcher } from "@/Components/ui/ThemeSwither"
+import { ThemeSwitcher } from "@/Components/other/ThemeSwither"
 
 
 export const RedirectWrapper: FC = () => {

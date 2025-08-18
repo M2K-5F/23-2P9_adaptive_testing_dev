@@ -9,7 +9,7 @@ import {
     DropdownMenuTrigger,
     Button, Avatar, AvatarFallback, AvatarImage,
     ThemeSwitcher
-} from "@/Components/ui"
+} from "@/Components"
 import { userStore } from "@/stores/userStore"
 import clsx from "clsx"
 import { LogOut } from "lucide-react"

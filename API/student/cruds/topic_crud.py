@@ -53,7 +53,7 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
 
 
 def start_topic(user: UserOut, user_topic_id: str):
-    user_topic: UserTopic = UserTopic.get_or_none(UserTopic.id == user_topic_id)
+    user_topic: UserTopic = UserTopic.get_or_none(UserTopic.id == user_topic_id, UserTopic.user == user.username)
 
     if not user_topic:
         raise HTTPException(400, 'u not followed at this course')
@@ -80,7 +80,7 @@ def start_topic(user: UserOut, user_topic_id: str):
         })
 
 
-    if not current_topic.number_in_course:    
+    # if not current_topic.number_in_course:    
         return JSONResponse(questions_with_answers)
 
     return JSONResponse('logic not included yet')

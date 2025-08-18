@@ -1,23 +1,22 @@
 import React, { FC, memo, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { userStore } from "@/stores/userStore";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useCourseStore } from "@/stores/useCourseStore";
-import { Button } from "./button";
-import { ThemeSwitcher } from "./ThemeSwither";
+import { Button } from "../ui/button";
 import { useTopicStore } from "@/stores/useTopicStore";
 import { Link, SetURLSearchParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Skeleton } from "./skeleton";
-import { Label } from "./label";
+import { Skeleton } from "@/Components/ui/skeleton";
+import { Label } from "@/Components/ui/label";
 import { CreatedCourse } from "@/types/interfaces";
-import { SearchContainer } from "./SearchContainer";
+import { SearchContainer } from "@/Components/other/SearchContainer";
 import { ApiService, searchCourses } from "@/services/api.service";
 import { routes } from "@/config/routes.config";
-import { OpenCloseSvg } from "./aside-close";
+import { OpenCloseSvg } from "@/Components/ui/aside-close";
 import { useAsideVisibilityStore } from "@/Layouts/AppLayout";
-import { CreateTopicDialog } from "./create-topic-dialog";
+import { CreateTopicDialog } from "@/Components/dialogs/create-topic-dialog";
 import clsx from "clsx";
-import { UserMenu } from "./user-menu";
-import { CreateCourseDialog } from "./create-course-dialog";
+import { UserMenu } from "../other/user-menu";
+import { CreateCourseDialog } from "@/Components/dialogs/create-course-dialog";
 
 
 export const AsidePanelLayout: React.FC<{}> = memo(() => {

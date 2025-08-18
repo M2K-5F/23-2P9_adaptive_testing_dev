@@ -1,7 +1,7 @@
 import { useState, useEffect, memo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
-import { Button, Badge, CreatedQuestion, QuestionConstructor } from "@/Components/ui"
+import { Button, Badge, CreatedQuestion, QuestionConstructor } from "@/Components"
 import { CreatedTopic as CT, CreatedQuestion as CQ } from "@/types/interfaces"
 import { getQuestions, archTopic } from "@/services/api.service"
 import clsx from "clsx"
@@ -85,7 +85,7 @@ export const CreatedTopic = memo(({ topic, index }: {
             </section>
 
             {isExpanded && 
-                <section className="border-t py-4 bg-muted/50">
+                <section className="py-4 bg-muted/50">
                     <h4 className="text-md font-medium mx-4 mt-2 mb-3">Вопросы темы:</h4>
 
                     {questions?.length ? 

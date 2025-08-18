@@ -1,9 +1,12 @@
 import { useCourseStore } from "@/stores/useCourseStore"
-import { Button } from "./button"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./dialog"
-import { Label } from "./label"
-import { Input } from "./input"
-import { FC, memo, useId, useState } from "react"
+import { 
+    Label, Input, Button, Dialog, 
+    DialogClose, DialogContent, 
+    DialogDescription, DialogFooter, 
+    DialogHeader, DialogTitle, 
+    DialogTrigger  
+} from "@/Components"
+import { FC, memo, useEffect, useId, useState } from "react"
 import { userStore } from "@/stores/userStore"
 import { useCreateCourse } from "@/hooks/useCreateCourse"
 import { PropsVariant } from "@/types/types"
@@ -15,12 +18,18 @@ export const CreateCourseDialog: FC<{text: string, className?: string, variant?:
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const handler = useCreateCourse()
     const fetchCourses  = useCourseStore(s => s.fetchCourses)
+    const [isCreating, setIsCreating] = useState<boolean>(false)
+
+    
+    useEffect(() => {
+        isCreating && handler(titleId, () => {fetchCourses(), setIsOpen(false)}, () => {setIsCreating(false)})
+    }, [isCreating])
 
 
     return(
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className={className} variant={variant ?? 'ghost'}>{text}</Button>
+                <Button className={className} onClick={() => setIsCreating(false)} variant={variant ?? 'ghost'}>{text}</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -39,7 +48,7 @@ export const CreateCourseDialog: FC<{text: string, className?: string, variant?:
                 </div>
                 <DialogFooter>
                     <Button onClick={() => setIsOpen(false)} variant={'outline'}>Закрыть</Button>
-                    <Button onClick={() => handler( titleId, () => {fetchCourses(), setIsOpen(false)})} >Создать</Button>
+                    <Button disabled={isCreating} onClick={() => setIsCreating(true)} >Создать</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

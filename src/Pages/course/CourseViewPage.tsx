@@ -16,11 +16,14 @@ import {
     AccordionTrigger,
     CardFooter,
     Loader,
-    FollowedTopic
-} from "@/Components/ui"
+    FollowedTopic,
+    CardDescription,
+    Progress
+} from "@/Components"
 import { FetchedCourse } from "@/types/interfaces"
-import { GitCommitVerticalIcon } from "lucide-react"
+import { BarChart2, BookOpen, Check, GitCommitVerticalIcon, List, LogOut, Plus, RotateCcw, Share2, User, X } from "lucide-react"
 import clsx from "clsx"
+import { toast } from "sonner"
 
 
 export function FollowedCoursePage() {
@@ -69,45 +72,130 @@ export function FollowedCoursePage() {
     return (
         <div className=" p-6 h-full">
             <div className="max-w-3xl mx-auto">
-                <Card className="border-foreground">
-                    <CardHeader className="flex-row justify-between items-start gap-4">
-                        <div>
-                            <CardTitle className="text-2xl mb-2">
-                                {course.title}
-                            </CardTitle>
+                <Card className="mb-6 border-foreground">
+                    <CardHeader className="flex justify-between items-start space-y-0 ">
+                        <section className={clsx('w-full flex-col flex gap-2')} >
+                            <div className="flex flex-col w-full gap-2 max-w-full">
+                                    
+                                    <CardTitle className="max-w-full flex flex-wrap gap-2 items-center mb-1">
+                                        <div className="p-2 max-sm:hidden bg-primary/10 rounded-lg ">
+                                            <BookOpen className="h-5 w-5 text-primary" />
+                                        </div>
+                                        {course.title}fhiudysgipodufsgkuso;
+                                    </CardTitle>
 
-                            <div className="flex items-center gap-2">
-                                <Badge variant="secondary">Автор: {course.created_by}</Badge>
-                                
-                                <Badge 
-                                    variant={course.user_course ? "default" : "outline"}
-                                >{course.user_course ? "Подписан" : "Не подписан"}
-                                </Badge>
+                                    <div className={clsx('flex items-baseline justify-between')} >
+                                        <div className="flex items-center gap-2 flex-wrap max-w-[250px]">
+                                            <Badge variant="outline" className="flex items-center gap-1">
+                                                <List className="h-3 w-3" />
+                                                {createdTopics.length || 0} тем.
+                                            </Badge>
+                                            <Badge className="">
+                                                <User className="h-3 w-3 mr-1" />
+                                                Автор: {course.created_by}
+                                            </Badge>
+                                            <Badge
+                                                className={clsx(course.user_course ? 'bg-green-400' : 'border-red-500')} 
+                                                variant={course.user_course ? "default" : "outline"}
+                                            >{course.user_course
+                                                    ?   <>
+                                                            <Check className="h-3 w-3 mr-1" />
+                                                            Подписан
+                                                        </>
+                                                    :   <>
+                                                            <X className="h-3 text-red-400 w-3 mr-1" />
+                                                            Не подписан
+                                                        </>
+                                                }
+                                            </Badge>
+                                        </div>
+
+                                        <div className={clsx('w-fit flex flex-col max-md:hidden gap-2')}>
+                                            <Button
+                                                variant="outline"
+                                                onClick={async () => {
+                                                    await navigator.clipboard.writeText(
+                                                    `${window.location.origin}/course?fcourse_id=${course.id}`
+                                                    );
+                                                    toast.success('Ссылка скопирована в буфер обмена');
+                                                }}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <Share2 className="h-4 w-4" />
+                                                <span className="max-md:hidden">Поделиться курсом</span>
+                                            </Button>
+
+                                            {course.user_course && 
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() => alert('TODO functional')}
+                                                    className="flex items-center gap-2 text-destructive hover:text-destructive"
+                                                >
+                                                    <RotateCcw className="h-4 w-4" />
+                                                    <span className="max-md:hidden">Сбросить прогресс</span>
+                                                </Button>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2 min-md:hidden">
+                                        <Badge
+                                            variant='secondary'
+                                            onClick={async () => {
+                                                await navigator.clipboard.writeText(
+                                                `${window.location.origin}/course?fcourse_id=${course.id}`
+                                                );
+                                                toast.success('Ссылка скопирована в буфер обмена');
+                                            }}
+                                            className="flex items-center gap-2 border border-foreground cursor-pointer"
+                                        >
+                                            <Share2 className="h-4 w-4" />
+                                            <span className="min-md:hidden">Поделиться курсом</span>
+                                        </Badge>
+                                        {course.user_course && 
+                                            <Badge
+                                                variant="secondary"
+                                                onClick={() => alert('TODO functional')}
+                                                className="flex items-center gap-2 text-destructive hover:text-destructive"
+                                            >
+                                                <RotateCcw className="h-4 w-4" />
+                                                <span className="min-md:hidden">Сбросить прогресс</span>
+                                            </Badge>
+                                        }
+                                    </div>
                             </div>
-                        </div>
-
-                        <Button 
-                            variant={course.user_course ? "destructive" : "default"}
-                            size="sm"
-                            onClick={handleFollowToggle}
-                        >{course.user_course ? "Отписаться" : "Подписаться"}
-                        </Button>
+                            
+                            <Button
+                                variant={course.user_course ? "destructive" : "default"}
+                                size="sm"
+                                onClick={handleFollowToggle}
+                                className="flex items-center gap-1 max-w-80 w-full"
+                            >{course.user_course
+                                ?   <>
+                                        <LogOut className="h-4 w-4" />
+                                        Отписаться
+                                    </>
+                                :   <>
+                                        <Plus className="h-4 w-4" />
+                                        Подписаться
+                                    </>
+                            }
+                            </Button>
+                        </section>
                     </CardHeader>
-                    
-                    {course.user_course && <CardContent>
-                        <div className="flex items-center gap-4">
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                    className="bg-primary h-2 rounded-full" 
-                                    style={{ width: `${course.user_course.course_progress}%` }}
-                                />
+
+                    {course.user_course && 
+                        <CardContent>
+                            <div className="flex items-center gap-4">
+                                <Progress value={course.user_course.course_progress || 0} className="h-2 flex-1" />
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    <BarChart2 className="h-4 w-4" />
+                                    {Math.round(course.user_course.course_progress || 0)}% завершено
+                                </div>
                             </div>
-                            <span className="text-sm text-muted-foreground">
-                                {Math.round(course.user_course.course_progress)}% завершено
-                            </span>
-                        </div>
-                    </CardContent>}
-                </Card>
+                        </CardContent>
+                    }
+                    </Card>
 
                 <Accordion defaultValue="topics" type="single" collapsible className="w-full">
                     <AccordionItem value="topics">
@@ -132,7 +220,7 @@ export function FollowedCoursePage() {
                                                     <GitCommitVerticalIcon size={40} className="" />
                                                 </div>
                                             }
-                                            <FollowedTopic topic={topic} index={index} userTopic={userTopic} /> 
+                                            <FollowedTopic topic={topic} index={index} userTopic={userTopic} isCourseFollowed={Boolean(course.user_course)} /> 
                                         </Fragment>
                                     )
                                 })}

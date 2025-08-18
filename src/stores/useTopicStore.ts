@@ -24,6 +24,7 @@ export const useTopicStore = create<States & Actions>()(immer((set, get) => ({
         set(draft => {
             draft.createdTopics[Number(courseId)] = topics
         })
+        return
     },
 
     fetchFollowedTopics: async (courseId) => {
@@ -35,6 +36,7 @@ export const useTopicStore = create<States & Actions>()(immer((set, get) => ({
         } catch {
             set(d => {d.followedTopics[courseId] = []})
         }
+        return
     },
 
     reset: () => set({createdTopics: []}),

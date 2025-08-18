@@ -2,12 +2,13 @@ import { createCourse } from '@/services/api.service'
 import { toast } from "sonner"
 import { useId } from "react"
 
-export const useCreateCourse = () => async (inputId: ReturnType<typeof useId>, callback: () => void) => {
+export const useCreateCourse = () => async (inputId: ReturnType<typeof useId>, callback: () => void, exceptionCallback: () => void) => {
         const input = document.querySelector(`#${inputId}[name=title]`) as HTMLInputElement
         const title = input.value.trim()
         
         if (title.length < 3) {
             toast("Название должно содержать минимум 3 символа")
+            exceptionCallback()
             return
         }
 

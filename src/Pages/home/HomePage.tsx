@@ -1,10 +1,10 @@
-import { CreatedCourse } from "@/Components/ui/CreatedCourse";
+import { CreatedCourse } from "@/Components/models/CreatedCourse";
 import { userStore } from "@/stores/userStore";
-import { CreateCourseDialog } from "@/Components/ui/create-course-dialog"
+import { CreateCourseDialog } from "@/Components/dialogs/create-course-dialog"
 import { useCourseStore } from "@/stores/useCourseStore";
-import { FollowedCourse } from "@/Components/ui/FollowedCourse";
+import { FollowedCourse } from "@/Components/models/FollowedCourse";
 import clsx from "clsx";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/Components/ui";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/Components";
 
 export default function HomePage() {
     const role = userStore(s => s.role)

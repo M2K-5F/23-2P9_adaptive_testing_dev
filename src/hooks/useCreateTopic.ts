@@ -2,7 +2,7 @@ import { toast } from "sonner"
 import { createTopic } from "@/services/api.service"
 
 
-export const useCreateTopic = () => async (courseId: number, titleId: string, descriptionId: string, callback: () => void) => {
+export const useCreateTopic = () => async (courseId: number, titleId: string, descriptionId: string, callback: () => void, exceptionCallback: () => void) => {
     const titleInput = document.getElementById(titleId) as HTMLInputElement
     const descInput = document.getElementById(descriptionId) as HTMLInputElement
     const title = titleInput.value.trim()
@@ -19,11 +19,12 @@ export const useCreateTopic = () => async (courseId: number, titleId: string, de
 
     if (descriptionString) {
         toast('Ошибка при создании темы:', {description: descriptionString})
+        exceptionCallback()
         return
     }
 
         try {
-            await createTopic(title, description, String(courseId))
+            const topic = await createTopic(title, description, String(courseId))
             toast(`Тема с названием ${title} успешно созданa!`)
             callback()
         } catch (error) {

@@ -3,7 +3,7 @@ import { Fragment, useEffect, useLayoutEffect, useState } from "react";
 import { useTopicStore } from "@/stores/useTopicStore";
 import { useCourseStore } from "@/stores/useCourseStore";
 import clsx from "clsx";
-import { CreatedTopic, CreateTopicDialog } from "@/Components/ui";
+import { CreatedTopic, CreateTopicDialog } from "@/Components";
 
 export function TopicsPortal() {
     const navigate = useNavigate()

@@ -131,6 +131,12 @@
   }
 }
 
+@layer components {
+  .block-visible {
+    display: block !important;
+  }
+}
+
 @layer utilities {
   .scrollbar-hidden {
     scrollbar-width: none !important;

@@ -1,10 +1,12 @@
 import { useCourseStore } from "@/stores/useCourseStore"
-import { Button } from "./button"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./dialog"
+import {
+    Dialog, DialogClose, DialogContent, 
+    DialogDescription, DialogFooter, DialogHeader, 
+    DialogTitle, DialogTrigger, 
+    Input, Button, Label 
+} from "@/Components"
 import { useSearchParams } from "react-router-dom"
-import { Label } from "./label"
-import { Input } from "./input"
-import { FC, memo, useId, useState } from "react"
+import { FC, memo, useEffect, useId, useState } from "react"
 import { useCreateTopic } from "@/hooks/useCreateTopic"
 import { useTopicStore } from "@/stores/useTopicStore"
 import { Flashlight } from "lucide-react"
@@ -12,17 +14,23 @@ import { PropsVariant } from "@/types/types"
 
 export const CreateTopicDialog: FC<{text: string, className?: string, variant?: PropsVariant}> = memo(({text, className, variant}) => {
     const createdCourses = useCourseStore(s => s.createdCourses)
-    const fetchTopics = useTopicStore(s => s.fetchTopics)
+    const fetchTopics = useTopicStore(s => s.fetchCreatedTopics)
     const courseId = Number(useSearchParams()[0].get('course_id'))
     const [titleId, descriptionId] = [useId(), useId()]
     const createHandler = useCreateTopic()
+    const [isCreating, setIsCreating] = useState<boolean>(false)
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
+    console.log('gjhghcgu');
+    useEffect(() => {
+        isCreating && createHandler(courseId, titleId, descriptionId, () => {fetchTopics(courseId), setIsOpen(false)}, () => {setIsCreating(false)})
+    }, [isCreating])
+    
 
     return(
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className={className} variant={variant ?? 'ghost'}>{text}</Button>
+                <Button className={className} onClick={() => {setIsCreating(false)}} variant={variant ?? 'ghost'}>{text}</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -47,7 +55,9 @@ export const CreateTopicDialog: FC<{text: string, className?: string, variant?: 
                     <DialogClose asChild>
                         <Button variant={'outline'}>Закрыть</Button>
                     </DialogClose>
-                    <Button onClick={() => createHandler(courseId, titleId, descriptionId, () => {fetchTopics(courseId), setIsOpen(false)})} >Создать</Button>
+                    <Button disabled={isCreating} onClick={() => {
+                        setIsCreating(true)
+                    }}>Создать</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
