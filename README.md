@@ -6,12 +6,14 @@
 - ` py -m pip install -U pip`
 - `pip install -e .`
 - создать папку `/API/certs/` с файлами для ключей `jwt_private.pem` | `jwt_public.pem`
+- настроить `allow_origins=["Список клиентских доменов"]` в `main.py`
 - `cd API`
 - `py db.py`
 
 ### Фронт
 
  - `npm i`
+ - В `src/config/api.constants.ts` установить `baseURL = "URL вашего сервера"` 
 
 ## Очистка БД
 

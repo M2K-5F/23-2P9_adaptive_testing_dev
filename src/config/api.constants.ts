@@ -1,17 +1,14 @@
-const host = 'http://26.94.89.32' as const;
-const port = '8001' as const;
+export const baseURL = `http://localhost:8001` as const;
+export const tURL = `${baseURL}/t` as const;
+export const sURL = `${baseURL}/s` as const;
 
-export const URL = `${host}:${port}` as const;
-export const tURL = `${URL}/t` as const;
-export const sURL = `${URL}/s` as const;
-
-const searchUrl = `${URL}/search` as const;
+const searchUrl = `${baseURL}/search` as const;
 
 export const APIUrls = {
-    usersMeURL: `${URL}/auth/users/me`,
-    logInURL: `${URL}/auth/login`,
-    logOutURL: `${URL}/auth/logout`,
-    registerURL: `${URL}/auth/register`,
+    usersMeURL: `${baseURL}/auth/users/me`,
+    logInURL: `${baseURL}/auth/login`,
+    logOutURL: `${baseURL}/auth/logout`,
+    registerURL: `${baseURL}/auth/register`,
 
     createCourseURL: `${tURL}/course/create`,
     getCoursesURL: `${tURL}/course/get`,
