@@ -1,17 +1,14 @@
-const host = 'http://localhost' as const;
-const port = '8001' as const;
+export const baseURL = `http://localhost:8001` as const;
+export const tURL = `${baseURL}/t` as const;
+export const sURL = `${baseURL}/s` as const;
 
-export const URL = `${host}:${port}` as const;
-export const tURL = `${URL}/t` as const;
-export const sURL = `${URL}/s` as const;
-
-const searchUrl = `${URL}/search` as const;
+const searchUrl = `${baseURL}/search` as const;
 
 export const APIUrls = {
-    usersMeURL: `${URL}/auth/users/me`,
-    logInURL: `${URL}/auth/login`,
-    logOutURL: `${URL}/auth/logout`,
-    registerURL: `${URL}/auth/register`,
+    usersMeURL: `${baseURL}/auth/users/me`,
+    logInURL: `${baseURL}/auth/login`,
+    logOutURL: `${baseURL}/auth/logout`,
+    registerURL: `${baseURL}/auth/register`,
 
     createCourseURL: `${tURL}/course/create`,
     getCoursesURL: `${tURL}/course/get`,
@@ -20,13 +17,18 @@ export const APIUrls = {
     followCourseURL: `${sURL}/course/follow`,
     unfollowCourseURL: `${sURL}/course/unfollow`,
     getCourseURL: `${sURL}/course/get_by_id`,
+    clearUCUrl: `${sURL}/course/clear`,
+    getCourseStatsURL: `${tURL}/course/stats`,
 
     createTopicURL: `${tURL}/topic/create`,
+    addTopicToUCURL: `${sURL}/topic/add_topic_to_user_course`,
     getTopicsURL: `${sURL}/topic/get`,
     getFollowedTopicsURL: `${sURL}/topic/get_followed`,
     archTopicURL: `${tURL}/topic/arch`,
     followTopicURL: `${sURL}/topic/follow`,
     unfollowTopicURL: `${sURL}/topic/unfollow`,
+    startPassingTopicURL: `${sURL}/topic/start`,
+    submitTopicURL: `${sURL}/topic/submit_topic`,
 
     createQuestionURL: `${tURL}/question/create`,
     getQuestionsURL: `${tURL}/question/get`,

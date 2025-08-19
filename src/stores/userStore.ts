@@ -18,8 +18,6 @@ export const userStore = create<userStoreShema>( set => {
             try {
                 const response = await fetch(APIUrls.usersMeURL,{credentials: 'include'})
                 const data = await response.json()
-                console.log(data);
-                
                 if (response.ok) {
                     set({nick: data.nick, status: 'authorized', role: data.status})
                 } else {
@@ -39,8 +37,6 @@ export const userStore = create<userStoreShema>( set => {
                     state => ({...state, status: 'serverunavailable'})
                 )
             }
-            
-            console.log('response returned') 
         },
         DelUser: () => {
             logoutUser()

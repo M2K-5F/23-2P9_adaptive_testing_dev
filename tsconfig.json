@@ -3,14 +3,14 @@
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["DOM", "ESNext"],
-    "jsx": "react-jsx", // Автоматический импорт React (для React 17+)
+    "jsx": "react-jsx", 
     "strict": true,
-    "moduleResolution": "bundler", // Для Vite
+    "moduleResolution": "bundler", 
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": "./", // Для алиасов путей
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"] // Пример алиаса
+      "@/*": ["src/*"],
     }
   },
   "include": ["src"]

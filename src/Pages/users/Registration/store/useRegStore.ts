@@ -1,7 +1,5 @@
 import { ValueContext } from "@/Layouts/AuthLayout";
 import { registerUser } from "@/services/api.service";
-import { Store } from "lucide-react";
-import { v } from "node_modules/shadcn/dist/index-4a90b588";
 import { ChangeEvent, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";

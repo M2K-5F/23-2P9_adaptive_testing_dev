@@ -1,10 +1,9 @@
 import { Outlet, useNavigate } from "react-router-dom"
 import {userStore} from "../stores/userStore"
 import { useRef, useLayoutEffect, FC, memo, useEffect } from "react"
-import {Loader} from '../Components/Loader'
 import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
-import { ThemeSwitcher } from "@/Components/ThemeSwither"
+import { Loader } from "@/Components"
 
 
 export const RedirectWrapper: FC = () => {
@@ -51,7 +50,11 @@ export const RedirectWrapper: FC = () => {
     }, [shouldRedirect, status])
 
     if (status === 'undefined') {
-        return <Loader /> 
+        return( 
+            <div className="h-dvh w-dvw flex items-center justify-center">
+                <Loader variant='success' />
+            </div> 
+        )
     }
 
     if (shouldRedirect) {

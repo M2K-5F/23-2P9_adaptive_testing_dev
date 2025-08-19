@@ -7,11 +7,10 @@ export const Paths = {
     'unauthorized': ['/401', '/users/autorize', '/users/registration'],
     'undefined': ['/users/autorize', '/users/registration', '/forstudent', '/showform', '/forteacher', '/createform', '/forteacher/results'],
     'serverunavailable': ['/users/autorize', '/users/registration', '/forstudent', '/showform', '/forteacher', '/createform', '/forteacher/results']
-}
+} as const
 
-
-export const isStatusPathAvailable = (status: status | role) => {
-    return Paths[status].includes(window.location.pathname)
+export const isStatusPathAvailable = (status: status | role) => { 
+    return Paths[status].includes(window.location.pathname) 
 }
 
 export const isRolePathAvailable = (roles: role[]) => {
@@ -23,4 +22,10 @@ export const isRolePathAvailable = (roles: role[]) => {
         }
     }
     return !shouldRedirect
+}
+
+export const routes = {
+    home: '/',
+    editCourse: (courseId: number, expanded: number = 0) => `/edit/course?course_id=${courseId}&expanded=${expanded}`,
+    viewCourse: (fcourseId: number) => `/course?fcourse_id=${fcourseId}`,
 }

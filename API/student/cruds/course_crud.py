@@ -1,18 +1,19 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from typing import Union, Tuple
+from playhouse.shortcuts import model_to_dict
 from peewee import fn
 
-from db import database, Course, UserCourse, UserTopic, Topic
+from db import database, Course, UserCourse, UserTopic, Topic, UserQuestion
 from shemas import UserOut
 
 
 @database.atomic()
 def get_followed_courses(user: UserOut):
-    followed_courses = UserCourse\
-        .select(UserCourse, Course)\
-        .join(Course, on=(UserCourse.course == Course.id))\
-        .where(UserCourse.user == user.username, UserCourse.is_active == True)
+    followed_courses = (UserCourse
+        .select(UserCourse, Course)
+        .join(Course, on=(UserCourse.course == Course.id))
+        .where(UserCourse.user == user.username, UserCourse.is_active == True))
 
     return JSONResponse([{**uc.__data__, "course": uc.course.__data__} for uc in followed_courses])
 
@@ -88,5 +89,33 @@ def get_course_by_id(user: UserOut, courseId: int):
             status_code=status.HTTP_404_NOT_FOUND
         )
     
-    followed_course = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
-    return JSONResponse({'course_data': current_course.__data__, 'isFollowed': True if followed_course else False, })
+    followed_course: UserCourse = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
+    return JSONResponse({**current_course.__data__, 'user_course': ({**followed_course.__data__} if followed_course else False)})
+
+
+@database.atomic()
+def clear_uc_progress(user: UserOut, user_course_id: int):
+    user_course = UserCourse.get_or_none(UserCourse.id == user_course_id, UserCourse.user == user.username)
+    if not user_course:
+        raise HTTPException(404)
+    
+    user_topics = (UserTopic
+                    .select().
+                    where(UserTopic.by_user_course == user_course))
+
+    for user_topic in user_topics:
+        user_questions = (UserQuestion
+                            .select()
+                            .where(UserQuestion.by_user_topic == user_topic))
+        for user_question in user_questions:
+            user_question.delete_instance()
+        user_topic.topic_progress = 0
+        user_topic.is_completed = False
+        user_topic.ready_to_pass = False if user_topic.topic.number_in_course else True
+        user_topic.save()
+
+    user_course.course_progress = 0
+    user_course.completed_topic_number = 0
+    user_course.save()
+
+    return JSONResponse(model_to_dict(user_course, exclude=[UserCourse.user], max_depth=1))

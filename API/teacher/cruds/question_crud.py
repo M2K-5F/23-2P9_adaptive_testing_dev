@@ -1,7 +1,9 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
+import playhouse
 from typing import Union, Tuple
 from peewee import fn
+import playhouse.shortcuts
 
 from db import (database, User, UserRole, Role, 
     Course, Answer, Question,
@@ -41,6 +43,8 @@ def create_question(user: UserOut, topic_id: str, question: QuestionBase ):
             by_question = created_question
         )
     
+    current_topic.question_count += 1
+    current_topic.save()
     return JSONResponse(
         content=created_question.__data__
     )
@@ -54,6 +58,12 @@ def arch_question(user: UserOut, question_id: str ):
 
     current_question.is_active = not current_question.is_active
     current_question.save()
+
+    
+    topic = current_question.by_topic
+    topic.question_count = len(Question.select().where(Question.by_topic == topic, Question.is_active))
+    topic.save()
+
     
     return JSONResponse(current_question.__data__)
 
@@ -73,11 +83,6 @@ def get_question_list(user: UserOut, topic_id: str):
     questions = Question.select().where(
         Question.by_topic == current_topic
     )
-    if not questions:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user not found"
-        )
     
     to_return = []
     for question in questions:

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Requ
 from fastapi.responses import JSONResponse
 
 from api_depends import get_user_from_request
-from ..cruds import course_create, get_created_by_teacher_courses, change_activity_of_course
+from ..cruds import course_create, get_created_by_teacher_courses, change_activity_of_course, get_course_statistics
 from shemas import UserOut
 
 course_router = APIRouter(prefix='/course', tags=['Teacher/Course'])
@@ -30,3 +30,11 @@ async def arch_course(
     current_user: UserOut = Depends(get_user_from_request)
 ) -> JSONResponse:
     return change_activity_of_course(course_id=course_id, user=current_user)
+
+
+@course_router.get('/stats')
+async def get_statistics(
+    current_user: UserOut = Depends(get_user_from_request),
+    course_id = Query()
+) -> JSONResponse:
+    return get_course_statistics(current_user, course_id)

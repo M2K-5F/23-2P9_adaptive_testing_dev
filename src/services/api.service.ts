@@ -2,7 +2,7 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { CreatedCourse, Form, Question } from '../types/interfaces'
+import { CompletedTopic, CourseStats, CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, QuestionToPass, UserTopic } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -185,7 +185,7 @@ export const createTopic = (topic_title: string, description: string, course_id:
 }
 
 
-export const getTopics = (course_id: number) => {
+export const getTopics = (course_id: number): Promise<CreatedTopic[]> => {
     return ApiService.requestToServer(
         APIUrls.getTopicsURL,
         {
@@ -198,14 +198,14 @@ export const getTopics = (course_id: number) => {
 }
 
 
-export const getFollowedTopics = (course_id: number) => {
+export const getFollowedTopics = (course_id: number): Promise<UserTopic[]> => {
     return ApiService.requestToServer(
         APIUrls.getFollowedTopicsURL,
         {
             credentials: 'include',
         },
         {
-            "course_id": course_id,
+            "user_course_id": course_id,
         }
     )
 }
@@ -298,7 +298,7 @@ export const archQuestion = (question_id: number) => {
 }
 
 
-export const getSearchedCourses = (searchQuery: string) => {
+export const searchCourses = (searchQuery: string) => {
     return ApiService.requestToServer(
         APIUrls.searchCourseURL,
         {
@@ -311,7 +311,7 @@ export const getSearchedCourses = (searchQuery: string) => {
 }
 
 
-export const getCourse = (courseId: string): Promise<{course_data: CreatedCourse, isFollowed: boolean}> => {
+export const getCourse = (courseId: number): Promise<FetchedCourse> => {
     return ApiService.requestToServer(
         APIUrls.getCourseURL,
         {
@@ -319,6 +319,74 @@ export const getCourse = (courseId: string): Promise<{course_data: CreatedCourse
         },
         {
             'course_id': courseId
+        }
+    )
+}
+
+export const addTopicToUC = (topicId: number): Promise<UserTopic> => {
+    return ApiService.requestToServer(
+        APIUrls.addTopicToUCURL,
+        {
+            method: 'post',
+            credentials: 'include'
+        },
+        {   
+            "topic_id": topicId
+        }
+    )
+}
+
+export const startPassingTopic = (user_topicId: number): Promise<QuestionToPass[]> => {
+    return ApiService.requestToServer(
+        APIUrls.startPassingTopicURL,
+        {
+            credentials: 'include',
+            method: 'post'
+        },
+        {
+            'topic_id': user_topicId
+        }
+    )
+}
+
+
+export const submitTopic = (topic: CompletedTopic): Promise<{score: number}> => {
+    return ApiService.requestToServer(
+        APIUrls.submitTopicURL,
+        {
+            credentials: 'include',
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(topic)
+        },
+    )
+}
+
+
+export const clearUCProgress = (userCourseId: number) => {
+    return ApiService.requestToServer(
+        APIUrls.clearUCUrl,
+        {
+            credentials: 'include',
+            method: 'delete'
+        },
+        {
+            'user_course_id': userCourseId
+        }
+    )
+}
+
+
+export const getCourseStats = (courseId: number): Promise<CourseStats> => {
+    return ApiService.requestToServer(
+        APIUrls.getCourseStatsURL,
+        {
+            credentials: 'include',
+        },
+        {
+            "course_id": courseId
         }
     )
 }

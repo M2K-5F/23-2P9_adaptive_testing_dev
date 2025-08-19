@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
+@import "./reset.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,6 +43,7 @@
 }
 
 :root {
+  --ds-bg: rgb(255, 255, 255);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.13 0.028 261.692);
@@ -78,7 +80,8 @@
 }
 
 .dark {
-  --aside: oklch(0.278 0.033 256.848);
+  --aside: rgb(9, 15, 29);
+  --ds-bg: rgb(41, 42, 45);
   --background: oklch(0.13 0.028 261.692);
   --foreground: oklch(0.985 0.002 247.839);
   --card: oklch(0.21 0.034 264.665);
@@ -119,4 +122,37 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  div {
+    @apply font-medium;
+    & > * {
+      @apply font-normal
+    }
+  }
+}
+
+@layer components {
+  .block-visible {
+    display: block !important;
+  }
+
+  .aside-shadow {
+    box-shadow: 0px 0px 0px 1px #3d444d, 0px 6px 12px -3px #01040966, 0px 6px 18px 0px #01040966
+  }
+}
+
+@layer utilities {
+  .scrollbar-hidden {
+    scrollbar-width: none !important;
+  }
+}
+
+.srch-input:focus + div > .srch-placeholder,
+.srch-input:not(:placeholder-shown) + div > .srch-placeholder {
+  visibility: hidden;
+  z-index: -infinity;
+}
+
+aside:has(.w-\[300px\]) > div.w-\[300px\], aside:has(.w-\[60px\]) > div.w-\[60px\] {
+    scrollbar-width: none !important;
 }

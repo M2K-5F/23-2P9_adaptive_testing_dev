@@ -36,39 +36,41 @@ export default function Autorize () {
 
                 <CardContent>
                     <form>
-                    <div className="flex flex-col gap-6">
-                        <div className="grid gap-2">
-                        <Label htmlFor="email">Логин</Label>
-                        <Input
-                            value={loginFieldValue}
-                            onChange={e => {
-                                const v = e.currentTarget.value
-                                loginHandler(v)
-                            }}
-                            id='text'
-                            type='text'
-                            placeholder="login"
-                            required
-                        />
-                        {isLoginFieldError && <Label className={'font-medium text-red-700'}>Логин должен содержать минимум 3 символа</Label>}
+                        <div className="flex flex-col gap-6">
+                            <div className="grid gap-2">
+                            <Label htmlFor="email">Логин</Label>
+                            <Input
+                                value={loginFieldValue}
+                                onChange={e => {
+                                    const v = e.currentTarget.value
+                                    loginHandler(v)
+                                }}
+                                id='text'
+                                type='text'
+                                placeholder="login"
+                                name="login"
+                                required
+                            />
+                            {isLoginFieldError && <Label className={'font-medium text-red-700'}>Логин должен содержать минимум 3 символа</Label>}
+                            </div>
+                            <div className="grid gap-2">
+                            <div className="flex items-center">
+                                <Label htmlFor="password">Пароль</Label>
+                            </div>
+                            <Input 
+                                value={passwordFieldValue}
+                                onChange={(e) => {
+                                    const v = e.currentTarget.value
+                                    passwordHandler(v)
+                                }}
+                                id="password" 
+                                type="password" 
+                                name="password"
+                                placeholder="password"
+                                required />
+                                {isPasswordFieldError && <Label className={'font-medium text-red-700'}>Пароль должен содержать минимум 3 символа</Label>}
+                            </div>
                         </div>
-                        <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Пароль</Label>
-                        </div>
-                        <Input 
-                            value={passwordFieldValue}
-                            onChange={(e) => {
-                                const v = e.currentTarget.value
-                                passwordHandler(v)
-                            }}
-                            id="password" 
-                            type="password" 
-                            placeholder="password"
-                            required />
-                            {isPasswordFieldError && <Label className={'font-medium text-red-700'}>Пароль должен содержать минимум 3 символа</Label>}
-                        </div>
-                    </div>
                     </form>
                 </CardContent>
 

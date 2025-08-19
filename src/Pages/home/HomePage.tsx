@@ -1,57 +1,97 @@
-import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
-import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { archCourse, createCourse, getCourses, getFollowedCourses, getSearchedCourses } from "../../services/api.service";
-import { CreatedCourse, FollowedCourse } from "../../types/interfaces";
-import { Loader } from '../../Components/Loader'
-import {SearchContainer} from '../../Components/SearchContainer'
-import { toast, ToastContainer } from "react-toastify";
-import { userStore } from "../../stores/userStore";
-import { useHomeStore } from "./stores/homeStore";
-import { toastContainerIds } from "../../config/toasts.constant";
-import { CreatedCoursesSection } from "./Components/CreatedCourseSection";
-import { FollowedCourseSection } from "./Components/FollowedCourseSection";
-
+import { CreatedCourse } from "@/Components/models/CreatedCourse";
+import { userStore } from "@/stores/userStore";
+import { CreateCourseDialog } from "@/Components/dialogs/create-course-dialog"
+import { useCourseStore } from "@/stores/useCourseStore";
+import { FollowedCourse } from "@/Components/models/FollowedCourse";
+import clsx from "clsx";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/Components";
 
 export default function HomePage() {
-    const navigate = useNavigate()
-    const {nick, role} = userStore()
-    const {
-        init,
-        isLoading,
-        createStatus,
-    } = useHomeStore()
+    const role = userStore(s => s.role)
 
-    useLayoutEffect(() => {
-        init()
-    }, [])
-
-    useEffect(() => { if (createStatus.isCreated) toast.success('Курс успешно создан', {containerId: toastContainerIds.homeContainer})
-    }, [createStatus.isCreating])
-
-
-    if (isLoading) {
-        return <Loader /> 
-    }
-    
     return (
-        <div className="teacher-portal">
-            <ToastContainer containerId={toastContainerIds.homeContainer} theme='dark' style={{top: "250px",marginLeft: 'auto', right: '100px'}} position='top-right' />
+        <div className="p-8 min-h-screen">
+            <Accordion defaultValue={['followed', 'created']} type='multiple' >
+                {role.includes('teacher') && <CreatedCoursesSection />}
+                {role.includes('student') && <FollowedCourseSection />}
+            </Accordion>
+        </div>
+    )
+}
 
-            <SearchContainer
-            placeholder="Поиск по названию курса..."
-            searchfn={(query, callback) => {
-                getSearchedCourses(query)
-                .then((data: CreatedCourse[]) => {
-                    callback(data)
-                })
-            }}
-            handlefn={(course) => navigate(`/course?course_id=${course.id}`)} 
-            summary={{name: 'Создан: ', content: 'created_by'}}
-            />
+export function CreatedCoursesSection() {
+    const createdCourses = useCourseStore(s => s.createdCourses)
 
-            {role.includes('teacher') && <CreatedCoursesSection /> }
+    return(
+        <AccordionItem value="created">
+            <AccordionTrigger className="mb-8">
+                <h1 className="text-2xl font-bold">Курсы созданные мной</h1>
+            </AccordionTrigger>
+            <AccordionContent>
+                {createdCourses.length
+                    ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            {createdCourses.map(course =>
+                                <CreatedCourse
+                                    key={course.id}
+                                    course={course}
+                                />
+                            )}
+                            <CreateCourseDialog
+                                className={clsx(
+                                    'h-42 flex items-center text-md',
+                                    'justify-center border-2 border-dashed border-gray-300',
+                                    'rounded-lg hover:border-gray-400 transition-colors'
+                                )}
+                                text="+ Создать курс" 
+                                variant='outline'
+                            />
+                        </div>
+                    :   <div className="flex flex-col items-center justify-center py-12  rounded-lg shadow-sm">
+                            <p className=" mb-4">Нет созданных курсов</p>
+                            <CreateCourseDialog
+                                text="Создать первый курс"
+                                variant='default'
+                            />
+                        </div>
+                }
+            </AccordionContent>
+        </AccordionItem>
+    )
+}
 
-            {role.includes('student') && <FollowedCourseSection /> }
-    </div>
+export function FollowedCourseSection() {
+    const followedCourses = useCourseStore(s => s.followedCoures)
+
+    return(
+        <AccordionItem value="followed">
+            <AccordionTrigger className="mb-8">
+                <h1 className="text-2xl font-bold">Мои курсы</h1>
+            </AccordionTrigger>
+
+            {followedCourses.length > 0
+                ?   <AccordionContent className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
+                        {followedCourses.map(userCourse =>
+                            <FollowedCourse
+                                key={userCourse.course.id}
+                                userCourse={userCourse}
+                            />
+                        )}
+                    </AccordionContent>
+                :   <AccordionContent className="flex items-center justify-center py-12 rounded-lg shadow-sm">
+                        <div className="scale-120 text-center py-4 text-sm text-gray-500">
+                            <p>Вы не подписаны ни на один курс.</p>
+                            <p className="mt-1">
+                                Нажмите 
+                                <kbd className={clsx(
+                                    "kbd kbd-sm h-4.5 w-4.5 mx-1",
+                                    "border-gray-500 border inline-grid",
+                                    "content-end rounded-sm justify-center text-[12px]"
+                                )}>/</kbd> 
+                                для поиска
+                            </p>
+                        </div>
+                    </AccordionContent>
+            }
+        </AccordionItem>
     )
 }

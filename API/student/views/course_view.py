@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Requ
 from fastapi.responses import JSONResponse
 
 from api_depends import get_user_from_request
-from ..cruds import get_followed_courses, follow_course, get_course_by_id, unfollow_course
+from ..cruds import get_followed_courses, follow_course, get_course_by_id, unfollow_course, clear_uc_progress
 from shemas import UserOut, Roles
 
 course_router = APIRouter(prefix='/course', tags=["Student/Course"])
@@ -34,3 +34,11 @@ async def get_course(
     current_user = Depends(get_user_from_request)
 ) -> JSONResponse:
     return get_course_by_id(user=current_user, courseId=course_id)
+
+
+@course_router.delete('/clear')
+async def clear_progress(
+    current_user = Depends(get_user_from_request),
+    user_course_id = Query()
+):
+    return clear_uc_progress(current_user, user_course_id)

@@ -5,7 +5,7 @@ export interface userStoreShema {
     nick: string ,
     status: status,
     role: role[]
-    regUser: (userShema) => void
+    regUser: (user: fetchedUserShema) => void
     DelUser: Function
     pingUser: () => void
 }
@@ -62,20 +62,35 @@ export interface CreatedCourse {
 }
 
 
-export interface FollowedCourse {
+export interface UserCourse {
     id: number,
     user: string,
     course: CreatedCourse,
     course_progress: number
+    is_active: boolean
+    completed_topic_number: number
 }
+
+
+export interface FetchedCourse extends CreatedCourse {
+    user_course: UserCourse | false
+}
+
 
 export interface CreatedTopic extends CreatedCourse {
     description: string
+    number_in_course: number
+    question_count: number
+    by_course: number
 }
 
-export interface FetchedTopic extends CreatedTopic {
-    number_in_course: number
-    count: number
+export interface UserTopic {
+    id: number
+    topic: CreatedTopic
+    by_user_course: UserCourse
+    ready_to_pass: boolean
+    is_completed: boolean
+    topic_progress: number
 }
 
 export interface AnswerOption {
@@ -92,6 +107,64 @@ export interface CreatedQuestion {
     question_type: 'single' | 'multiple'
     is_active: boolean
     answer_options: AnswerOption[]
+}
+
+export interface CompletedTopic {
+    user_topic_id: number
+    questions: CompletedQuestion[]
+}
+
+export interface CompletedQuestion {
+    id: number
+    answer_options: CompletedOption[]
+}
+
+export interface CompletedOption {
+    id: number
+    is_correct: boolean
+}
+
+export interface QuestionToPass {
+    id: number
+    text: string
+    by_topic: number
+    question_type: 'single' | 'multiple'
+    is_active: boolean
+    answer_options: OptionToPass[]
+}
+
+export interface OptionToPass {
+    id: number
+    text: string
+}
+
+export interface TopicDetail {
+    topic_id: number
+    topic_title: string
+    is_completed: boolean
+    topic_progress: number
+    question_count: number
+    average_score: number
+    ready_to_pass: boolean
+}
+
+export interface StudentStats {
+    user_id: number
+    username: string
+    name: string
+    telegram_link: string
+    course_progress: number
+    completed_topics: number
+    total_topics: number
+    topics_details: TopicDetail[]
+}
+
+export interface CourseStats {
+    course_id: number
+    course_title: string
+    total_students: number
+    average_progress: number
+    students: StudentStats[]
 }
 
 export interface FormCreate extends Partial<Form>{}
