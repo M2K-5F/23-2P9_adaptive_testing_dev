@@ -5,7 +5,7 @@ export interface userStoreShema {
     nick: string ,
     status: status,
     role: role[]
-    regUser: (_: userShema) => void
+    regUser: (user: fetchedUserShema) => void
     DelUser: Function
     pingUser: () => void
 }
@@ -136,6 +136,35 @@ export interface QuestionToPass {
 export interface OptionToPass {
     id: number
     text: string
+}
+
+export interface TopicDetail {
+    topic_id: number
+    topic_title: string
+    is_completed: boolean
+    topic_progress: number
+    question_count: number
+    average_score: number
+    ready_to_pass: boolean
+}
+
+export interface StudentStats {
+    user_id: number
+    username: string
+    name: string
+    telegram_link: string
+    course_progress: number
+    completed_topics: number
+    total_topics: number
+    topics_details: TopicDetail[]
+}
+
+export interface CourseStats {
+    course_id: number
+    course_title: string
+    total_students: number
+    average_progress: number
+    students: StudentStats[]
 }
 
 export interface FormCreate extends Partial<Form>{}

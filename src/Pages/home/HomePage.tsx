@@ -38,7 +38,7 @@ export function CreatedCoursesSection() {
                             )}
                             <CreateCourseDialog
                                 className={clsx(
-                                    'h-full flex items-center text-md',
+                                    'h-42 flex items-center text-md',
                                     'justify-center border-2 border-dashed border-gray-300',
                                     'rounded-lg hover:border-gray-400 transition-colors'
                                 )}

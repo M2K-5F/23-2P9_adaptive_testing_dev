@@ -13,6 +13,7 @@ import { AppLayout } from "@/Layouts/AppLayout";
 import { AuthLayout } from "@/Layouts/AuthLayout";
 import { TopicPage } from "@/Pages/topic/PassTopicPage";
 import { Toaster } from "sonner";
+import { CourseStatisticsPage } from "@/Pages/stats/course/CourseStatsPage";
 
 
 export default function RoutePaths () {
@@ -42,6 +43,7 @@ export default function RoutePaths () {
               <Route index Component={HomePage} />
               <Route path="edit/course" Component={TopicsPortal} />
               <Route path="course" Component={FollowedCoursePage} />
+              <Route path="stats/course" Component={CourseStatisticsPage} />
             </Route>
 
           </Route>

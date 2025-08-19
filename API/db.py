@@ -16,7 +16,7 @@ class Table(Model):
 
 class User(Table):
     username = CharField(unique=True)
-    name = CharField()
+    name = CharField(unique=True)
     telegram_link = CharField()
     password_hash = CharField()
     created_at = DateTimeField(default=datetime.now)
@@ -89,58 +89,29 @@ class UserQuestion(Table):
     question_score = FloatField(default=0)
 
 
-
-# class Poll(Table):
-#     title = CharField(unique=True)
-#     description = TextField(null=True)
-#     created_by = ForeignKeyField(User, field=User.username, backref='polls')
-#     created_at = DateTimeField(default=datetime.now)
-#     is_active = BooleanField(default=True)
-
-# class Question(Table):
-#     number = IntegerField()
-#     poll = ForeignKeyField(Poll, backref='questions')
-#     text = TextField() 
-#     question_type = CharField(default='single_choice')
-
-
-# class AnswerOption(Table):
-#     number = IntegerField()
-#     question = ForeignKeyField(Question, backref='answer_options')
-#     text = TextField()
-#     is_correct = BooleanField(default=False)
-
-
-# class UserAnswer(Table):
-#     user = ForeignKeyField(User, field=User.username, backref='answers')
-#     question = ForeignKeyField(Question, backref='user_answers')
-#     answer_option = ForeignKeyField(AnswerOption, backref='selected_by')
-#     answered_at = DateTimeField(default=datetime.now)
-
-
 if __name__ == "__main__":
     database.connect()
-    database.drop_tables([UserCourse, UserTopic])
     database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
     database.close()
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)
     teacher_role, _ = Role.get_or_create(status=Roles.TEACHER)
+    try:
+        base_teacher, _ = User.get_or_create(
+            username = 'teacher',
+            name = 'teacher',
+            defaults={
+                'telegram_link': 'https://t.me/teacher_tg.com',
+                'password_hash': get_password_hash('12345')
+            })
+        UserRole.get_or_create(
+            user = base_teacher,
+            role = teacher_role
+        )
 
-    base_teacher, _ = User.get_or_create(
-        username = 'teacher',
-        defaults={
-            'name': 'teacher',
-            'telegram_link': 'https://t.me/teacher_tg.com',
-            'password_hash': get_password_hash('12345')
-        })
-    UserRole.get_or_create(
-        user = base_teacher,
-        role = teacher_role
-    )
-
-    UserRole.get_or_create(
-        user = base_teacher,
-        role = student_role
-    )
-    
+        UserRole.get_or_create(
+            user = base_teacher,
+            role = student_role
+        )
+    except:
+        print('passed')

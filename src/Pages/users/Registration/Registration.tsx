@@ -37,7 +37,7 @@ export default function Regisration () {
 
                         {errors.username === 'alreadyused' && 
                             <Label className="font-medium text-red-700">
-                                Логин занят
+                                Логин или имя пользователя заняты
                             </Label>
                         }
                     </div>

@@ -3,7 +3,8 @@ import { Fragment, useEffect, useLayoutEffect, useState } from "react";
 import { useTopicStore } from "@/stores/useTopicStore";
 import { useCourseStore } from "@/stores/useCourseStore";
 import clsx from "clsx";
-import { CreatedTopic, CreateTopicDialog } from "@/Components";
+import { Button, CreatedTopic, CreateTopicDialog } from "@/Components";
+import { BarChart2, BarChart3 } from "lucide-react";
 
 export function TopicsPortal() {
     const navigate = useNavigate()
@@ -39,6 +40,15 @@ export function TopicsPortal() {
                     )}
                 >{createdCourses.find(c => c.id === courseId)?.title}
                 </div>
+                <Button 
+                    onClick={() => {
+                        navigate('/stats/course?stats_course_id=' + createdCourses.find(c => c.id === courseId)?.id)
+                    }}
+                    variant={'secondary'} 
+                    className="p-0.5 my-auto row-start-2 col-start-2 mx-auto mt-3 w-fit h-fit mr-auto" >
+                    <BarChart3></BarChart3>
+                    Статистика
+                </Button>
             </header>
 
             {createdTopics[courseId] 

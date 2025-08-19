@@ -21,6 +21,7 @@ export const APIUrls = {
     unfollowCourseURL: `${sURL}/course/unfollow`,
     getCourseURL: `${sURL}/course/get_by_id`,
     clearUCUrl: `${sURL}/course/clear`,
+    getCourseStatsURL: `${tURL}/course/stats`,
 
     createTopicURL: `${tURL}/topic/create`,
     addTopicToUCURL: `${sURL}/topic/add_topic_to_user_course`,

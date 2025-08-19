@@ -21,7 +21,7 @@ export const CreateTopicDialog: FC<{text: string, className?: string, variant?: 
     const [isCreating, setIsCreating] = useState<boolean>(false)
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
-    console.log('gjhghcgu');
+    
     useEffect(() => {
         isCreating && createHandler(courseId, titleId, descriptionId, () => {fetchTopics(courseId), setIsOpen(false)}, () => {setIsCreating(false)})
     }, [isCreating])

@@ -2,7 +2,7 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { CompletedTopic, CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, QuestionToPass, UserTopic } from '../types/interfaces'
+import { CompletedTopic, CourseStats, CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, QuestionToPass, UserTopic } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -374,6 +374,19 @@ export const clearUCProgress = (userCourseId: number) => {
         },
         {
             'user_course_id': userCourseId
+        }
+    )
+}
+
+
+export const getCourseStats = (courseId: number): Promise<CourseStats> => {
+    return ApiService.requestToServer(
+        APIUrls.getCourseStatsURL,
+        {
+            credentials: 'include',
+        },
+        {
+            "course_id": courseId
         }
     )
 }
