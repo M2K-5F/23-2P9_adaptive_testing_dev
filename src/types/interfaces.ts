@@ -109,6 +109,35 @@ export interface CreatedQuestion {
     answer_options: AnswerOption[]
 }
 
+export interface CompletedTopic {
+    user_topic_id: number
+    questions: CompletedQuestion[]
+}
+
+export interface CompletedQuestion {
+    id: number
+    answer_options: CompletedOption[]
+}
+
+export interface CompletedOption {
+    id: number
+    is_correct: boolean
+}
+
+export interface QuestionToPass {
+    id: number
+    text: string
+    by_topic: number
+    question_type: 'single' | 'multiple'
+    is_active: boolean
+    answer_options: OptionToPass[]
+}
+
+export interface OptionToPass {
+    id: number
+    text: string
+}
+
 export interface FormCreate extends Partial<Form>{}
 
 

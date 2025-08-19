@@ -5,12 +5,16 @@ import { Card, CardTitle, Badge, Button } from "@/Components";
 import clsx from "clsx";
 import { p } from "node_modules/shadcn/dist/index-8c784f6a";
 import { useAddTopicToUC } from "@/hooks/useAddTopic";
+import { useNavigate } from "react-router-dom";
 
 
 const MIN_COMPLETION_PERCENT = 80
 
 export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: UserTopic | undefined, isCourseFollowed: boolean}> = ({topic, index, isCourseFollowed, userTopic}) => {
     const handler = useAddTopicToUC()
+    const navigate = useNavigate()
+
+
     return(
         <Card className="flex flex-row p-0 overflow-hidden gap-0 m-0">
             <div className="w-1.5 bg-primary shrink-0" />
@@ -84,7 +88,9 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                                             : <></>
                                         }
                                         {userTopic.ready_to_pass
-                                            ?   <span className="text-green-500">Доступно для прохождения</span>
+                                            ? topic.question_count
+                                                ?   <span className="text-green-500">Доступно для прохождения</span>
+                                                :   <span className="text-red-500">В данной теме нет вопросов<br />Заблокировано для прохождения</span>
                                             :   <span className="text-red-500">Заблокировано для прохождения</span>
                                         }
                                     </>
@@ -119,8 +125,10 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                         {userTopic
                             ?   <>
                                     <div className="shrink grow"></div>
-                                    {userTopic.ready_to_pass && (
-                                        <Button size="sm" variant='default'>
+                                    {userTopic.ready_to_pass && topic.question_count > 0 && (
+                                        <Button size="sm" variant='default'
+                                            onClick={() => navigate(`/topic?utopic_id=${userTopic.id}&title=${topic.title}`, {state: {from: `${userTopic.id}`}})}
+                                        >
                                             {userTopic.topic_progress
                                                 ? userTopic.is_completed
                                                     ? 'Перепройти'

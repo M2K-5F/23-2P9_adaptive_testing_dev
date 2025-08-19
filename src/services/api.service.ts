@@ -2,7 +2,7 @@
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
 import { userStore } from '../stores/userStore'
-import { CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, UserTopic } from '../types/interfaces'
+import { CompletedTopic, CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, QuestionToPass, UserTopic } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -332,6 +332,48 @@ export const addTopicToUC = (topicId: number): Promise<UserTopic> => {
         },
         {   
             "topic_id": topicId
+        }
+    )
+}
+
+export const startPassingTopic = (user_topicId: number): Promise<QuestionToPass[]> => {
+    return ApiService.requestToServer(
+        APIUrls.startPassingTopicURL,
+        {
+            credentials: 'include',
+            method: 'post'
+        },
+        {
+            'topic_id': user_topicId
+        }
+    )
+}
+
+
+export const submitTopic = (topic: CompletedTopic): Promise<{score: number}> => {
+    return ApiService.requestToServer(
+        APIUrls.submitTopicURL,
+        {
+            credentials: 'include',
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(topic)
+        },
+    )
+}
+
+
+export const clearUCProgress = (userCourseId: number) => {
+    return ApiService.requestToServer(
+        APIUrls.clearUCUrl,
+        {
+            credentials: 'include',
+            method: 'delete'
+        },
+        {
+            'user_course_id': userCourseId
         }
     )
 }

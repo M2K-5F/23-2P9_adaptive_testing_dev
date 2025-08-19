@@ -4,32 +4,30 @@ import { useTopicStore } from "@/stores/useTopicStore"
 import { useCourseStore } from "@/stores/useCourseStore"
 import { followCourse, getCourse, unfollowCourse } from "@/services/api.service"
 import { 
-    Card,
-    CardHeader,
-    CardTitle,
-    CardContent,
-    Button,
-    Badge,
-    AccordionContent,
-    Accordion,
-    AccordionItem,
-    AccordionTrigger,
-    CardFooter,
-    Loader,
-    FollowedTopic,
-    CardDescription,
-    Progress
+    Card,CardHeader,
+    CardTitle, CardContent,
+    Button, Badge,
+    AccordionContent, Accordion,
+    AccordionItem, AccordionTrigger,
+    Loader, FollowedTopic, Progress
 } from "@/Components"
 import { FetchedCourse } from "@/types/interfaces"
-import { BarChart2, BookOpen, Check, GitCommitVerticalIcon, List, LogOut, Plus, RotateCcw, Share2, User, X } from "lucide-react"
+import { 
+    BarChart2, BookOpen, Check, 
+    GitCommitVerticalIcon, List, 
+    LogOut, Plus, RotateCcw, 
+    Share2, User, X 
+} from "lucide-react"
 import clsx from "clsx"
 import { toast } from "sonner"
+import { useClipboard } from "@/hooks/useClipboard"
+import { ClearUCProgressDialog } from "@/Components/dialogs/clear_uc_progress_dialog"
+import { userStore } from "@/stores/userStore"
 
 
 export function FollowedCoursePage() {
     const [searchParams, setParams] = useSearchParams()
     const courseId = Number(searchParams.get('fcourse_id'))
-    const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [course, setCourse] = useState<FetchedCourse>()
     const createdTopics = useTopicStore(s => s.createdTopics)[courseId]
@@ -37,6 +35,7 @@ export function FollowedCoursePage() {
     const fetchCourses = useCourseStore(s => s.fetchFollowedCourses)
     const allFollowedTopics = useTopicStore(s => s.followedTopics)
     const followedTopics = course?.user_course ? allFollowedTopics[course.user_course.id] : []
+    const copyToCB = useClipboard()
 
     const handleFollowToggle = async () => {
         setIsLoading(true)
@@ -48,22 +47,25 @@ export function FollowedCoursePage() {
         setCourse(await getCourse(courseId))
         setIsLoading(false)
         await fetchCourses()
-
     }
 
 
     useLayoutEffect(() => {
-        setIsLoading(true)
-        getCourse(courseId)
-            .then(d => {
-                setCourse(d)
-                setIsLoading(false)
-            })
-        fetchCreatedTopics(courseId)
+        (async () => {
+            setIsLoading(true)
+            setCourse(await getCourse(courseId))
+            const _ = await fetchCreatedTopics(courseId)
+            setIsLoading(false)
+        })()
+        
     }, [courseId])
 
     useLayoutEffect(() => {
-        course && course.user_course && fetchFollowedTopics(course.user_course.id)
+        if (course && course.user_course){
+            setIsLoading(true)
+            fetchFollowedTopics(course.user_course.id)
+                .then(() => setIsLoading(false))
+        } 
     }, [course])
 
     
@@ -81,7 +83,7 @@ export function FollowedCoursePage() {
                                         <div className="p-2 max-sm:hidden bg-primary/10 rounded-lg ">
                                             <BookOpen className="h-5 w-5 text-primary" />
                                         </div>
-                                        {course.title}fhiudysgipodufsgkuso;
+                                        {course.title}
                                     </CardTitle>
 
                                     <div className={clsx('flex items-baseline justify-between')} >
@@ -114,10 +116,9 @@ export function FollowedCoursePage() {
                                             <Button
                                                 variant="outline"
                                                 onClick={async () => {
-                                                    await navigator.clipboard.writeText(
+                                                    await copyToCB(
                                                     `${window.location.origin}/course?fcourse_id=${course.id}`
-                                                    );
-                                                    toast.success('Ссылка скопирована в буфер обмена');
+                                                    )
                                                 }}
                                                 className="flex items-center gap-2"
                                             >
@@ -126,14 +127,7 @@ export function FollowedCoursePage() {
                                             </Button>
 
                                             {course.user_course && 
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() => alert('TODO functional')}
-                                                    className="flex items-center gap-2 text-destructive hover:text-destructive"
-                                                >
-                                                    <RotateCcw className="h-4 w-4" />
-                                                    <span className="max-md:hidden">Сбросить прогресс</span>
-                                                </Button>
+                                                <ClearUCProgressDialog userCourseId={course.user_course.id} /> 
                                             }
                                         </div>
                                     </div>
@@ -142,10 +136,15 @@ export function FollowedCoursePage() {
                                         <Badge
                                             variant='secondary'
                                             onClick={async () => {
-                                                await navigator.clipboard.writeText(
-                                                `${window.location.origin}/course?fcourse_id=${course.id}`
-                                                );
-                                                toast.success('Ссылка скопирована в буфер обмена');
+                                                try {
+                                                    await navigator.clipboard.writeText(
+                                                        `${window.location.origin}/course?fcourse_id=${course.id}`
+                                                    );
+                                                    toast('Ссылка скопирована в буфер обмена')
+                                                } catch {
+                                                    toast('Не удалось скопировать')
+                                                }
+                                                
                                             }}
                                             className="flex items-center gap-2 border border-foreground cursor-pointer"
                                         >
@@ -153,14 +152,7 @@ export function FollowedCoursePage() {
                                             <span className="min-md:hidden">Поделиться курсом</span>
                                         </Badge>
                                         {course.user_course && 
-                                            <Badge
-                                                variant="secondary"
-                                                onClick={() => alert('TODO functional')}
-                                                className="flex items-center gap-2 text-destructive hover:text-destructive"
-                                            >
-                                                <RotateCcw className="h-4 w-4" />
-                                                <span className="min-md:hidden">Сбросить прогресс</span>
-                                            </Badge>
+                                            <ClearUCProgressDialog isBadge userCourseId={course.user_course.id} />
                                         }
                                     </div>
                             </div>

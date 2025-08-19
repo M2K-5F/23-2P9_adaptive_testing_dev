@@ -50,7 +50,6 @@ export const AppLayout: FC = memo(() => {
 
     return(
         <React.Fragment>
-            <Toaster position='top-center' />
             <div className='flex h-dvh overflow-hidden scroll-auto w-dvw'>
                 <AsidePanelLayout /> 
                 <main className="p-1 md:p-4 grow will-change-transform overflow-y-scroll max-lg:ml-[60px] h-dvh" style={{willChange: 'width'}}>    

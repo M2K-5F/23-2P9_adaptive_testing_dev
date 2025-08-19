@@ -15,7 +15,6 @@ export const AuthLayout: FC = () => {
 
     return (
             <main className={'flex h-dvh justify-center items-center flex-col pb-10'}>
-                <Toaster position='top-center' /> 
                 <div className="scale-110 max-sm:scale-100 h-fit max-w-md w-md flex-col flex items-center gap-2">
                     <div className="grid grid-cols-3 w-full items-center justify-items-center">
                         <ToggleGroup className="col-start-2" value={value} type='single'>

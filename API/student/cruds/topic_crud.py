@@ -79,11 +79,9 @@ def start_topic(user: UserOut, user_topic_id: str):
             **question.__data__, 'answer_options': [model_to_dict(answer, max_depth=1, exclude=[Answer.is_correct, Answer.by_question]) for answer in answers]
         })
 
-
-    # if not current_topic.number_in_course:    
-        return JSONResponse(questions_with_answers)
-
-    return JSONResponse('logic not included yet')
+        
+    return JSONResponse(questions_with_answers)
+    #logic of adaptivity
 
 
 def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
@@ -151,7 +149,8 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
             uk.question_score = question_score
             uk.save()
 
-    user_topic.topic_progress = round(score, 3)
+    if user_topic.topic_progress < score:
+        user_topic.topic_progress = round(score, 3)
     user_course = user_topic.by_user_course
     if user_topic.topic_progress > 0.8 and not user_topic.is_completed:
         user_course.completed_topic_number += 1

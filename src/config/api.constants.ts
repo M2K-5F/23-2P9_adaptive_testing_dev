@@ -20,6 +20,7 @@ export const APIUrls = {
     followCourseURL: `${sURL}/course/follow`,
     unfollowCourseURL: `${sURL}/course/unfollow`,
     getCourseURL: `${sURL}/course/get_by_id`,
+    clearUCUrl: `${sURL}/course/clear`,
 
     createTopicURL: `${tURL}/topic/create`,
     addTopicToUCURL: `${sURL}/topic/add_topic_to_user_course`,
@@ -28,6 +29,8 @@ export const APIUrls = {
     archTopicURL: `${tURL}/topic/arch`,
     followTopicURL: `${sURL}/topic/follow`,
     unfollowTopicURL: `${sURL}/topic/unfollow`,
+    startPassingTopicURL: `${sURL}/topic/start`,
+    submitTopicURL: `${sURL}/topic/submit_topic`,
 
     createQuestionURL: `${tURL}/question/create`,
     getQuestionsURL: `${tURL}/question/get`,

@@ -10,8 +10,8 @@ interface States {
 }
 
 interface Actions {
-    fetchCreatedTopics: (courseId: number) => void
-    fetchFollowedTopics: (courseId: number) => void
+    fetchCreatedTopics: (courseId: number) => Promise<void>
+    fetchFollowedTopics:  (courseId: number) => Promise<void>
     reset: () => void
 }
 
@@ -19,12 +19,11 @@ export const useTopicStore = create<States & Actions>()(immer((set, get) => ({
     createdTopics: [],
     followedTopics: [],
 
-    fetchCreatedTopics: async (courseId) => {
+    fetchCreatedTopics: async (courseId): Promise<void> => {
         const topics = await getTopics(courseId)
         set(draft => {
             draft.createdTopics[Number(courseId)] = topics
         })
-        return
     },
 
     fetchFollowedTopics: async (courseId) => {
@@ -36,7 +35,6 @@ export const useTopicStore = create<States & Actions>()(immer((set, get) => ({
         } catch {
             set(d => {d.followedTopics[courseId] = []})
         }
-        return
     },
 
     reset: () => set({createdTopics: []}),

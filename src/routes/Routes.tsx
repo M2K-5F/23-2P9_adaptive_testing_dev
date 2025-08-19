@@ -11,6 +11,8 @@ import { userStore } from "../stores/userStore";
 import { use, useLayoutEffect } from "react";
 import { AppLayout } from "@/Layouts/AppLayout";
 import { AuthLayout } from "@/Layouts/AuthLayout";
+import { TopicPage } from "@/Pages/topic/PassTopicPage";
+import { Toaster } from "sonner";
 
 
 export default function RoutePaths () {
@@ -23,10 +25,12 @@ export default function RoutePaths () {
 
   return(
     <>
+      <Toaster position='top-center' />
       <BrowserRouter >
         <Routes>
           <Route path="/403" Component={ForbiddenPage} /> 
           <Route path="/503" Component={ServiceUnavailablePage} />
+          <Route path="/topic" Component={TopicPage} />
           <Route path="" Component={RedirectWrapper}>
 
             <Route path="/users/*" Component={AuthLayout}>
