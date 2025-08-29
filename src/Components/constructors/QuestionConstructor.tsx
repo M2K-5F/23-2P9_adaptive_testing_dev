@@ -38,7 +38,7 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
     }, [isCreating])
 
     return (
-        <article className="p-5 w-auto shadow-md bg-input/80 my-6 rounded-lg border border-foreground">
+        <article className="p-3 pt-5 w-auto shadow-md bg-input/80 my-6 rounded-lg border border-foreground">
             <div className="flex items-center gap-2 mb-4">
                 <FilePlus className="h-5 w-5 text-primary" />
                 <Label className="text-md font-semibold">Создание нового вопроса</Label>
@@ -54,13 +54,9 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
             />
 
             <div className="flex items-center gap-3 mb-4 p-3 bg-secondary/20 rounded-lg">
-                <span className="text-sm font-medium">Тип вопроса:</span>
                 <Badge variant='default'>
-                    {createdQuestion.question_type === 'single' ? "Один правильный ответ" : "Несколько правильных ответов"}
+                    {createdQuestion.question_type === 'single' ? "Один правильный ответ" : `Правильных ответов: ${correctAnswersCount}`}
                 </Badge>
-                <span className="text-sm text-muted-foreground ml-auto">
-                    Правильных ответов: {correctAnswersCount}
-                </span>
             </div>
 
             <fieldset className="mb-4">
@@ -114,7 +110,7 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
                 </Button>
                 
                 {(!createdQuestion.text.trim() || correctAnswersCount === 0) && (
-                    <div className="flex items-center gap-2 text-sm text-destructive">
+                    <div className="flex ml-2 items-center gap-2 text-sm text-destructive">
                         <AlertCircle className="h-4 w-4" />
                         {!createdQuestion.text.trim() ? 'Введите текст вопроса' : 'Добавьте хотя бы один правильный ответ'}
                     </div>
@@ -150,12 +146,12 @@ const AnswerElement = memo((props: {
             <header className="mb-3">
                 <Label className="font-medium flex items-center h-5.5 gap-2">
                     <span>Вариант ответа #{props.index + 1}</span>
-                    {props.answer.is_correct && (
+                    {/* {props.answer.is_correct && (
                         <Badge variant="default" className="flex items-center gap-1">
                             <CheckCircle className="h-3.5 w-3.5" />
                             Правильный
                         </Badge>
-                    )}
+                    )} */}
                 </Label>
             </header>
 
