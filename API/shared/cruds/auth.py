@@ -42,7 +42,7 @@ def create_user(user: UserCreate):
 
 
 @database.atomic()
-def find_user(username) :
+def get_user(username) :
     current_user = User.get_or_none(User.username == username)
     if not current_user:
         raise HTTPException(
@@ -57,12 +57,12 @@ def find_user(username) :
         username=current_user.username,
         name=current_user.name,
         telegram_link=current_user.telegram_link,
-        role=user_roles
+        roles=user_roles
     )
 
 
 @database.atomic()
-def find_password(username):
+def get_password(username):
     current_user = User.get_or_none(User.username == username)
 
     if current_user:

@@ -1,17 +1,18 @@
 import { Button } from '@/Components/ui/button'
-import { useNavigate } from "react-router-dom";
-import { userStore } from '../../stores/userStore';
-import { useEffect } from 'react';
+import { useUserStore } from '@/stores/useUserStore';
+import { useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ServiceUnavailablePage() {
-    const navigate = useNavigate();
-    const status = userStore().status
-    
-    useEffect(() => { 
+    const status = useUserStore(s => s.status)
+    const navigate = useNavigate()
+
+    useLayoutEffect(() => {
         if (status !== 'serverunavailable') {
-            navigate(['student', "teacher"].includes(status) ? `/for${status}` : '/users/autorize')
+            navigate('/', {replace: true})
         }
-    })
+    }, [status])
+
 
     return (
         <main className="error-page__container">

@@ -1,14 +1,15 @@
 import { Outlet, useNavigate } from "react-router-dom"
-import {userStore} from "../stores/userStore"
+import {useUserStore} from "../stores/useUserStore"
 import { useRef, useLayoutEffect, FC, memo, useEffect } from "react"
-import { isRolePathAvailable, isStatusPathAvailable } from "../config/routes.config"
+import { isStatusPathAvailable } from "../config/routes.config"
 import { ApiService } from "../services/api.service"
 import { Loader } from "@/Components"
 
 
 export const RedirectWrapper: FC = () => {
     const navigate = useNavigate()
-    const {status, role} = userStore()
+    const status = useUserStore(s => s.status)
+    
 
     const shouldRedirect =
         (status === 'authorized' && isStatusPathAvailable('unauthorized')) ||
@@ -42,10 +43,6 @@ export const RedirectWrapper: FC = () => {
             return
         }
 
-        if (!isRolePathAvailable(role)) {
-            navigate('/')
-            return
-        }
         console.log(status)
     }, [shouldRedirect, status])
 

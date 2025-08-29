@@ -28,7 +28,7 @@ export default function Regisration () {
             
                     <div className="grid gap-2 items-baseline">
                         <Label htmlFor="username">Логин:</Label>
-                        <Input placeholder="используется при входе" id="username" value={values.username} onChange={fieldSetter}/>
+                        <Input placeholder="used for login" id="username" value={values.username} onChange={fieldSetter}/>
                         {errors.username == 'unvalid' && 
                             <Label className={'font-medium text-red-700'}>
                                 Логин должен содержать минимум 3 символа
@@ -62,7 +62,7 @@ export default function Regisration () {
                     
                         <div className="grid gap-2 col-start-3 col-end-6">
                             <Label htmlFor="name">Имя пользователя:</Label>
-                            <Input id="name" value={values.name} onChange={fieldSetter} placeholder="отображаемое имя" /> 
+                            <Input id="name" value={values.name} onChange={fieldSetter} placeholder="viewed name" /> 
                             {errors.name == 'unvalid' && 
                                 <Label className={'font-medium text-red-700'}>
                                     Имя должно содержать минимум 3 символа

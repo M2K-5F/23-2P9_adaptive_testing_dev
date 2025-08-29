@@ -8,13 +8,12 @@ from shemas import UserOut
 
 
 @database.atomic()
-def course_create(course_title, user: UserOut):
+def course_create(course_title, course_description, user: UserOut):
 
     if Course.get_or_none(
         Course.title == course_title, 
-        Course.created_by == User.get_or_none(
-            User.username == user.username
-        )
+        Course.created_by == user.username,
+        Course.description == course_description
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -24,6 +23,7 @@ def course_create(course_title, user: UserOut):
         data: Course = Course.create(
             title = course_title,
             created_by = user.username,
+            description = course_description
         )
 
     except:
@@ -62,7 +62,7 @@ def change_activity_of_course(course_id: str, user: UserOut):
 def get_created_by_teacher_courses(user: UserOut):
         courses = Course.select().where(Course.created_by == user.username)
 
-        return JSONResponse([course.__data__ for course in courses])
+        return JSONResponse([course.dump for course in courses])
 
 
 @database.atomic()

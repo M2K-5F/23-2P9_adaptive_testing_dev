@@ -2,9 +2,11 @@ import { createCourse } from '@/services/api.service'
 import { toast } from "sonner"
 import { useId } from "react"
 
-export const useCreateCourse = () => async (inputId: ReturnType<typeof useId>, callback: () => void, exceptionCallback: () => void) => {
-        const input = document.querySelector(`#${inputId}[name=title]`) as HTMLInputElement
-        const title = input.value.trim()
+export const useCreateCourse = () => async ([titleId, descriptionId]: ReturnType<typeof useId>[], callback: () => void, exceptionCallback: () => void) => {
+        const titleInput = document.querySelector(`#${titleId}[name=title]`) as HTMLInputElement
+        const title = titleInput.value.trim()
+        const descInput = document.querySelector(`#${descriptionId}[name=description]`) as HTMLInputElement
+        const desc = descInput.value.trim()
         
         if (title.length < 3) {
             toast("Название должно содержать минимум 3 символа")
@@ -12,10 +14,18 @@ export const useCreateCourse = () => async (inputId: ReturnType<typeof useId>, c
             return
         }
 
+        if (desc.length < 3) {
+            toast("Описание должно содержать минимум 3 символа")
+            exceptionCallback()
+            return
+        }
+
+
         try {
-            await createCourse(title)
+            await createCourse(title, desc)
             toast(`Курс с названием ${title} успешно создан!`)
-            input.value = ""
+            titleInput.value = ""
+            descInput.value = ''
             callback()
         } catch (error) {
             toast(

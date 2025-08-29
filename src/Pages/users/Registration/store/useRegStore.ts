@@ -92,7 +92,7 @@ export const useRegStore = create<State & Error & Actions>()(
                     const response = await registerUser(JSON.stringify({
                         username: values.username, 
                         name: values.name,
-                        telegram_link: "https:t.me//example.com/",
+                        telegram_link: `https://t.me/example${values.username}`,
                         password: values.password,
                         role: get().role
                     }))

@@ -1,5 +1,5 @@
 import { CreatedCourse, FollowedCourse } from "../types/interfaces"
-import { userStore } from "../stores/userStore"
+import { userStore } from "../stores/useUserStore"
 
 
 export const courseSearch = (createdCourseList: CreatedCourse[], followedCourseList: FollowedCourse[], searchQuery: string, nick: string) => {

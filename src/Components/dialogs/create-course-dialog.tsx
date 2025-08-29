@@ -7,14 +7,14 @@ import {
     DialogTrigger  
 } from "@/Components"
 import { FC, memo, useEffect, useId, useState } from "react"
-import { userStore } from "@/stores/userStore"
+import { useUserStore } from "@/stores/useUserStore"
 import { useCreateCourse } from "@/hooks/useCreateCourse"
 import { PropsVariant } from "@/types/types"
 
 
 export const CreateCourseDialog: FC<{text: string, className?: string, variant?: PropsVariant}> = memo(({text, className, variant}) => {
-    const nick = userStore(s => s.nick)
-    const titleId = useId()
+    const username = useUserStore(s => s.username)
+    const [titleId, descriptionId] = [useId(), useId()]
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const handler = useCreateCourse()
     const fetchCourses  = useCourseStore(s => s.fetchCourses)
@@ -22,7 +22,7 @@ export const CreateCourseDialog: FC<{text: string, className?: string, variant?:
 
     
     useEffect(() => {
-        isCreating && handler(titleId, () => {fetchCourses(), setIsOpen(false)}, () => {setIsCreating(false)})
+        isCreating && handler([titleId, descriptionId], () => {fetchCourses(), setIsOpen(false)}, () => {setIsCreating(false)})
     }, [isCreating])
 
 
@@ -37,13 +37,17 @@ export const CreateCourseDialog: FC<{text: string, className?: string, variant?:
                         Создание курса
                     </DialogTitle>
                     <DialogDescription>
-                        {`Создать новый курс у пользователя: ${nick}`}
+                        {`Создать новый курс у пользователя: ${username}`}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">
                     <div className="grid gap-3">
-                        <Label htmlFor={titleId}>Название</Label>
+                        <Label htmlFor={titleId}>Название:</Label>
                         <Input id={titleId} name="title"  />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor={descriptionId}>Описание:</Label>
+                        <Input id={descriptionId} name="description"  />
                     </div>
                 </div>
                 <DialogFooter>

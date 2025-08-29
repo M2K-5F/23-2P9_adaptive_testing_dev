@@ -7,7 +7,7 @@ from fastapi import Cookie, Depends, HTTPException, status, Request
 from Config import oauth2_scheme
 from Utils import decode_jwt
 from shemas import UserOut, Roles
-from shared.cruds import find_user
+from shared.cruds import get_user
 
 
 async def get_current_user(
@@ -46,7 +46,7 @@ async def get_current_active_user(
     username: str = Depends(get_current_user)
 ) -> UserOut:
 
-    user = find_user(username)
+    user = get_user(username)
 
     if not user:
         raise HTTPException(
@@ -60,13 +60,13 @@ async def get_current_active_user(
 
 
 async def is_teacher(user: UserOut = Depends(get_current_active_user)):
-    if Roles.TEACHER not in user.role:
+    if Roles.TEACHER not in user.roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return
 
 
 async def is_student(user:UserOut = Depends(get_current_active_user)):
-    if Roles.STUDENT not in user.role:
+    if Roles.STUDENT not in user.roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return
 

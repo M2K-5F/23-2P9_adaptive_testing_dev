@@ -1,3 +1,4 @@
+// export const baseURL = `http://mytest.servehttp.com` as const;
 export const baseURL = `http://localhost:8001` as const;
 export const tURL = `${baseURL}/t` as const;
 export const sURL = `${baseURL}/s` as const;

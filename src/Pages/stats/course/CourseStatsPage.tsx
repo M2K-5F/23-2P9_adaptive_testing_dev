@@ -37,23 +37,23 @@ export const CourseStatisticsPage: FC = () => {
 
     return (
         <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Статистика курсов</h1>
+        <div className="flex gap-2 items-center justify-between">
+            <h1 className="text-3xl max-sm:text-lg font-bold">Статистика курсов</h1>
             
             <Select onValueChange={(value) => setSearchParams(p => {
                 p.set('stats_course_id', `${value}`)
                 return p
             })} value={course_id.toString()}>
-            <SelectTrigger className="w-64">
-                <SelectValue placeholder="Выберите курс" />
-            </SelectTrigger>
-            <SelectContent>
-                {createdCourses.map((course) => (
-                <SelectItem key={course.id} value={course.id.toString()}>
-                    {course.title}
-                </SelectItem>
-                ))}
-            </SelectContent>
+                <SelectTrigger className="w-fit">
+                    <SelectValue placeholder="Выберите курс" />
+                </SelectTrigger>
+                <SelectContent>
+                    {createdCourses.map((course) => (
+                    <SelectItem key={course.id} value={course.id.toString()}>
+                        {course.title}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
             </Select>
         </div>
 
@@ -95,20 +95,20 @@ export const CourseStatisticsPage: FC = () => {
                     <CardTitle>Статистика студентов</CardTitle>
                     <CardDescription>Детальная информация по каждому студенту:</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className='max-sm:p-2'>
                     <div className="space-y-4">
                         {statistics.students.map((student) => (
                             <Card key={student.user_id} className="p-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div>
+                                <div className="flex flex-col justify-baseline items-start mb-4">
+                                    <div className='flex justify-between w-full flex-row'>
                                         <h3 className="font-semibold">{student.name}</h3>
-                                        <Button variant={'link'} onClick={() => {
-                                            copy(student.telegram_link)
-                                        }} className="p-0 text-sm text-muted-foreground">@{student.telegram_link}</Button>
+                                        <Badge variant={student.course_progress === 100 ? "default" : "secondary"}>
+                                            {student.course_progress}%
+                                        </Badge>
                                     </div>
-                                    <Badge variant={student.course_progress === 100 ? "default" : "secondary"}>
-                                        {student.course_progress}%
-                                    </Badge>
+                                    <Button variant={'link'} onClick={() => {
+                                        copy(student.telegram_link)
+                                    }} className="p-0 text-sm text-muted-foreground">@{student.telegram_link}</Button>
                                 </div>
 
                                 <Progress 
@@ -131,7 +131,7 @@ export const CourseStatisticsPage: FC = () => {
                                     <Fragment key={topic.topic_id}>  
                                         {index > 0 && <DropdownMenuSeparator className='my-2' />}
                                         <div key={topic.topic_id} className="flex items-center justify-between text-sm">
-                                            <span className={topic.is_completed ? "text-green-600" : "text-muted-foreground"}>
+                                            <span className={(topic.is_completed ? "text-green-600" : "text-muted-foreground") + ' w-full pr-2 overflow-ellipsis'}>
                                                 {topic.topic_title}
                                             </span>
                                             <div className="flex items-center gap-2">

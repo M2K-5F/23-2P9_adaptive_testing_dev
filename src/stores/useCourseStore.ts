@@ -2,7 +2,7 @@ import { getCourses, getFollowedCourses, getTopics } from "@/services/api.servic
 import { CreatedCourse, UserCourse } from "@/types/interfaces";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { userStore } from "./userStore";
+import { useUserStore } from "./useUserStore";
 
 
 interface States {
@@ -21,13 +21,13 @@ export const useCourseStore = create<States & Actions>()(immer((set, get) => ({
 
     fetchCourses: async () => {
         const states: {created: CreatedCourse[], followed: UserCourse[]} = {created: [], followed: []}
-        const role = userStore.getState().role
-        if (role.includes('student')) {
+        const roles = useUserStore.getState().roles
+        if (roles.includes('student')) {
             try {
                 states.followed = await getFollowedCourses()
             } catch {}
         }
-        if (role.includes('teacher')) {
+        if (roles.includes('teacher')) {
             try {
                 states.created = await getCourses()
             } catch {}

@@ -47,7 +47,7 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
 
 
     return JSONResponse([
-        model_to_dict(topic, exclude=[UserTopic.user], max_depth=1)
+        topic.dump
         for topic in user_topics
     ])
 
@@ -76,7 +76,10 @@ def start_topic(user: UserOut, user_topic_id: str):
     for question in questions:
         answers = list(question.created_answers)
         questions_with_answers.append({
-            **question.__data__, 'answer_options': [model_to_dict(answer, max_depth=1, exclude=[Answer.is_correct, Answer.by_question]) for answer in answers]
+            **question.dump, 
+            'answer_options': [
+                model_to_dict(answer, max_depth=1, exclude=[Answer.is_correct, Answer.by_question]) for answer in answers
+            ]
         })
 
         
@@ -211,4 +214,4 @@ def add_topic_to_user_course(user: UserOut, topic_id: str):
     if not is_created:
         raise HTTPException(400, 'already added')
 
-    return JSONResponse(model_to_dict(user_topic, exclude=[UserTopic.user], max_depth=1))
+    return JSONResponse(user_topic.dump)

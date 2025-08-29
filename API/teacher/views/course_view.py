@@ -11,9 +11,10 @@ course_router = APIRouter(prefix='/course', tags=['Teacher/Course'])
 @course_router.post('/create', summary='Create course by teacher')
 async def create_course(
     current_user: UserOut = Depends(get_user_from_request),
-    course_title = Query(default="course")
+    course_title = Query(default="course"),
+    course_description = Query(default='description')
 ) -> JSONResponse:
-    return course_create(course_title, user=current_user)
+    return course_create(course_title, course_description, user=current_user)
 
 
 @course_router.get('/get', summary='Get created by teacher courses')

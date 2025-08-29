@@ -1,10 +1,10 @@
 import { loginUser } from "@/services/api.service"
-import { userStore } from "@/stores/userStore"
-import { useState } from "react"
+import { useUserStore } from "@/stores/useUserStore"
+import { use, useState } from "react"
 import { boolean } from "zod"
 
 export const useAuth = () => {
-    const {regUser} = userStore()
+    const {regUser} = useUserStore()
     const [isLoginFieldError, setLoginFieldError] = useState<boolean>(false)
     const [isPasswordFieldError, setPasswordFieldError] = useState<boolean>(false)
     const [isAuthError, setIsAuthError] = useState<boolean>(false)
@@ -40,8 +40,13 @@ export const useAuth = () => {
         if (!validator()) return
 
         loginUser(loginFieldValue, passwordFieldValue)
-        .then( data => {
-            regUser({nick: data.username!, status: data.role!})
+        .then( user => {
+            regUser({
+                username: user.username, 
+                name: user.name, 
+                roles: user.roles, 
+                telegram_link: user.telegram_link
+            })
         })    
         .catch( error => {       
             switch (Number(error.message)) {

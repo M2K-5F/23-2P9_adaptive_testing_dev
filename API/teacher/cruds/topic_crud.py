@@ -54,7 +54,9 @@ def create_topic(user: UserOut, title: str, description: str, course_id: str):
             topic_progress = 0,
             is_completed = False
         )
-    return JSONResponse(current_topic.__data__)
+    current_course.topic_count += 1
+    current_course.save()
+    return JSONResponse(current_topic.dump)
 
 
 @database.atomic()
@@ -65,6 +67,6 @@ def change_activity_of_topic(user: UserOut, topic_id: str):
     )
     current_topic.is_active = not current_topic.is_active
     current_topic.save()
-    return JSONResponse(current_topic.__data__)
+    return JSONResponse(current_topic.dump)
 
 

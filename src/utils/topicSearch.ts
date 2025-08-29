@@ -1,5 +1,5 @@
 import { CreatedCourse, CreatedTopic, FollowedCourse } from "../types/interfaces"
-import { userStore } from "../stores/userStore"
+import { userStore } from "../stores/useUserStore"
 import { useMemo } from "react"
 
 

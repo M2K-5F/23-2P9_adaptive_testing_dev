@@ -1,12 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { userStore } from "../../stores/userStore";
 import { logoutUser } from "../../services/api.service";
 import { Button } from "@/Components/ui/button";
 
 export default function ForbiddenPage() {
     const navigate = useNavigate();
-    const status = userStore().status
     
 
     return (

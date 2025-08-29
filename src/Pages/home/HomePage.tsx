@@ -1,5 +1,5 @@
 import { CreatedCourse } from "@/Components/models/CreatedCourse";
-import { userStore } from "@/stores/userStore";
+import { useUserStore } from "@/stores/useUserStore";
 import { CreateCourseDialog } from "@/Components/dialogs/create-course-dialog"
 import { useCourseStore } from "@/stores/useCourseStore";
 import { FollowedCourse } from "@/Components/models/FollowedCourse";
@@ -7,13 +7,13 @@ import clsx from "clsx";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/Components";
 
 export default function HomePage() {
-    const role = userStore(s => s.role)
+    const roles = useUserStore(s => s.roles)
 
     return (
-        <div className="p-8 min-h-screen">
+        <div className="p-4 h-full">
             <Accordion defaultValue={['followed', 'created']} type='multiple' >
-                {role.includes('teacher') && <CreatedCoursesSection />}
-                {role.includes('student') && <FollowedCourseSection />}
+                {roles.includes('teacher') && <CreatedCoursesSection />}
+                {roles.includes('student') && <FollowedCourseSection />}
             </Accordion>
         </div>
     )
@@ -29,7 +29,7 @@ export function CreatedCoursesSection() {
             </AccordionTrigger>
             <AccordionContent>
                 {createdCourses.length
-                    ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                    ?   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                             {createdCourses.map(course =>
                                 <CreatedCourse
                                     key={course.id}
@@ -38,7 +38,7 @@ export function CreatedCoursesSection() {
                             )}
                             <CreateCourseDialog
                                 className={clsx(
-                                    'h-42 flex items-center text-md',
+                                    'h-40 md:h-53.5 flex items-center text-md',
                                     'justify-center border-2 border-dashed border-gray-300',
                                     'rounded-lg hover:border-gray-400 transition-colors'
                                 )}
@@ -78,17 +78,8 @@ export function FollowedCourseSection() {
                         )}
                     </AccordionContent>
                 :   <AccordionContent className="flex items-center justify-center py-12 rounded-lg shadow-sm">
-                        <div className="scale-120 text-center py-4 text-sm text-gray-500">
-                            <p>Вы не подписаны ни на один курс.</p>
-                            <p className="mt-1">
-                                Нажмите 
-                                <kbd className={clsx(
-                                    "kbd kbd-sm h-4.5 w-4.5 mx-1",
-                                    "border-gray-500 border inline-grid",
-                                    "content-end rounded-sm justify-center text-[12px]"
-                                )}>/</kbd> 
-                                для поиска
-                            </p>
+                        <div className="whitespace-break-spaces text-center py-4 text-lg text-gray-500">
+                            Вы не подписаны ни на один курс.
                         </div>
                     </AccordionContent>
             }

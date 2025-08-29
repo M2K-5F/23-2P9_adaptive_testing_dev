@@ -45,9 +45,7 @@ def create_question(user: UserOut, topic_id: str, question: QuestionBase ):
     
     current_topic.question_count += 1
     current_topic.save()
-    return JSONResponse(
-        content=created_question.__data__
-    )
+    return JSONResponse(created_question.dump)
 
 
 @database.atomic()
@@ -65,7 +63,7 @@ def arch_question(user: UserOut, question_id: str ):
     topic.save()
 
     
-    return JSONResponse(current_question.__data__)
+    return JSONResponse(current_question.dump)
 
 
 @database.atomic()
@@ -93,7 +91,7 @@ def get_question_list(user: UserOut, topic_id: str):
         for answer in db_answers:
             answers.append(answer.__data__)
 
-        to_return.append({**question.__data__, "answer_options": answers})
+        to_return.append({**question.dump, "answer_options": answers})
 
     return JSONResponse(
         content=to_return

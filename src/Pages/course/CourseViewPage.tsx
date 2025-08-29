@@ -22,7 +22,7 @@ import clsx from "clsx"
 import { toast } from "sonner"
 import { useClipboard } from "@/hooks/useClipboard"
 import { ClearUCProgressDialog } from "@/Components/dialogs/clear_uc_progress_dialog"
-import { userStore } from "@/stores/userStore"
+
 
 
 export function FollowedCoursePage() {
@@ -69,7 +69,7 @@ export function FollowedCoursePage() {
     }, [course])
 
     
-    if (isLoading || !course || !createdTopics || !followedTopics) return <Loader variant='success'/>
+    if (isLoading || !course || !createdTopics || !followedTopics) return <Loader className="m-auto mt-dvh" variant='success'/>
 
     return (
         <div className=" p-6 h-full">
@@ -94,7 +94,7 @@ export function FollowedCoursePage() {
                                             </Badge>
                                             <Badge className="">
                                                 <User className="h-3 w-3 mr-1" />
-                                                Автор: {course.created_by}
+                                                Автор: {course.created_by.username}
                                             </Badge>
                                             <Badge
                                                 className={clsx(course.user_course ? 'bg-green-400' : 'border-red-500')} 
@@ -127,7 +127,13 @@ export function FollowedCoursePage() {
                                             </Button>
 
                                             {course.user_course && 
-                                                <ClearUCProgressDialog userCourseId={course.user_course.id} /> 
+                                                <ClearUCProgressDialog 
+                                                    userCourseId={course.user_course.id} 
+                                                    callback={async (id) => {
+                                                        await fetchFollowedTopics(id)
+                                                        setCourse(await getCourse(courseId))
+                                                    }}
+                                                /> 
                                             }
                                         </div>
                                     </div>
@@ -139,12 +145,11 @@ export function FollowedCoursePage() {
                                                 try {
                                                     await navigator.clipboard.writeText(
                                                         `${window.location.origin}/course?fcourse_id=${course.id}`
-                                                    );
+                                                    )
                                                     toast('Ссылка скопирована в буфер обмена')
                                                 } catch {
                                                     toast('Не удалось скопировать')
                                                 }
-                                                
                                             }}
                                             className="flex items-center gap-2 border border-foreground cursor-pointer"
                                         >
@@ -152,7 +157,14 @@ export function FollowedCoursePage() {
                                             <span className="min-md:hidden">Поделиться курсом</span>
                                         </Badge>
                                         {course.user_course && 
-                                            <ClearUCProgressDialog isBadge userCourseId={course.user_course.id} />
+                                            <ClearUCProgressDialog 
+                                                isBadge 
+                                                userCourseId={course.user_course.id}
+                                                callback={async (id) => {
+                                                    await fetchFollowedTopics(id)
+                                                    setCourse(await getCourse(courseId))
+                                                }}
+                                            />
                                         }
                                     </div>
                             </div>
@@ -179,7 +191,16 @@ export function FollowedCoursePage() {
                     {course.user_course && 
                         <CardContent>
                             <div className="flex items-center gap-4">
-                                <Progress value={course.user_course.course_progress || 0} className="h-2 flex-1" />
+                                <Progress 
+                                    value={((100 - course.user_course.course_progress) * 0.99) - 1} 
+                                    className={clsx(course.user_course.course_progress >= 50
+                                        ?   course.user_course.course_progress >= 80
+                                            ?   'bg-green-500'
+                                            :   'bg-yellow-500'
+                                        :   'bg-red-500',
+                                        "rotate-y-180"
+                                    )}
+                                />
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <BarChart2 className="h-4 w-4" />
                                     {Math.round(course.user_course.course_progress || 0)}% завершено
