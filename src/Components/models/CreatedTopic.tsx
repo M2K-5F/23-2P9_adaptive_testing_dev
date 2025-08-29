@@ -32,7 +32,6 @@ export const CreatedTopic = memo(({ topic, index }: {
     const [questions, setQuestions] = useState<any[]>([])
     const [isCreating, setIsCreating] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
     
     const handleExpand = () => {
         setParams(p => {
@@ -43,13 +42,9 @@ export const CreatedTopic = memo(({ topic, index }: {
 
     const fetchQuestions = async () => {
         setIsLoading(true)
-        setError(null)
         try {
             const questionsData = await getQuestions(topic.id)
             setQuestions(questionsData)
-        } catch (err) {
-            setError('Не удалось загрузить вопросы')
-            console.error('Error fetching questions:', err)
         } finally {
             setIsLoading(false)
         }
@@ -64,7 +59,7 @@ export const CreatedTopic = memo(({ topic, index }: {
     }
 
     useEffect(() => {
-        if (isExpanded) {
+        if (!isExpanded) {
             fetchQuestions()
         }
     }, [isExpanded])
@@ -175,17 +170,11 @@ export const CreatedTopic = memo(({ topic, index }: {
                             )
                         }
                     </div>
-                    {isLoading ? (
-                            <div className="flex items-center gap-2 w-40 mx-auto text-sm text-muted-foreground mt-2">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Загрузка вопросов...
-                            </div>
-                        ) : error ? (
-                            <div className="text-sm text-destructive w-40 mx-auto mt-2 flex items-center gap-1">
-                                <AlertCircle className="h-4 w-4" />
-                                {error}
-                            </div>
-                        ) : null
+                    {isLoading &&
+                        <div className="flex items-center gap-2 w-40 mx-auto text-sm text-muted-foreground mt-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Загрузка вопросов...
+                        </div>
                     }
 
                     {!isCreating 

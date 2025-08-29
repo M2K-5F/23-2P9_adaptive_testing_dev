@@ -1,7 +1,7 @@
 import { useRegStore } from "./store/useRegStore"
 import { Input } from "@/Components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/Components/ui/card"
-import { Label } from "@/Components/ui/label"
+import { Label } from "@/Components"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/Components/ui/select"
 import { Button } from "@/Components/ui/button"
 import { AuthLayout, ValueContext } from "@/Layouts/AuthLayout"
@@ -28,7 +28,7 @@ export default function Regisration () {
             
                     <div className="grid gap-2 items-baseline">
                         <Label htmlFor="username">Логин:</Label>
-                        <Input placeholder="used for login" id="username" value={values.username} onChange={fieldSetter}/>
+                        <Input placeholder="никнейм" id="username" value={values.username} onChange={fieldSetter}/>
                         {errors.username == 'unvalid' && 
                             <Label className={'font-medium text-red-700'}>
                                 Логин должен содержать минимум 3 символа
@@ -42,7 +42,7 @@ export default function Regisration () {
                         }
                     </div>
             
-                    <div className="grid grid-cols-5 gap-x-2 items-baseline">
+                    <div className="flex flex-nowrap gap-2">
                     
                         <div className="grid gap-2 col-start-1 col-end-3">
                             <Label>Роль:</Label>
@@ -60,9 +60,9 @@ export default function Regisration () {
                             </Select>
                         </div>
                     
-                        <div className="grid gap-2 col-start-3 col-end-6">
+                        <div className="grid gap-2 col-start-3 col-end-6 grow">
                             <Label htmlFor="name">Имя пользователя:</Label>
-                            <Input id="name" value={values.name} onChange={fieldSetter} placeholder="viewed name" /> 
+                            <Input id="name" value={values.name} onChange={fieldSetter} placeholder="имя" /> 
                             {errors.name == 'unvalid' && 
                                 <Label className={'font-medium text-red-700'}>
                                     Имя должно содержать минимум 3 символа
@@ -75,7 +75,7 @@ export default function Regisration () {
                     
                         <div className="grid gap-2">
                             <Label>Пароль:</Label>
-                            <Input value={values.password} onChange={fieldSetter} id="password" placeholder="password" />
+                            <Input value={values.password} onChange={fieldSetter} id="password" placeholder="пароль" />
                             {errors.password == 'unvalid' && 
                                 <Label className={'font-medium text-red-700'}>
                                     Пароль должен содержать минимум 3 символа
@@ -85,7 +85,7 @@ export default function Regisration () {
                     
                         <div className="grid gap-2">
                             <Label>Повтор пароля:</Label>
-                            <Input id="repeat" value={values.repeat} onChange={fieldSetter} placeholder="repeat" /> 
+                            <Input id="repeat" value={values.repeat} onChange={fieldSetter} placeholder="повтор" /> 
                             {errors.repeat === 'unvalid' || errors.repeat === 'notmatches' && 
                                 <Label className={'font-medium text-red-700'}>
                                     Пароли не совпадают

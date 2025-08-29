@@ -26,17 +26,19 @@ export const UserMenu = React.memo(() => {
 
     return (
         <DropdownMenu open={isOpen}  onOpenChange={setIsOpen}>
-            <DropdownMenuTrigger className={clsx(
+            <DropdownMenuTrigger
+                className={clsx(
                     'p-2 hover:bg-secondary/50 rounded-lg',
                     'flex flex-row font-medium text-sm',
                     'justify-center items-center gap-2'
-                )} >
+                )} 
+            >
                 <Avatar className="h-8 w-8">
                     <AvatarFallback>
                     {username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
-                <span>{username.toUpperCase()}</span>
+                <span className="font-medium">{username.toUpperCase()}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel className="font-normal">

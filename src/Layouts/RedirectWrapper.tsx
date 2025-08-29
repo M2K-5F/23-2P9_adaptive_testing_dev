@@ -42,8 +42,6 @@ export const RedirectWrapper: FC = () => {
             navigate('/503')
             return
         }
-
-        console.log(status)
     }, [shouldRedirect, status])
 
     if (status === 'undefined') {

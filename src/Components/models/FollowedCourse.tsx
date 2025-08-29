@@ -99,7 +99,7 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                     {userCourse.course_progress > 0 && (
                         <div className="flex items-center gap-1 text-sm bg-green-500/20 px-2 py-1 rounded-full text-green-700">
                             <Award className="h-3.5 w-3.5" />
-                            <span>Начат</span>
+                            <span>{userCourse.course_progress === 100 ? 'Завершен' : 'Начат'}</span>
                         </div>
                     )}
                 </div>

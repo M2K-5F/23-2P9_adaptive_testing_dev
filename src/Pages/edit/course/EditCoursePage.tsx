@@ -3,7 +3,7 @@ import { Fragment, useEffect, useLayoutEffect, useState } from "react";
 import { useTopicStore } from "@/stores/useTopicStore";
 import { useCourseStore } from "@/stores/useCourseStore";
 import clsx from "clsx";
-import { Button, CreatedTopic, CreateTopicDialog } from "@/Components";
+import { Button, CreatedTopic, CreateTopicDialog, Loader } from "@/Components";
 import { BarChart2, BarChart3 } from "lucide-react";
 
 export function TopicsPortal() {
@@ -24,7 +24,7 @@ export function TopicsPortal() {
 
     return (
         <div
-            className={clsx('p-3')}
+            className={clsx('p-4')}
         >
             <header className={clsx(
                 'w-full grid justify-center mb-4 grid-rows-2'
@@ -54,24 +54,26 @@ export function TopicsPortal() {
             </header>
 
             {createdTopics[courseId] 
-                ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                        {createdTopics[Number(courseId)].map((topic, index) => 
-                            <CreatedTopic
-                                key={topic.id}
-                                topic={topic}
-                                index={index}
+                ?    createdTopics[courseId].length
+                    ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            {createdTopics[Number(courseId)].map((topic, index) => 
+                                <CreatedTopic
+                                    key={topic.id}
+                                    topic={topic}
+                                    index={index}
+                                />
+                            )}
+                            <CreateTopicDialog 
+                                className={clsx(
+                                    'h-45.5 flex items-center text-md',
+                                    'justify-center border-2 border-dashed border-gray-300',
+                                    'rounded-lg hover:border-gray-400'
+                                )}  
+                                text="+ Создать тему" 
+                                variant='outline' 
                             />
-                        )}
-                        <CreateTopicDialog 
-                            className={clsx(
-                                'h-42 flex items-center text-md',
-                                'justify-center border-2 border-dashed border-gray-300',
-                                'rounded-lg hover:border-gray-400'
-                            )}  
-                            text="+ Создать тему" 
-                            variant='outline' 
-                        />
-                    </div> 
+                        </div>
+                    :   <Loader variant='success' /> 
                 :   <p className="no-courses-message"> 
                         "Нет созданных тем"
                     </p>

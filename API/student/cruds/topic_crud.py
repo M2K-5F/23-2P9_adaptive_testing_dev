@@ -155,7 +155,7 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
     if user_topic.topic_progress < score:
         user_topic.topic_progress = round(score, 3)
     user_course = user_topic.by_user_course
-    if user_topic.topic_progress > 0.8 and not user_topic.is_completed:
+    if user_topic.topic_progress >= 0.8 and not user_topic.is_completed:
         user_course.completed_topic_number += 1
         user_topic.is_completed = True
         print(user_course.completed_topic_number / len(Topic.select().where(Topic.by_course == user_course.course, Topic.is_active)))

@@ -108,7 +108,7 @@ export const CourseStatisticsPage: FC = () => {
                                     </div>
                                     <Button variant={'link'} onClick={() => {
                                         copy(student.telegram_link)
-                                    }} className="p-0 text-sm text-muted-foreground">@{student.telegram_link}</Button>
+                                    }} className="p-0 text-sm text-muted-foreground">@{student.telegram_link.split('://')[1]}</Button>
                                 </div>
 
                                 <Progress 

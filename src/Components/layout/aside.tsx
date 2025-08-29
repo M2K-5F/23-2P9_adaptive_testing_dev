@@ -8,17 +8,30 @@ import { AsideDetail } from "./aside-details";
 
 export const AsidePanel: React.FC<{}> = memo(() => {
     const fetchCourses = useCourseStore(s => s.fetchCourses)
-    const {isOpen, isDetailVisible, isSummaryVisible} = useAsideVisibilityStore()
+    const {isOpen, isDetailVisible, setIsOpen} = useAsideVisibilityStore()
 
     useLayoutEffect(() => {(fetchCourses())}, [])
 
+    useEffect(() => {
+        const eventhandler = (e: Event) => {
+            setIsOpen(false)
+        }
+
+        document.querySelector('main.h-full.max-h-full')?.addEventListener(
+            'click', eventhandler
+        )
+        return () => {
+            document.querySelector('main.h-full.max-h-full')?.removeEventListener('click', eventhandler)
+        }
+    }, [])
+
 
     return(
-        <div 
-        className={clsx(
-            'fixed select-none',
-            'h-dvh z-10',
-        )}
+        <div
+            className={clsx(
+                'fixed select-none',
+                'h-dvh z-10',
+            )}
         >
             <aside
             className={clsx(
@@ -49,7 +62,7 @@ export const AsidePanel: React.FC<{}> = memo(() => {
 export const AsideSummary = () => {
     const setIsOpen = useAsideVisibilityStore(s => s.setIsOpen)
     return(
-            <OpenCloseSvg className="rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => {setIsOpen(true)}} />
+            <OpenCloseSvg className="rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={(e) => {setIsOpen(true), e.stopPropagation()}} />
     )
 }
 
