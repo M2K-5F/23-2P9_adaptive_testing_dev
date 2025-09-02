@@ -27,7 +27,7 @@ export function TopicsPortal() {
             className={clsx('p-4')}
         >
             <header className={clsx(
-                'w-full grid justify-center mb-4 grid-rows-2'
+                'w-full h-full grid justify-center mb-4 grid-rows-2'
             )}>
 
                 <div 
@@ -73,10 +73,10 @@ export function TopicsPortal() {
                                 variant='outline' 
                             />
                         </div>
-                    :   <Loader variant='success' /> 
-                :   <p className="no-courses-message"> 
-                        "Нет созданных тем"
-                    </p>
+                    :   <p className="no-courses-message"> 
+                            "Нет созданных тем"
+                        </p>
+                :   <Loader className="h-full" variant='success' /> 
             }
         </div>
     )

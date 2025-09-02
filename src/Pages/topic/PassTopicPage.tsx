@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { Check, ChevronRight, Loader2, X } from 'lucide-react'
 import { Button, Card, Progress, Badge, Separator, CardHeader, CardContent, CardFooter, Loader } from '@/Components'
 import { toast } from 'sonner'
-import { CompletedTopic, Question, QuestionToPass } from '@/types/interfaces'
+import { CompletedTopic, QuestionToPass } from '@/types/interfaces'
 import { useImmer } from 'use-immer'
 import { startPassingTopic, submitTopic } from '@/services/api.service'
 import { useTopicStore } from '@/stores/useTopicStore'
@@ -65,11 +65,12 @@ export const TopicPage = () => {
             const submissionData: CompletedTopic = {
                 user_topic_id: userTopicId,
                 questions: questions.map(q => ({
-                id: q.id,
-                answer_options: q.answer_options.map(opt => ({
-                    id: opt.id,
-                    is_correct: (selectedAnswers[q.id] || []).includes(opt.id)
-                }))
+                    id: q.id,
+                    by_topic: q.by_topic.id,
+                    answer_options: q.answer_options.map(opt => ({
+                        id: opt.id,
+                        is_correct: (selectedAnswers[q.id] || []).includes(opt.id)
+                    }))
                 }))
             }
             
@@ -107,7 +108,7 @@ export const TopicPage = () => {
                         </Badge>
                     </div>
                 
-                    <Progress value={progress} className="h-2" />
+                    <Progress offsetValue={1} value={progress} className="h-2" />
                 </CardHeader>
 
                 {currentQuestion && (
@@ -128,9 +129,9 @@ export const TopicPage = () => {
                                 }
                                 className="w-full justify-start text-left h-auto py-3"
                                 onClick={() => handleAnswerSelect(
-                                currentQuestion.id, 
-                                option.id, 
-                                currentQuestion.question_type === 'multiple'
+                                    currentQuestion.id, 
+                                    option.id, 
+                                    currentQuestion.question_type === 'multiple'
                                 )}
                             >
                                 {currentQuestion.question_type === 'multiple' 

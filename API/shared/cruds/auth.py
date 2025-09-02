@@ -52,7 +52,6 @@ def get_user(username) :
 
     user_roles = UserRole.select().where(UserRole.user == current_user)
     user_roles = [role.role.status for role in user_roles]
-    print('roles', user_roles)
     return UserOut(
         username=current_user.username,
         name=current_user.name,

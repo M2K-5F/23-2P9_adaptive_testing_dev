@@ -13,7 +13,6 @@ import { searchCourses } from "@/services/api.service";
 interface asideSectionsVisibilityStore {
     timer: number
     isOpen: boolean, 
-    isSummaryVisible: boolean, 
     isDetailVisible: boolean,
     setIsOpen: (isOpen: boolean) => void
 }
@@ -23,16 +22,13 @@ export const useAsideVisibilityStore = create<asideSectionsVisibilityStore>()(im
             timer: 0,
             isOpen: false, 
             isDetailVisible: false, 
-            isSummaryVisible: true,
             setIsOpen: (isOpen) => {
                 set(d => {
                     clearTimeout(get().timer)
                     d.isOpen = isOpen
                     if (isOpen) {
                         d.isDetailVisible = true
-                        d.timer = setTimeout(() => set(d => {d.isSummaryVisible = false}), 500) as unknown as number
                     } else {
-                        d.isSummaryVisible = true
                         d.timer = setTimeout(() => set(d => {d.isDetailVisible = false}), 500) as unknown as number
                     }
                 })
@@ -48,7 +44,13 @@ export const AppLayout: FC = memo(() => {
             <div className='h-dvh max-h-dvh w-dvw'>
                 <AsidePanel />
                 <main className="h-full max-h-full">    
-                    <header className={clsx('w-full fixed bg-[var(--aside)] grid-cols-3 items-center justify-items-center content-center grid h-14')} >
+                    <header 
+                        className={clsx(
+                            'w-full fixed bg-[var(--aside)] grid-cols-3',
+                            'items-center justify-items-center', 
+                            'content-center grid h-14'
+                        )} 
+                    >
                         <div className="w-full pl-4">
                             <AsideSummary />    
                         </div>
@@ -61,7 +63,7 @@ export const AppLayout: FC = memo(() => {
                             callbackfn={(course) => {navigate(routes.viewCourse(course.id))}}
                         />
                     </header>
-                    <div className="max-h-dvh scrollbar-hidden overflow-y-scroll pt-14">    
+                    <div className="max-h-dvh h-dvh scrollbar-hidden overflow-y-scroll pt-14">    
                         <Outlet />
                     </div>
                 </main>

@@ -112,6 +112,7 @@ export interface CompletedTopic {
 export interface CompletedQuestion {
     id: number
     answer_options: CompletedOption[]
+    by_topic: number
 }
 
 export interface CompletedOption {

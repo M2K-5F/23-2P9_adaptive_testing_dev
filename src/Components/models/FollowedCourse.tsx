@@ -1,7 +1,7 @@
 import { useState, useEffect, memo, FC } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { CreatedCourse, UserCourse, UserTopic } from "../../types/interfaces"
-import { Button, Badge, Progress } from "@/Components"
+import { Button, Badge, Progress, Skeleton } from "@/Components"
 import clsx from "clsx"
 import { getTopics } from "@/services/api.service"
 import { useTopicStore } from "@/stores/useTopicStore"
@@ -53,7 +53,10 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
         )}>
             <section className="p-5 bg-gradient-to-r from-card to-card/80">
                 <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-start gap-3 flex-1">
+                    <div 
+                        onClick={() => navigate(routes.viewCourse(userCourse.course.id))} 
+                        className="flex cursor-pointer items-start gap-3 flex-1"
+                    >
                         <div className="p-2 bg-primary/10 rounded-lg mt-1">
                             <BookOpen className="h-5 w-5 text-primary" />
                         </div>
@@ -62,7 +65,6 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                                 className='
                                     text-lg font-semibold cursor-pointer 
                                     hover:text-primary transition-colors'
-                                onClick={() => navigate(routes.viewCourse(userCourse.course.id))}
                             >
                                 {userCourse.course.title}
                             </h3>
@@ -103,15 +105,9 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                         </div>
                     )}
                 </div>
-                <Progress 
-                    value={((100 - userCourse.course_progress) * 0.99) - 1} 
-                    className={clsx(userCourse.course_progress >= 50
-                        ?   userCourse.course_progress >= 80
-                            ?   'bg-green-500'
-                            :   'bg-yellow-500'
-                        :   'bg-red-500',
-                        "rotate-y-180 mt-3"
-                    )}
+                <Progress offsetValue={2}
+                    className="mt-3"
+                    value={userCourse.course_progress}
                 />
 
                 <Button
@@ -123,6 +119,7 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                             return p
                         })
                     }}
+                    id="expandCourseBtn"
                     className="mt-4 flex items-center gap-2 w-full sm:w-auto"
                 >   
                     <ChevronUp className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
@@ -137,56 +134,56 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                         Темы курса
                     </h4>
 
-                    {isLoading ? (
-                        <div className="text-sm text-muted-foreground py-4 text-center">
-                            Загрузка тем...
-                        </div>
-                    ) : topics?.length ? (
-                        <div className={clsx('scrollbar-hidden max-h-50 overflow-y-auto space-y-4')}>
-                            {topics.map((topic, index) => (
-                                <div key={topic.id} className="flex flex-col items-center">
-                                    {index > 0 && (
-                                        <div className="text-2xl text-foreground/30 my-2">
-                                            ↓
+                    {isLoading 
+                        ?   <div className='grid grid-cols-2 gap-2'>
+                                <Skeleton  className="h-20"/>
+                                <Skeleton  className="h-20"/>
+                            </div>
+                        :   topics?.length 
+                            ?   <div className={clsx('scrollbar-hidden max-h-65 overflow-y-auto space-y-4')}>
+                                    {topics.map((topic, index) => (
+                                        <div key={topic.id} className="flex flex-col items-center">
+                                            {index > 0 && 
+                                                <div className="text-3xl text-foreground/30 my-2">
+                                                    ↓
+                                                </div>
+                                            }
+                                            <div className="w-full p-4 border rounded-lg bg-background hover:shadow-md transition-shadow">
+                                                <h5 className="font-medium mb-2">{topic.topic.title}</h5>
+                                                <p className="text-sm text-muted-foreground mb-3">
+                                                    {topic.topic.description || "Нет описания"}
+                                                </p>
+                                                
+                                                <div className="flex items-center gap-2 text-sm mb-3">
+                                                    <span className="bg-secondary px-2 py-1 rounded-md">
+                                                        Вопросов: {topic.topic.question_count || 0}
+                                                    </span>
+                                                </div>
+                                                
+                                                {topic.topic_progress > 0 && (topic.is_completed 
+                                                    ?   <Badge variant='default' className="border-green-500 mt-2 block border p-0 pr-2">
+                                                            <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-green-500 mr-2">
+                                                                <Check className="h-3 w-3" />
+                                                                Пройдено
+                                                            </Badge>
+                                                            Баллы: {topic.topic_progress.toFixed(1)}/1
+                                                        </Badge>
+                                                    :   <Badge variant='default' className="border-red-500 block mt-2 border p-0 pr-2">
+                                                            <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-red-500 mr-2">
+                                                                <X className="h-3 w-3" />
+                                                                Не пройдено
+                                                            </Badge>
+                                                            Баллы: {topic.topic_progress.toFixed(1)}/1
+                                                        </Badge>
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                    <div className="w-full p-4 border rounded-lg bg-background hover:shadow-md transition-shadow">
-                                        <h5 className="font-medium mb-2">{topic.topic.title}</h5>
-                                        <p className="text-sm text-muted-foreground mb-3">
-                                            {topic.topic.description || "Нет описания"}
-                                        </p>
-                                        
-                                        <div className="flex items-center gap-2 text-sm mb-3">
-                                            <span className="bg-secondary px-2 py-1 rounded-md">
-                                                Вопросов: {topic.topic.question_count || 0}
-                                            </span>
-                                        </div>
-                                        
-                                        {topic.topic_progress > 0 && (topic.is_completed 
-                                            ?   <Badge variant='default' className="border-green-500 mt-2 block border p-0 pr-2">
-                                                    <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-green-500 mr-2">
-                                                        <Check className="h-3 w-3" />
-                                                        Пройдено
-                                                    </Badge>
-                                                    Баллы: {topic.topic_progress.toFixed(1)}/1
-                                                </Badge>
-                                            :   <Badge variant='default' className="border-red-500 block mt-2 border p-0 pr-2">
-                                                    <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-red-500 mr-2">
-                                                        <X className="h-3 w-3" />
-                                                        Не пройдено
-                                                    </Badge>
-                                                    Баллы: {topic.topic_progress.toFixed(1)}/1
-                                                </Badge>
-                                        )}
-                                    </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-muted-foreground py-4 text-center">
-                            Нет доступных тем
-                        </p>
-                    )}
+                            :   <p className="text-sm text-muted-foreground py-4 text-center">
+                                    Нет доступных тем
+                                </p>
+                    }
 
                     <Button 
                         variant='default'

@@ -4,7 +4,7 @@ from typing import Union, Tuple
 from playhouse.shortcuts import model_to_dict
 from peewee import fn
 
-from db import database, Course, UserCourse, UserTopic, Topic, UserQuestion
+from db import database, Course, UserCourse, UserTopic, Topic, UserQuestion, AdaptiveQuestion
 from shemas import UserOut
 
 
@@ -16,6 +16,7 @@ def get_followed_courses(user: UserOut):
         .where(UserCourse.user == user.username, UserCourse.is_active == True))
 
     return JSONResponse([uc.recdump for uc in followed_courses])
+
 
 @database.atomic()
 def follow_course(user: UserOut, course_id: str):
@@ -94,6 +95,10 @@ def get_course_by_id(user: UserOut, courseId: int):
         )
     
     followed_course: UserCourse = UserCourse.get_or_none(UserCourse.user == user.username, UserCourse.course == current_course, UserCourse.is_active)
+    if followed_course:
+        adaptive_questions = AdaptiveQuestion.select().where(AdaptiveQuestion.user == user.username)
+        for q in adaptive_questions:
+            q.delete_instance()
     return JSONResponse({**current_course.dump, 'user_course': ({**followed_course.dump} if followed_course else False)})
 
 
@@ -113,6 +118,9 @@ def clear_uc_progress(user: UserOut, user_course_id: int):
                             .where(UserQuestion.by_user_topic == user_topic))
         for user_question in user_questions:
             user_question.delete_instance()
+
+        for adapque in user_topic.adaptive_questions:
+            adapque.delete_instance()
         user_topic.topic_progress = 0
         user_topic.is_completed = False
         user_topic.ready_to_pass = False if user_topic.topic.number_in_course else True

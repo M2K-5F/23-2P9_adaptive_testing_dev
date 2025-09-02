@@ -40,7 +40,7 @@ export const AsidePanel: React.FC<{}> = memo(() => {
                 '',
                 isOpen ? 'w-77' : 'w-0'
             )}
-            style={{transition: `width cubic-bezier(.4,0,.2,1) ${!isOpen ?  '.4s' : '.4s'}`}}
+            style={{transition: `width cubic-bezier(.4,0,.2,1) .4s`}}
             >
                 <section 
                     className={clsx(

@@ -61,7 +61,7 @@ export const logoutUser = async () => {
 }
 
 
-export const loginUser = (login: string, password: string): Promise<UserShema> => {
+export const loginUser = (login: string, password: string, is_remember: boolean): Promise<UserShema> => {
     return  ApiService.requestToServer(
         APIUrls.logInURL,
         {
@@ -71,7 +71,7 @@ export const loginUser = (login: string, password: string): Promise<UserShema> =
                 'accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({username: login, password: password})
+            body: JSON.stringify({username: login, password: password, is_remember: is_remember})
         },
         undefined,
         true

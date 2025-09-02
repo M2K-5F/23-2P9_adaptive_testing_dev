@@ -69,7 +69,7 @@ export function FollowedCoursePage() {
     }, [course])
 
     
-    if (isLoading || !course || !createdTopics || !followedTopics) return <Loader className="m-auto mt-dvh" variant='success'/>
+    if (isLoading || !course || !createdTopics || !followedTopics) return <Loader className="" variant='success'/>
 
     return (
         <div className=" p-6 h-full">
@@ -191,15 +191,8 @@ export function FollowedCoursePage() {
                     {course.user_course && 
                         <CardContent>
                             <div className="flex items-center gap-4">
-                                <Progress 
-                                    value={((100 - course.user_course.course_progress) * 0.99) - 1} 
-                                    className={clsx(course.user_course.course_progress >= 50
-                                        ?   course.user_course.course_progress >= 80
-                                            ?   'bg-green-500'
-                                            :   'bg-yellow-500'
-                                        :   'bg-red-500',
-                                        "rotate-y-180"
-                                    )}
+                                <Progress offsetValue={2}
+                                    value={course.user_course.course_progress}
                                 />
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <BarChart2 className="h-4 w-4" />

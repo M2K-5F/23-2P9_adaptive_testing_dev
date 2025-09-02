@@ -49,9 +49,9 @@ export const CourseStatisticsPage: FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                     {createdCourses.map((course) => (
-                    <SelectItem key={course.id} value={course.id.toString()}>
-                        {course.title}
-                    </SelectItem>
+                        <SelectItem key={course.id} value={course.id.toString()}>
+                            {course.title}
+                        </SelectItem>
                     ))}
                 </SelectContent>
             </Select>
@@ -111,15 +111,8 @@ export const CourseStatisticsPage: FC = () => {
                                     }} className="p-0 text-sm text-muted-foreground">@{student.telegram_link.split('://')[1]}</Button>
                                 </div>
 
-                                <Progress 
-                                value={((100 - student.course_progress) * 0.99) - 1} 
-                                className={clsx(student.course_progress >= 50
-                                    ?   student.course_progress >= 80
-                                        ?   'bg-green-500'
-                                        :   'bg-yellow-500'
-                                    :   'bg-red-500',
-                                    "rotate-y-180"
-                                )}
+                                <Progress offsetValue={2}
+                                value={student.course_progress}
                                 />
 
                                 <div className="mt-3 text-sm text-muted-foreground">

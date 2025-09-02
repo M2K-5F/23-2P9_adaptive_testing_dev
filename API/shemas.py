@@ -54,6 +54,7 @@ class SubmitAnswerUnit(BaseModel):
 class SubmitQuestionUnit(BaseModel):
     id: int
     answer_options: List[SubmitAnswerUnit]
+    by_topic: int
 
 
 class TopicSubmitAnswers(BaseModel):

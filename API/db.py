@@ -110,6 +110,15 @@ class UserTopic(Table):
     is_completed = BooleanField(default=False)
     topic_progress = FloatField(default=0)
 
+
+class AdaptiveQuestion(Table):
+    user = ForeignKeyField(User, field=User.username, backref='adaptive_questions')
+    for_user_topic = ForeignKeyField(UserTopic, backref='adaptive_questions')
+    by_user_topic = ForeignKeyField(UserTopic)
+    question = ForeignKeyField(Question)
+    question_score = FloatField(default=0)
+
+
 class UserQuestion(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_questions")
     by_user_topic = ForeignKeyField(UserTopic)
@@ -119,7 +128,7 @@ class UserQuestion(Table):
 
 if __name__ == "__main__":
     database.connect()
-    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic])
+    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion])
     database.close()
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)

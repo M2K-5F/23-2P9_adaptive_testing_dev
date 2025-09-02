@@ -54,7 +54,6 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
         ?   searchCourses(searchQuery)
         :   setSearchedCourses([])
     }, [searchQuery])
-    console.log(active, searchCourses.length);
     
 
     return(
