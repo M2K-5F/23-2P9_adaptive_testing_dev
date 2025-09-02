@@ -12,6 +12,7 @@ interface State {
         name: string
         password: string
         repeat: string
+        telegram_link: string
     }
     role: 'student' | 'teacher'
 }
@@ -24,6 +25,7 @@ interface Error {
         name: FieldError
         password: FieldError
         repeat: FieldError | 'notmatches'
+        telegram_link: FieldError | 'validate_error'
     }    
 }
 
@@ -40,7 +42,8 @@ export const useRegStore = create<State & Error & Actions>()(
             username: '', 
             name: '', 
             password: '', 
-            repeat: '' 
+            repeat: '',
+            telegram_link: '',
         },
 
         role: 'student',
@@ -49,7 +52,8 @@ export const useRegStore = create<State & Error & Actions>()(
             username: false, 
             name: false, 
             password: false, 
-            repeat: false 
+            repeat: false,
+            telegram_link: false
         },
 
         fieldSetter: (e) => {
@@ -63,9 +67,9 @@ export const useRegStore = create<State & Error & Actions>()(
         setRole: (newrole) => set({ role: newrole }),
 
         reset: () => set((state) => {
-            state.values = { username: '', name: '', password: '', repeat: '' }
+            state.values = { username: '', name: '', password: '', repeat: '', telegram_link: ''}
             state.role = 'student'
-            state.errors = { username: false, name: false, password: false, repeat: false }
+            state.errors = { username: false, name: false, password: false, repeat: false, telegram_link: false }
         }),
 
         useRegistration: async (setPage) => {
@@ -92,7 +96,7 @@ export const useRegStore = create<State & Error & Actions>()(
                     const response = await registerUser(JSON.stringify({
                         username: values.username, 
                         name: values.name,
-                        telegram_link: `https://t.me/example${values.username}`,
+                        telegram_link: values.telegram_link,
                         password: values.password,
                         role: get().role
                     }))
@@ -105,6 +109,7 @@ export const useRegStore = create<State & Error & Actions>()(
                     })
                 } catch (error: any) {
                     error.message === '400' && set(draft => {draft.errors.username = 'alreadyused'})
+                    error.message === '422' && set(d => {d.errors.telegram_link = 'validate_error'})
                 }
             }   
         },

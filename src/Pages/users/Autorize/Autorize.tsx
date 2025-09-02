@@ -4,9 +4,6 @@ import { Input } from "@/Components/ui/input"
 import { Checkbox, Label } from "@/Components"
 import { Button } from "@/Components/ui/button"
 import { useAuth } from "./hooks/useAuth"
-import { Toggle } from "@/Components/ui/toggle"
-import { ToggleGroup } from "@radix-ui/react-toggle-group"
-import { ToggleGroupItem } from "@/Components/ui/toggle-group"
 import { useContext, useRef } from "react"
 import { ValueContext } from "@/Layouts/AuthLayout"
 import clsx from "clsx"
@@ -27,7 +24,7 @@ export default function Autorize () {
                 <CardHeader className="text-center">
                     <CardTitle className={'text-center'}>Войти в свой аккаунт</CardTitle>
                     <CardDescription>
-                        Войти в аккаунт kptcID используя логин и пароль
+                        Войти в аккаунт используя логин и пароль
                     </CardDescription>
                 </CardHeader>
 
@@ -40,7 +37,7 @@ export default function Autorize () {
                                     onChange={() => resetError('login')}
                                     id='text'
                                     type='text'
-                                    placeholder="login"
+                                    placeholder="логин"
                                     name="login"
                                     required
                                 />
@@ -57,7 +54,7 @@ export default function Autorize () {
                                     id="password" 
                                     type="password" 
                                     name="password"
-                                    placeholder="password"
+                                    placeholder="пароль"
                                     required 
                                 />
                                 {Error.field === 'password' && 

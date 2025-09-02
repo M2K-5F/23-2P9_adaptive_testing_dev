@@ -14,7 +14,7 @@ from shemas import UserCreate, Roles, UserOut, QuestionBase, AnswerOptionBase
 
 
 @database.atomic()
-def create_question(user: UserOut, topic_id: str, question: QuestionBase ):
+def create_question(user: UserOut, topic_id: str, question: QuestionBase):
     current_topic = Topic.get_or_none(
         Topic.id == topic_id
     )
@@ -23,6 +23,7 @@ def create_question(user: UserOut, topic_id: str, question: QuestionBase ):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="topic not found"
         )
+
     
     created_question, is_created = Question.get_or_create(
         text = question.text,
@@ -39,13 +40,14 @@ def create_question(user: UserOut, topic_id: str, question: QuestionBase ):
     for answer_option in question.answer_options:
         Answer.create(
             text = answer_option.text,
-            is_correct = answer_option.is_correct,
+            is_correct = True if question.question_type == 'text' else answer_option.is_correct,
             by_question = created_question
         )
     
     current_topic.question_count += 1
     current_topic.save()
     return JSONResponse(created_question.dump)
+
 
 
 @database.atomic()

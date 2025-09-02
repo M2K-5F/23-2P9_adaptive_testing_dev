@@ -13,7 +13,8 @@ question_router = APIRouter(prefix='/question', tags=['Teacher/Question'])
 def create_teacher_question(
     current_user = Depends(get_user_from_request),
     topic_id = Query(),
-    question: QuestionBase = Body()
+    question: QuestionBase = Body(),
+    type = Query()
 ) -> JSONResponse:
     return create_question(current_user, topic_id, question)
 

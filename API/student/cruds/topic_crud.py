@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Union
 from fastapi import HTTPException, status
 from peewee import prefetch
 import random
@@ -8,9 +8,15 @@ from playhouse.shortcuts import model_to_dict
 from db import (
     UserTopic, database, User, UserRole, Role,
     Course, Answer, Question, AdaptiveQuestion,
-    Topic, UserCourse, UserQuestion,
+    Topic, UserCourse, UserQuestion, UserTextAnswer
 )
-from shemas import SubmitAnswerUnit, SubmitQuestionUnit, TopicSubmitAnswers, UserCreate, Roles, UserOut, QuestionBase, AnswerOptionBase
+from shemas import(
+    SubmitAnswerUnit,
+    SubmitChoiceQuestionUnit,
+    SubmitTextQuestionUnit, 
+    TopicSubmitAnswers, UserCreate, Roles, 
+    UserOut, QuestionBase, AnswerOptionBase
+)
 
 
 @database.atomic()
@@ -65,7 +71,7 @@ def start_topic(user: UserOut, user_topic_id: str):
 
     current_topic = user_topic.topic
 
-    questions = (Question
+    questions = list(Question
                 .select()
                 .where(Question.by_topic == current_topic.id, Question.is_active)
     )
@@ -75,9 +81,12 @@ def start_topic(user: UserOut, user_topic_id: str):
     for question in questions:
         answers = list(question.created_answers)
         questions_with_answers.append({
-            **question.dump, 
+            **question.dump,
             'answer_options': [
-                model_to_dict(answer, max_depth=1, exclude=[Answer.is_correct, Answer.by_question]) for answer in answers
+                {
+                    'id': answer.id,
+                    'text': '' if question.qquestion_type == 'text' else answer.text
+                } for answer in answers
             ]
         })
 
@@ -113,7 +122,10 @@ def start_topic(user: UserOut, user_topic_id: str):
             {
                 **question.question.dump,
                 'answer_options': [
-                    model_to_dict(answer, max_depth=1, exclude=[Answer.is_correct, Answer.by_question]) for answer in question.question.created_answers
+                    {
+                        'id': answer.id,
+                        'text': '' if question.question.question_type == 'text' else answer.text
+                    } for answer in question.question.created_answers
                 ]
             }
         )
@@ -131,9 +143,10 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
         raise HTTPException(400, 'u cannot pass this topic')
 
     score = 0
+    
 
     submit_questions = topic_answers_data.questions
-    submit_adaptive_questions: list[SubmitQuestionUnit] = []
+    submit_adaptive_questions: List[Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]] = []
 
     for question in submit_questions:
         if question.by_topic != user_topic.topic.id:
@@ -147,6 +160,7 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
                         .where(Question.by_topic == user_topic.topic.id, Question.is_active)
     )
 
+    #adding all adaptive questions that are in topic to pass
     for q in submit_adaptive_questions:
         adaptive_question = AdaptiveQuestion.get_or_none(
             AdaptiveQuestion.question == Question.get_or_none(Question.id == q.id), 
@@ -157,39 +171,78 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
         created_questions.append(adaptive_question.question)
     
     created_questions.sort(key=lambda q: q.id)
+
     if len(submit_questions) != len(created_questions):
         raise HTTPException(400, 'u didn`t answer all questions')
 
     question_count = len(submit_questions)
 
+    #logic of submiting
     for index, submit_question in enumerate(submit_questions):
         created_question = created_questions[index]
         if submit_question.id != created_question.id:
             raise HTTPException(400 ,'question IDs is not matches')
         
-        submit_answers = (submit_question.answer_options)
-        submit_answers.sort(key=lambda ans: ans.id)
-        created_answers = (Answer
-                            .select()
-                            .where(Answer.by_question == submit_question.id)
-                            .order_by(Answer.id)
-        )
-        if len(submit_answers) != len(created_answers):
-            raise HTTPException(400, 'u didn`t answer all answers')
-
-        answer_count = len(submit_answers)
         question_score = 0
+            
+        if submit_question.type == 'choice':
+            submit_answers = (submit_question.answer_options)
+            submit_answers.sort(key=lambda ans: ans.id)
+            created_answers = (Answer
+                                .select()
+                                .where(Answer.by_question == submit_question.id)
+                                .order_by(Answer.id)
+            )
+            if len(submit_answers) != len(created_answers):
+                raise HTTPException(400, 'u didn`t answer all answers')
 
-        for index, submit_answer in enumerate(submit_answers):
-            created_answer: Answer = created_answers[index]
-            if created_answer.id != submit_answer.id:
-                raise HTTPException(400, 'answer IDs is not matches')
+            answer_count = len(submit_answers)
 
-            if created_answer.is_correct == submit_answer.is_correct:
-                score += 1 / (answer_count * question_count)
-                question_score += 1 / answer_count
+            for index, submit_answer in enumerate(submit_answers):
+                created_answer: Answer = created_answers[index]
+                if created_answer.id != submit_answer.id:
+                    raise HTTPException(400, 'answer IDs is not matches')
 
-        if submit_question.by_topic != user_topic.topic.id:
+                if created_answer.is_correct == submit_answer.is_correct:
+                    score += 1 / (answer_count * question_count)
+                    question_score += 1 / answer_count
+            
+        elif submit_question.type == 'text':
+            created_answers = list(Answer
+                                        .select()
+                                        .where(Answer.by_question == submit_question.id)
+            )
+            for created_answer in created_answers:
+                if created_answer.text == submit_question.text:
+                    question_score = 1
+                    score += 1 /question_count
+                
+        
+        #submiting static questions
+        if submit_question.by_topic == user_topic.topic.id:
+            uk, is_created = UserQuestion.get_or_create(
+                user = user.username,
+                by_user_topic = user_topic,
+                question = created_question,
+                defaults = {
+                    'question_score': question_score
+                }
+            )
+            if not is_created:
+                uk.question_score = max(question_score, uk.question_score)
+                uk.save()
+
+            if submit_question.type == 'text':
+                UserTextAnswer.create(
+                    user = user.username,
+                    question = created_question,
+                    by_user_topic = user_topic,
+                    for_user_question = uk,
+                    is_correct = bool(question_score)
+                )
+
+        #submiting adaptive question
+        else:
             user_question = UserQuestion.get_or_none(UserQuestion.question == Question.get_or_none(Question.id == submit_question.id), user = user.username)
             if not user_question:
                 raise HTTPException(400 ,'How u get adaptive question before pass that question firstly?')
@@ -217,19 +270,8 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
                 raise HTTPException(400, 'cant find this adaptive question')
             adaptive_question_unit.delete_instance()
 
-        else:
-            uk, is_created = UserQuestion.get_or_create(
-                user = user.username,
-                by_user_topic = user_topic,
-                question = created_question,
-                defaults = {
-                    'question_score': question_score
-                }
-            )
-            if not is_created:
-                uk.question_score = max(question_score, uk.question_score)
-                uk.save()
 
+    #grading user topic
     if user_topic.topic_progress < score:
         user_topic.topic_progress = round(score, 3)
     user_course = user_topic.by_user_course

@@ -1,7 +1,7 @@
 """API templates"""
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field, field_validator
-from typing import List
+from typing import List, Union, Literal
 
 
 class Roles(str, Enum):
@@ -16,7 +16,7 @@ class UserBase(BaseModel):
 
     @field_validator('telegram_link')
     def validate_telegram_link(cls, v):
-        if "t.me/" not in str(v):
+        if "https://t.me/" not in str(v):
             raise ValueError("Telegram link must contain 't.me/'")
         return v
 
@@ -41,8 +41,8 @@ class AnswerOptionBase(BaseModel):
 
 
 class QuestionBase(BaseModel):
-    text: str = Field(..., min_length=3, max_length=500)
-    question_type: str = "single_choice"
+    text: str 
+    question_type: str
     answer_options: List[AnswerOptionBase]
 
 
@@ -51,16 +51,24 @@ class SubmitAnswerUnit(BaseModel):
     is_correct: bool
 
 
-class SubmitQuestionUnit(BaseModel):
+class SubmitTextQuestionUnit(BaseModel):
+    id: int
+    text: str
+    by_topic: int
+    type: Literal['text'] = 'text'
+
+
+class SubmitChoiceQuestionUnit(BaseModel):
     id: int
     answer_options: List[SubmitAnswerUnit]
     by_topic: int
+    type: Literal['choice'] = 'choice'
 
 
 class TopicSubmitAnswers(BaseModel):
     user_topic_id: int
     questions: List[
-        SubmitQuestionUnit
+        Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]
     ]
 
 

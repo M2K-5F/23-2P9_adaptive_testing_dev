@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Button } from "@/Components/ui/button"
 import { AuthLayout, ValueContext } from "@/Layouts/AuthLayout"
 import { useContext, useEffect } from "react"
+import clsx from "clsx"
 
 export default function Regisration () {
     const setPage = useContext(ValueContext)!
@@ -66,6 +67,23 @@ export default function Regisration () {
                             {errors.name == 'unvalid' && 
                                 <Label className={'font-medium text-red-700'}>
                                     Имя должно содержать минимум 3 символа
+                                </Label>
+                            }
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="telegram_link">Ссылка на телеграм:</Label>
+                            <Input value={values.telegram_link} onChange={fieldSetter} id="telegram_link" placeholder="ссылка на телеграм" />
+                            {errors.telegram_link == 'unvalid' && 
+                                <Label className={'font-medium text-red-700'}>
+                                    Ссылка должна содержать минимум 3 символа
+                                </Label>
+                            }
+                            {errors.telegram_link === 'validate_error' &&
+                                <Label className={clsx('font-medium text-red-700')}>
+                                    Невалидная ссылка
                                 </Label>
                             }
                         </div>

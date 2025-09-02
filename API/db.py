@@ -126,9 +126,18 @@ class UserQuestion(Table):
     question_score = FloatField(default=0)
 
 
+class UserTextAnswer(Table):
+    user = ForeignKeyField(User, field=User.username)
+    question = ForeignKeyField(Question)
+    by_user_topic = ForeignKeyField(UserTopic)
+    for_user_question = ForeignKeyField(UserQuestion)
+    text = CharField(max_length=60)
+    is_correct = BooleanField(default=False)
+
+
 if __name__ == "__main__":
     database.connect()
-    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion])
+    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion, UserTextAnswer])
     database.close()
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)

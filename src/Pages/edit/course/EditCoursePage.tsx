@@ -73,9 +73,15 @@ export function TopicsPortal() {
                                 variant='outline' 
                             />
                         </div>
-                    :   <p className="no-courses-message"> 
-                            "Нет созданных тем"
-                        </p>
+                    :   <CreateTopicDialog 
+                            className={clsx(
+                                'h-45.5 flex items-center text-md',
+                                'justify-center border-2 border-dashed border-gray-300',
+                                'rounded-lg hover:border-gray-400'
+                            )}  
+                            text="+ Создать тему" 
+                            variant='outline' 
+                        />
                 :   <Loader className="h-full" variant='success' /> 
             }
         </div>
