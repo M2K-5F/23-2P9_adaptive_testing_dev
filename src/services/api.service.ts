@@ -391,3 +391,17 @@ export const getCourseStats = (courseId: number): Promise<CourseStats> => {
         }
     )
 }
+
+export const submitQuestion = (user_answer_id: number, score: number) => {
+    return ApiService.requestToServer(
+        APIUrls.submitQuestionURL,
+        {
+            credentials: 'include',
+            method: 'post'
+        },
+        {
+            'user_answer_id': user_answer_id,
+            "score": score
+        }
+    )
+}

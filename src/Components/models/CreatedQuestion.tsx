@@ -24,7 +24,7 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
 
     return (
         <article className={clsx(
-            "rounded-lg p-4 m-4 shadow-sm border transition-all bg-background",
+            "rounded-lg p-4 m-4 shadow-sm border transition-all bg-background/60",
             !question.is_active && 'opacity-70 bg-muted/30',
             expanded && 'ring-2 ring-primary/20'
         )}>
@@ -39,7 +39,12 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
                     
                     <div className="flex items-center gap-4 text-sm mt-2">
                         <span className="bg-secondary px-2 py-1 rounded-md">
-                            Тип: {question.question_type === 'single' ? 'Один ответ' : 'Множественный выбор'}
+                            Тип: {question.question_type === 'text'
+                                    ?   'Без вариантов'
+                                    :   question.question_type === 'single' 
+                                        ?   'Один ответ' 
+                                        :   'Множественный выбор'
+                                }
                         </span>
                         <Badge 
                             onClick={handleArchive} 
@@ -69,13 +74,12 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
                     title={question.is_active ? 'Архивировать' : 'Разархивировать'}
                     className="h-8 w-8 p-0"
                 >
-                    {isArchiving ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    ) : question.is_active ? (
-                        <Archive className="h-4 w-4" />
-                    ) : (
-                        <ArchiveRestore className="h-4 w-4" />
-                    )}
+                    {isArchiving 
+                        ?   <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        : question.is_active 
+                            ?   <Archive className="h-4 w-4" />
+                            :   <ArchiveRestore className="h-4 w-4" />
+                    }
                 </Button>
             </div>
 
@@ -92,7 +96,7 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
             {expanded && (
                 <div className="mt-4 pt-4 border-t">
                     <h5 className="font-medium mb-3 flex items-center gap-2">
-                        Варианты ответов:
+                        Варианты ответов: {question.question_type === 'text' ? 'для первичной проверки' : ''}
                         <Badge variant="outline">
                             {question.answer_options.length}
                         </Badge>

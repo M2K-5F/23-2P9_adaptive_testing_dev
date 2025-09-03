@@ -8,6 +8,7 @@ import { useClipboard } from '@/hooks/useClipboard';
 import { CourseStats } from '@/types/interfaces';
 import { getCourseStats } from '@/services/api.service';
 import { Separator } from '@radix-ui/react-select';
+import { SubmitTextQuestionsDialog } from '@/Components/dialogs/submit-question-dilog';
 
 
 export const CourseStatisticsPage: FC = () => {
@@ -106,17 +107,22 @@ export const CourseStatisticsPage: FC = () => {
                                             {student.course_progress}%
                                         </Badge>
                                     </div>
-                                    <Button variant={'link'} onClick={() => {
-                                        copy(student.telegram_link)
-                                    }} className="p-0 text-sm text-muted-foreground">@{student.telegram_link.split('://')[1]}</Button>
+                                    <Button 
+                                        variant={'link'} 
+                                        onClick={() => copy(student.telegram_link)} 
+                                        className="p-0 text-sm text-muted-foreground"
+                                    >
+                                        @{student.telegram_link.split('://')[1]}
+                                    </Button>
                                 </div>
 
-                                <Progress offsetValue={2}
-                                value={student.course_progress}
+                                <Progress 
+                                    offsetValue={2}
+                                    value={student.course_progress}
                                 />
 
                                 <div className="mt-3 text-sm text-muted-foreground">
-                                {student.completed_topics} из {student.total_topics} тем завершено
+                                    {student.completed_topics} из {student.total_topics} тем завершено
                                 </div>
 
                                 <div className="mt-4 space-y-2">
@@ -128,17 +134,42 @@ export const CourseStatisticsPage: FC = () => {
                                                 {topic.topic_title}
                                             </span>
                                             <div className="flex items-center gap-2">
-                                                {topic.is_completed && (
-                                                <Badge variant="outline" className="text-primary-foreground bg-green-300">
-                                                    {topic.average_score}%
-                                                </Badge>
-                                                )}
-                                                
+                                                {topic.average_score > 0 &&
+                                                    <Badge 
+                                                        variant="outline" 
+                                                        className={clsx(
+                                                            "text-primary-foreground bg-red-300",
+                                                            topic.average_score >= 50 && 'bg-orange-300',
+                                                            topic.average_score >= 80 && 'bg-green-300'
+                                                                    
+                                                        )}>
+                                                        {topic.average_score}%
+                                                    </Badge>
+                                                }
+
                                                 <span className="text-muted-foreground">
-                                                {topic.topic_progress * topic.question_count}/{topic.question_count}
+                                                    {topic.topic_progress * topic.question_count}/{topic.question_count}
                                                 </span>
                                             </div>
                                         </div>
+                                        {topic.unsubmited_answers.length > 0 && (
+                                                <div className="flex justify-end mt-2">
+                                                    <SubmitTextQuestionsDialog 
+                                                        answers={topic.unsubmited_answers}
+                                                        onSuccess={async () => {
+                                                            setLoading(true)
+                                                            setError(null)
+                                                            try {   
+                                                                course_id && setStatistics(await getCourseStats(course_id))
+                                                            } catch {
+                                                                setError('Ошибка загрузки статистики')
+                                                            } finally {
+                                                                setLoading(false)
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
                                     </Fragment>
                                 ))}
                                 </div>

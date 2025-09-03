@@ -15,10 +15,10 @@ export const useCreateQuestion = () => (question: QuestionCreate, topicId: numbe
         else if (question.answer_options.filter(answer => answer.text).length !== question.answer_options.length) {
             description = 'Вы заполнили не все поля с ответами'
         }
-        else if (correctAnswersCount === 0) {
+        else if (question.question_type !== 'text' && correctAnswersCount === 0) {
             description = 'Выберите хотя бы один верный вариант ответа'
         }
-        else if (correctAnswersCount === question.answer_options.length) {
+        else if (question.question_type !== 'text' && correctAnswersCount === question.answer_options.length) {
             description = 'Верными не могут быть все ответы'
         }
 

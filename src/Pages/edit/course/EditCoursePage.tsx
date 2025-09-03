@@ -54,8 +54,7 @@ export function TopicsPortal() {
             </header>
 
             {createdTopics[courseId] 
-                ?    createdTopics[courseId].length
-                    ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                             {createdTopics[Number(courseId)].map((topic, index) => 
                                 <CreatedTopic
                                     key={topic.id}
@@ -73,15 +72,6 @@ export function TopicsPortal() {
                                 variant='outline' 
                             />
                         </div>
-                    :   <CreateTopicDialog 
-                            className={clsx(
-                                'h-45.5 flex items-center text-md',
-                                'justify-center border-2 border-dashed border-gray-300',
-                                'rounded-lg hover:border-gray-400'
-                            )}  
-                            text="+ Создать тему" 
-                            variant='outline' 
-                        />
                 :   <Loader className="h-full" variant='success' /> 
             }
         </div>

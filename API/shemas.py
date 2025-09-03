@@ -42,7 +42,7 @@ class AnswerOptionBase(BaseModel):
 
 class QuestionBase(BaseModel):
     text: str 
-    question_type: str
+    question_type: Union[Literal['text'], Literal['single'], Literal['multiple']]
     answer_options: List[AnswerOptionBase]
 
 

@@ -68,6 +68,7 @@ export interface CreatedTopic extends CreatedCourseBase {
 
 export interface UserTopic {
     id: number
+    user: string
     topic: CreatedTopic
     by_user_course: UserCourse
     ready_to_pass: boolean
@@ -84,7 +85,7 @@ export interface AnswerOption {
 
 export interface QuestionCreate {
     text: string
-    question_type: 'single' | 'multiple'
+    question_type: 'single' | 'multiple' | 'text'
     answer_options: AnswerCreate[]
 }
 
@@ -95,24 +96,37 @@ export interface AnswerCreate {
 }
 
 
+export interface TextAnswerCreate {
+    text: string
+}
+
+
 export interface CreatedQuestion {
     id: number
     text: string
     by_topic: CreatedTopic
-    question_type: 'single' | 'multiple'
+    question_type: 'single' | 'multiple' | 'text'
     is_active: boolean
     answer_options: AnswerOption[]
 }
 
 export interface CompletedTopic {
     user_topic_id: number
-    questions: CompletedQuestion[]
+    questions: (CompletedQuestion | CompletedTextQuestion)[]
+}
+
+export interface CompletedTextQuestion {
+    id: number
+    text: string
+    by_topic: number
+    type: 'text'
 }
 
 export interface CompletedQuestion {
     id: number
     answer_options: CompletedOption[]
     by_topic: number
+    type: 'choice'
 }
 
 export interface CompletedOption {
@@ -124,7 +138,7 @@ export interface QuestionToPass {
     id: number
     text: string
     by_topic: CreatedTopic
-    question_type: 'single' | 'multiple'
+    question_type: 'single' | 'multiple' | 'text'
     is_active: boolean
     answer_options: OptionToPass[]
 }
@@ -142,6 +156,30 @@ export interface TopicDetail {
     question_count: number
     average_score: number
     ready_to_pass: boolean
+    unsubmited_answers: UnsubmitedAnswer[]
+}
+
+export interface UnsubmitedAnswer {
+    id: number
+    user: UserShema
+    question: {
+        id: number
+        text: string
+        by_topic: number
+        question_type: 'text'
+        is_active: boolean
+    }
+    by_user_topic: UserTopic
+    for_user_question: {
+        id: number
+        user: string
+        by_user_topic: number
+        question: number
+        question_score: number
+    }
+    text: string
+    is_correct: false
+    is_active: true
 }
 
 export interface StudentStats {

@@ -85,7 +85,7 @@ def start_topic(user: UserOut, user_topic_id: str):
             'answer_options': [
                 {
                     'id': answer.id,
-                    'text': '' if question.qquestion_type == 'text' else answer.text
+                    'text': '' if question.question_type == 'text' else answer.text
                 } for answer in answers
             ]
         })
@@ -186,6 +186,9 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
         question_score = 0
             
         if submit_question.type == 'choice':
+            if created_question.question_type == 'text':
+                raise HTTPException(400, 'question types not matches')
+
             submit_answers = (submit_question.answer_options)
             submit_answers.sort(key=lambda ans: ans.id)
             created_answers = (Answer
@@ -208,6 +211,9 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
                     question_score += 1 / answer_count
             
         elif submit_question.type == 'text':
+            if created_question.question_type != 'text':
+                raise HTTPException(400, 'question types not matches')
+
             created_answers = list(Answer
                                         .select()
                                         .where(Answer.by_question == submit_question.id)
@@ -233,20 +239,34 @@ def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
                 uk.save()
 
             if submit_question.type == 'text':
-                UserTextAnswer.create(
+                ua, _ = UserTextAnswer.get_or_create(
                     user = user.username,
                     question = created_question,
                     by_user_topic = user_topic,
                     for_user_question = uk,
-                    is_correct = bool(question_score)
+                    text = submit_question.text
                 )
+                ua.text = submit_question.text
+                ua.is_correct = max(ua.is_correct, bool(question_score))
+                ua.save()
 
         #submiting adaptive question
         else:
-            user_question = UserQuestion.get_or_none(UserQuestion.question == Question.get_or_none(Question.id == submit_question.id), user = user.username)
+            user_question = UserQuestion.get_or_none(
+                UserQuestion.question == Question.get_or_none(
+                    Question.id == submit_question.id
+                ), 
+                user = user.username
+            )
             if not user_question:
                 raise HTTPException(400 ,'How u get adaptive question before pass that question firstly?')
             user_question.question_score = question_score
+            if submit_question.type == 'text':
+                ua = UserTextAnswer.get_or_none(
+                    UserTextAnswer.by_user_topic == user_question.by_user_topic,
+                    UserTextAnswer.for_user_question == user_question
+                )
+                ua.is_correct = bool(question_score)
             user_question.save()
             user_topic_unit = UserTopic.get_or_none(
                 UserTopic.user == user.username, 

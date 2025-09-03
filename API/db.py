@@ -133,6 +133,7 @@ class UserTextAnswer(Table):
     for_user_question = ForeignKeyField(UserQuestion)
     text = CharField(max_length=60)
     is_correct = BooleanField(default=False)
+    is_active = BooleanField(default=True)
 
 
 if __name__ == "__main__":

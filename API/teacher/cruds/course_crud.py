@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
-from db import Topic, UserCourse, UserQuestion, UserTopic, database, User, Course
+
+from db import Topic, UserCourse, UserQuestion, UserTopic, database, User, Course, UserTextAnswer
 from peewee import fn
 import peewee
 from shemas import UserOut
@@ -104,6 +105,14 @@ def get_course_statistics(user: UserOut, course_id: int):
                         UserTopic.topic == topic.id,
                         UserTopic.by_user_course == user_course.id
                     )
+                    unsubmited_text_answers = list(UserTextAnswer
+                                                            .select()
+                                                            .where(
+                                                                UserTextAnswer.by_user_topic == user_topic,
+                                                                UserTextAnswer.is_correct == False,
+                                                                UserTextAnswer.is_active
+                                                            )
+                    )
                     if not user_topic:
                         student_stats['topics_details'].append({
                             'topic_id': topic.id,
@@ -112,7 +121,7 @@ def get_course_statistics(user: UserOut, course_id: int):
                             'topic_progress': 0,
                             'question_count': topic.question_count,
                             'average_score': 0,
-                            'ready_to_pass': False
+                            'ready_to_pass': False,
                         })
                     else:
                         student_stats['topics_details'].append({
@@ -122,7 +131,8 @@ def get_course_statistics(user: UserOut, course_id: int):
                             'topic_progress': round(user_topic.topic_progress, 3),
                             'question_count': topic.question_count,
                             'average_score': round(user_topic.topic_progress * 100, 2),
-                            'ready_to_pass': user_topic.ready_to_pass
+                            'ready_to_pass': user_topic.ready_to_pass,
+                            'unsubmited_answers': [a.dump for a in unsubmited_text_answers]
                         })
             
             statistics.append(student_stats)

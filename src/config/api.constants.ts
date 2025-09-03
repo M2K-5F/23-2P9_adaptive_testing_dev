@@ -34,8 +34,9 @@ export const APIUrls = {
     createQuestionURL: `${tURL}/question/create`,
     getQuestionsURL: `${tURL}/question/get`,
     archQuestionURL: `${tURL}/question/arch`,
+    submitQuestionURL: `${tURL}/question/submit`,
 
-    searchCourseURL: `${searchUrl}/course`
+    searchCourseURL: `${searchUrl}/course`,
 } as const;
 
 export type apiUrl = {
