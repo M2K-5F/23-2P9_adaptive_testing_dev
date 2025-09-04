@@ -2,7 +2,7 @@ import { createQuestion } from "@/services/api.service"
 import { CreatedQuestion, QuestionCreate } from "@/types/interfaces"
 import { toast } from "sonner"
 
-export const useCreateQuestion = () => (question: QuestionCreate, topicId: number, onResolve: () => void, onReject: () => void) => {
+export const useCreateQuestion = () => (question: QuestionCreate & {question_type: 'text'|'choice'}, topicId: number, onResolve: () => void, onReject: () => void) => {
         let description: string | undefined
         const correctAnswersCount = question.answer_options.filter(answer => answer.is_correct).length
 

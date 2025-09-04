@@ -46,6 +46,8 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
     if not user_course:
         raise HTTPException(400, 'you not followed at course')
 
+    is_user_course_active = user_course.course.is_active
+
     user_topics = (UserTopic
                                     .select()
                                     .join(Topic)
@@ -54,8 +56,9 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
     )
 
     for user_topic in user_topics:
-        if not user_topic.topic.is_active:
+        if not user_topic.topic.is_active or not is_user_course_active:
             user_topic.ready_to_pass = False
+
 
     return JSONResponse([topic.dump for topic in user_topics])
 

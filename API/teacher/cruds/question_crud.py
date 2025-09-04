@@ -23,12 +23,23 @@ def create_question(user: UserOut, topic_id: str, question: QuestionBase):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="topic not found"
         )
+    question_type = question.question_type
+    if question_type != 'text':
+        correct_answers_count = len(list(filter(lambda q: q.is_correct, question.answer_options )))
+        if correct_answers_count > 1:
+            question_type = 'multiple'
 
-    
+        elif correct_answers_count == 1:
+            question_type = 'single'
+
+        else:
+            raise HTTPException(400, 'no corrected options')
+
+
     created_question, is_created = Question.get_or_create(
         text = question.text,
         by_topic = current_topic,
-        defaults = {"question_type" : question.question_type}
+        defaults = {"question_type": question_type}
     )
 
     if not is_created:

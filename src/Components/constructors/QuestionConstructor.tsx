@@ -14,10 +14,9 @@ import clsx from "clsx"
 export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id: number}> = memo((props) => {
     const [isCreating, setIsCreating] = useState<boolean>(false)
     const handler = useCreateQuestion()
-    const [questionType, setType] = useState<'text' | 'choice' | string>('choice')
+    const [questionType, setType] = useState<'text' | 'choice'>('choice')
     const [createdQuestion, setCreatedQuestion] = useImmer<QuestionCreate>({
         text: '',
-        question_type: 'single',
         answer_options: [{
             text: '',
             is_correct: false
@@ -31,7 +30,7 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
         if (isCreating) {        
             console.log(createdQuestion);
                 
-            handler(createdQuestion, props.topic_id, 
+            handler({...createdQuestion, question_type: questionType}, props.topic_id, 
                 () => {
                     toast.success('Вопрос успешно создан!')
                     props.createQuestionHandler()
@@ -60,11 +59,8 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
 
             <Select 
                 value={questionType} 
-                onValueChange={(v) => {
-                    setType(v), 
-                    setCreatedQuestion(d => {
-                        d.question_type = v === 'text' ? 'text' : 'single'
-                    })
+                onValueChange={(v: 'choice'|'text') => {
+                    setType(v)
                 }}
             >
                 <SelectTrigger className={clsx('bg-white mb-4')} >
@@ -85,7 +81,7 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
                 <>
                     <div className="flex items-center gap-3 mb-4 p-3 bg-secondary/20 rounded-lg">
                         <Badge variant='default'>
-                            {createdQuestion.question_type === 'single' ? "Один правильный ответ" : `Правильных ответов: ${correctAnswersCount}`}
+                            Выбор из вариантов
                         </Badge>
                     </div>
 
@@ -111,25 +107,32 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
                 </>
             }
             {questionType === 'text' &&
-                <fieldset className="mb-4">
-                        <legend className="text-md font-medium mb-3 flex items-center gap-2">
-                            Варианты ответов для первичной проверки
-                            <Badge variant="outline">
-                                {createdQuestion.answer_options.length}
-                            </Badge>
-                        </legend>
-                        
-                        <div className="space-y-3">
-                            {createdQuestion.answer_options.map((answer, index) => (
-                                <TextAnswerElement
-                                    key={index}
-                                    index={index}
-                                    answer={answer}
-                                    questionSetter={setCreatedQuestion}
-                                />
-                            ))}
-                        </div>
-                    </fieldset>
+                <>
+                    <div className="flex items-center gap-3 mb-4 p-3 bg-secondary/20 rounded-lg">
+                        <Badge variant='default'>
+                            Выбор из вариантов
+                        </Badge>
+                    </div>
+                    <fieldset className="mb-4">
+                            <legend className="text-md font-medium mb-3 flex items-center gap-2">
+                                Варианты ответов для первичной проверки
+                                <Badge variant="outline">
+                                    {createdQuestion.answer_options.length}
+                                </Badge>
+                            </legend>
+                            
+                            <div className="space-y-3">
+                                {createdQuestion.answer_options.map((answer, index) => (
+                                    <TextAnswerElement
+                                        key={index}
+                                        index={index}
+                                        answer={answer}
+                                        questionSetter={setCreatedQuestion}
+                                    />
+                                ))}
+                            </div>
+                        </fieldset>
+                </>
             }
 
             <div className="flex flex-wrap gap-3">
@@ -218,9 +221,6 @@ const AnswerElement = memo((props: {
                                 if (!(draft.answer_options.filter(a => a.is_correct).length === 1 && !checked)) {
                                     draft.answer_options[props.index].is_correct = !!checked
                                 }
-                                
-                                const correctAnswers = draft.answer_options.filter(a => a.is_correct).length
-                                draft.question_type = correctAnswers > 1 ? 'multiple' : 'single'
                             })
                         }}
                     />

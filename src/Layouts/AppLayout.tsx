@@ -1,7 +1,7 @@
 import { AsidePanel, AsideSummary } from "@/Components/layout/aside"
 import useWindowSize from "@/hooks/useWindowSize";
 import React, { createContext, FC, memo, RefObject, useLayoutEffect, useState } from "react"
-import { Outlet, useNavigate } from "react-router-dom"
+import { Link, Outlet, useNavigate } from "react-router-dom"
 import { Toaster } from "@/Components/ui/sonner";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -51,8 +51,14 @@ export const AppLayout: FC = memo(() => {
                             'content-center grid h-14'
                         )} 
                     >
-                        <div className="w-full pl-4">
-                            <AsideSummary />    
+                        <div className="w-full flex gap-2 pl-4">
+                            <AsideSummary />   
+                            <Link 
+                                to="/" 
+                                className="text-sm font-medium text-primary hover:underline flex items-center"
+                            >
+                                ← На главную
+                            </Link> 
                         </div>
                         <SearchContainer
                             className="max-sm:w-45 max-md:w-75 max-lg:w-100 w-120"

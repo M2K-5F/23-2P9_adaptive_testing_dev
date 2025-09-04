@@ -1,4 +1,3 @@
-// export const baseURL = `http://mytest.servehttp.com` as const;
 export const baseURL = `http://localhost:8001` as const;
 export const tURL = `${baseURL}/t` as const;
 export const sURL = `${baseURL}/s` as const;
@@ -37,9 +36,9 @@ export const APIUrls = {
     submitQuestionURL: `${tURL}/question/submit`,
 
     searchCourseURL: `${searchUrl}/course`,
-} as const;
+} as const
 
 export type apiUrl = {
     [K in keyof typeof APIUrls]:
         typeof APIUrls[K] extends (pollID: number) => any ? ReturnType<typeof APIUrls[K]> : typeof APIUrls[K]
-}[keyof typeof APIUrls];
+}[keyof typeof APIUrls]

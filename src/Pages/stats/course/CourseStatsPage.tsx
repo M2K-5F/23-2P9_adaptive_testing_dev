@@ -148,7 +148,7 @@ export const CourseStatisticsPage: FC = () => {
                                                 }
 
                                                 <span className="text-muted-foreground">
-                                                    {topic.topic_progress * topic.question_count}/{topic.question_count}
+                                                    {(topic.topic_progress * topic.question_count).toPrecision(3)}/{topic.question_count}
                                                 </span>
                                             </div>
                                         </div>

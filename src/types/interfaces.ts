@@ -85,7 +85,6 @@ export interface AnswerOption {
 
 export interface QuestionCreate {
     text: string
-    question_type: 'single' | 'multiple' | 'text'
     answer_options: AnswerCreate[]
 }
 
