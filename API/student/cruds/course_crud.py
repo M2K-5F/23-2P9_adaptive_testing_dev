@@ -4,7 +4,7 @@ from typing import Union, Tuple
 from playhouse.shortcuts import model_to_dict
 from peewee import fn
 
-from db import database, Course, UserCourse, UserTopic, Topic, UserQuestion, AdaptiveQuestion
+from db import database, Course, UserCourse, UserTopic, Topic, UserQuestion, AdaptiveQuestion, UserTextAnswer
 from shemas import UserOut
 
 
@@ -118,9 +118,17 @@ def clear_uc_progress(user: UserOut, user_course_id: int):
                             .where(UserQuestion.by_user_topic == user_topic))
         for user_question in user_questions:
             user_question.delete_instance()
+        
+        user_answers = (UserTextAnswer
+                                .select()
+                                .where(UserTextAnswer.by_user_topic == user_topic))
 
         for adapque in user_topic.adaptive_questions:
             adapque.delete_instance()
+
+        for ans in user_answers:
+            ans.delete_instance()
+
         user_topic.topic_progress = 0
         user_topic.is_completed = False
         user_topic.ready_to_pass = False if user_topic.topic.number_in_course else True

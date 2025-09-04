@@ -46,13 +46,16 @@ def get_topics_by_followed_course(user: UserOut, user_course_id):
     if not user_course:
         raise HTTPException(400, 'you not followed at course')
 
-    user_topics: list[UserTopic] = (UserTopic
+    user_topics = (UserTopic
                                     .select()
                                     .join(Topic)
                                     .where(UserTopic.by_user_course == user_course)
                                     .order_by(UserTopic.topic.number_in_course.asc())
     )
 
+    for user_topic in user_topics:
+        if not user_topic.topic.is_active:
+            user_topic.ready_to_pass = False
 
     return JSONResponse([topic.dump for topic in user_topics])
 
@@ -62,6 +65,9 @@ def start_topic(user: UserOut, user_topic_id: str):
 
     if not user_topic:
         raise HTTPException(400, 'u not followed at this course')
+
+    if not user_topic.topic.is_active:
+        raise HTTPException(400, 'This topic are inactive')
 
     if not user_topic.by_user_course.is_active:
         raise HTTPException(400, 'This course are inactive')
@@ -136,8 +142,12 @@ def start_topic(user: UserOut, user_topic_id: str):
 def submit_topic_answers(user: UserOut, topic_answers_data: TopicSubmitAnswers):
     user_topic = UserTopic.get_or_none(UserTopic.id == topic_answers_data.user_topic_id, UserTopic.user == user.username)
 
+
     if not user_topic:
         raise HTTPException(400, 'topic not found or u not followed at course')
+
+    if not user_topic.topic.is_active:
+        raise HTTPException(400, 'This topic are inactive')
 
     if not user_topic.ready_to_pass:
         raise HTTPException(400, 'u cannot pass this topic')

@@ -31,12 +31,6 @@ const NotFoundPage = () => {
           </div>
         </div>
       </div>
-      
-      {/* Декоративные элементы в стиле shadcn/ui */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between px-10 pt-10 opacity-10">
-        <div className="w-32 h-32 rounded-full bg-slate-400"></div>
-        <div className="w-32 h-32 rounded-full bg-slate-400"></div>
-      </div>
     </div>
   )
 }
