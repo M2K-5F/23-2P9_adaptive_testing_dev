@@ -1,5 +1,5 @@
 import { useAsideVisibilityStore } from "@/Layouts/AppLayout"
-import { userStore } from "@/stores/userStore"
+import { useUserStore } from "@/stores/useUserStore"
 import { Link, SetURLSearchParams, useNavigate, useSearchParams } from "react-router-dom"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, CreateCourseDialog, CreateTopicDialog, Label, OpenCloseSvg, SearchContainer, Skeleton } from ".."
 import { UserMenu } from "../other/user-menu"
@@ -14,7 +14,7 @@ import { BarChart3 } from "lucide-react"
 
 export const AsideDetail = () => {
     const setIsOpen = useAsideVisibilityStore(s => s.setIsOpen)
-    const role = userStore(s => s.role)
+    const roles = useUserStore(s => s.roles)
     const navigate = useNavigate()
 
     
@@ -44,8 +44,8 @@ export const AsideDetail = () => {
                 callbackfn={(course) => {navigate(routes.viewCourse(course.id))}}
             />
 
-            {role.includes('teacher') && <AsideTeacherCourses /> }
-            {role.includes('student') && <AsideStudentCourses /> }
+            {roles.includes('teacher') && <AsideTeacherCourses /> }
+            {roles.includes('student') && <AsideStudentCourses /> }
             
             
         </>
@@ -228,8 +228,8 @@ const AsideStudentCourses: React.FC = () => {
                             }}
                         >
                             <span className="font-medium text-sm">{course.course.title}</span>
-                            <span className="ml-1 text-xs">
-                                Создан: {course.course.created_by}
+                            <span className="mt-1 text-xs">
+                                Создан: {course.course.created_by.name}
                             </span>
                         </Button>
                     ))

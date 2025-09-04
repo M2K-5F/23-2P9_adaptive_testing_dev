@@ -1,10 +1,24 @@
 import { useState, useEffect, memo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
-import { Button, Badge, CreatedQuestion, QuestionConstructor } from "@/Components"
-import { CreatedTopic as CT, CreatedQuestion as CQ } from "@/types/interfaces"
+import { Button, Badge } from "@/Components"
+import { CreatedQuestion, QuestionConstructor } from "@/Components"
+import { CreatedTopic as CT } from "@/types/interfaces"
 import { getQuestions, archTopic } from "@/services/api.service"
 import clsx from "clsx"
+import { 
+  Archive, 
+  ArchiveRestore, 
+  ChevronDown, 
+  ChevronUp, 
+  BookOpen, 
+  Plus, 
+  X,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Loader2
+} from "lucide-react"
 
 export const CreatedTopic = memo(({ topic, index }: {
     topic: CT, 
@@ -15,8 +29,9 @@ export const CreatedTopic = memo(({ topic, index }: {
     const expandedTopic = Number(params.get('expanded'))
     const isExpanded = expandedTopic === topic.id
     const fetchTopics = useTopicStore(s => s.fetchCreatedTopics)
-    const [questions, setQuestions] = useState<CQ[]>([])
+    const [questions, setQuestions] = useState<any[]>([])
     const [isCreating, setIsCreating] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     
     const handleExpand = () => {
         setParams(p => {
@@ -26,69 +41,121 @@ export const CreatedTopic = memo(({ topic, index }: {
     }
 
     const fetchQuestions = async () => {
-        setQuestions(await getQuestions(topic.id))
+        setIsLoading(true)
+        try {
+            const questionsData = await getQuestions(topic.id)
+            setQuestions(questionsData)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    const handleArchTopic = (topicId: number) => {
+    const handleArchTopic = () => {
         archTopic(topic.id)
         .then(() => {fetchTopics(courseId)})
+        .catch(err => {
+            console.error('Error archiving topic:', err)
+        })
     }
 
-    useEffect(() => {fetchQuestions()}, [])
+    useEffect(() => {
+        if (!isExpanded) {
+            fetchQuestions()
+        }
+    }, [isExpanded])
 
+    const activeQuestionsCount = questions.filter(q => q.is_active).length
 
     return (
         <article className={clsx(
-            `border border-foreground overflow-hidden`,
-            'rounded-lg shadow-sm mb-4 min-h-42 h-fit',
+            `border border-foreground overflow-hidden transition-all duration-300`,
+            'rounded-md shadow-sm mb-4 min-h-42 h-fit',
             isExpanded && 'sm:col-span-2',
             !topic.is_active &&  'opacity-70'
         )}>
-            <section className="p-4 bg-muted">
-                <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-lg font-medium cursor-pointer" onClick={handleExpand}>
-                        {topic.title}
-                    </h3>
+            <section className="p-5 bg-muted">
+                <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-primary/10 rounded-lg mt-1">
+                            <BookOpen className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 
+                                className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors line-clamp-2" 
+                                onClick={handleExpand}
+                            >
+                                {topic.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {topic.description || "Описание отсутствует"}
+                            </p>
+                        </div>
+                    </div>
 
                     <Button
                         variant='outline'
                         size="sm"
-                        onClick={() => {handleArchTopic(topic.id)}}
+                        onClick={handleArchTopic}
                         title={topic.is_active ? 'Архивировать' : 'Разархивировать'}
+                        className="h-8 w-8 p-0"
                     >
-                        {topic.is_active ? '🗄️' : '📦'}
+                        {topic.is_active ? 
+                            <Archive className="h-4 w-4" /> : 
+                            <ArchiveRestore className="h-4 w-4" />
+                        }
                     </Button>
                 </div>
 
-                <p className="text-sm text-wrap text-muted-foreground wrap-break-word mb-2">
-                    {topic.description || "Нет описания"}
-                </p>
-
-                <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm">Статус:</span>
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                    <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Вопросов: {questions.length}</span>
+                        {activeQuestionsCount > 0 && (
+                            <span className="text-green-600">({activeQuestionsCount} актив.)</span>
+                        )}
+                    </div>
+                    
                     <Badge 
-                        className="cursor-pointer" 
-                        onClick={() => handleArchTopic(topic.id)} 
-                        variant={topic.is_active ? 'default' : 'outline'}
-                        >{
-                            topic.is_active ? 'Активный' : 'В архиве'
-                        }</Badge>
+                        className="cursor-pointer flex items-center gap-1" 
+                        onClick={handleArchTopic} 
+                        variant={topic.is_active ? 'default' : 'secondary'}
+                    >
+                        {topic.is_active 
+                            ?   <>
+                                    <CheckCircle className="h-3.5 w-3.5" />
+                                    Активный
+                                </>
+                            :   <>
+                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    В архиве
+                                </>
+                        }
+                    </Badge>
                 </div>
 
                 <Button
-                    variant={isExpanded ? "destructive" : "default"}
+                    variant={"outline"}
                     size="sm"
                     onClick={handleExpand}
-                >
-                    {isExpanded ? 'Закрыть тему' : 'Перейти к теме'}
+                    className="mt-4 flex items-center gap-2 w-full sm:w-auto"
+                >   
+                    <ChevronUp className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
+                    {isExpanded ? 'Свернуть тему' : 'Подробнее'
+                    }
                 </Button>
             </section>
 
             {isExpanded && 
                 <section className="py-4 bg-muted/50">
-                    <h4 className="text-md font-medium mx-4 mt-2 mb-3">Вопросы темы:</h4>
+                    <div className="px-5 mb-4">
+                        <h4 className="text-md font-semibold flex items-center gap-2">
+                            <FileText className="h-5 w-5" />
+                            Вопросы темы
+                        </h4>                        
+                    </div>
 
-                    {questions?.length ? 
+                    <div className="space-y-3">
+                        {questions?.length ? 
                             questions.map(question => 
                                 <CreatedQuestion
                                     key={question.id} 
@@ -96,37 +163,53 @@ export const CreatedTopic = memo(({ topic, index }: {
                                     fetchQuestions={fetchQuestions}
                                 /> 
                             ) : 
-                            <p className="text-sm text-muted-foreground m-2.5">Нет созданных вопросов</p>
-                    
+                            !isLoading && (
+                                <p className="text-sm text-muted-foreground px-5">
+                                    Нет созданных вопросов
+                                </p>
+                            )
+                        }
+                    </div>
+                    {isLoading &&
+                        <div className="flex items-center gap-2 w-40 mx-auto text-sm text-muted-foreground mt-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Загрузка вопросов...
+                        </div>
                     }
 
-                    {!isCreating ? (
-                        <Button 
-                            variant='default'
-                            className="mt-3 mx-4 h-9 bg-green-400 hover:bg-green-300"
-                            onClick={() => setIsCreating(true)}
-                        >
-                            + Создать вопрос
-                        </Button>
-                    ) : (
-                        <>
-                            <QuestionConstructor
-                                topic_id={topic.id}
-                                createQuestionHandler={() => {setIsCreating(false), fetchQuestions()}}
-                            />
-                            
-                            <div className="mt-3">
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    className={clsx('mx-4')} 
-                                    onClick={() => setIsCreating(false)}
+                    {!isCreating 
+                        ?   <div className="px-5 mt-4">
+                                <Button 
+                                    variant='default'
+                                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600"
+                                    onClick={() => setIsCreating(true)}
                                 >
-                                    Отменить создание
+                                    <Plus className="h-4 w-4" />
+                                    Создать вопрос
                                 </Button>
                             </div>
-                        </>
-                    )}
+                        :   <>
+                                <QuestionConstructor
+                                    topic_id={topic.id}
+                                    createQuestionHandler={() => {
+                                        setIsCreating(false)
+                                        fetchQuestions()
+                                    }}
+                                />
+                                
+                                <div className="mt-3 px-5">
+                                    <Button
+                                        variant='destructive'
+                                        size="sm"
+                                        className="flex items-center gap-2" 
+                                        onClick={() => setIsCreating(false)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                        Отменить создание
+                                    </Button>
+                                </div>
+                            </>
+                    }
                 </section>
             }
         </article>

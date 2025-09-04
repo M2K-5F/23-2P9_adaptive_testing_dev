@@ -33,11 +33,12 @@ export const APIUrls = {
     createQuestionURL: `${tURL}/question/create`,
     getQuestionsURL: `${tURL}/question/get`,
     archQuestionURL: `${tURL}/question/arch`,
+    submitQuestionURL: `${tURL}/question/submit`,
 
-    searchCourseURL: `${searchUrl}/course`
-} as const;
+    searchCourseURL: `${searchUrl}/course`,
+} as const
 
 export type apiUrl = {
     [K in keyof typeof APIUrls]:
         typeof APIUrls[K] extends (pollID: number) => any ? ReturnType<typeof APIUrls[K]> : typeof APIUrls[K]
-}[keyof typeof APIUrls];
+}[keyof typeof APIUrls]

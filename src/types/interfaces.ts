@@ -2,10 +2,12 @@ export type status = 'authorized' | "forbidden" | "unauthorized" | "undefined" |
 export type role = 'teacher' | 'student' | "undefined"
 
 export interface userStoreShema {
-    nick: string ,
+    username: string,
+    name: string
     status: status,
-    role: role[]
-    regUser: (user: fetchedUserShema) => void
+    telegram_link: string
+    roles: role[]
+    regUser: (user: UserShema) => void
     DelUser: Function
     pingUser: () => void
 }
@@ -19,52 +21,33 @@ export interface RegistrationForm {
     password_rp: string
 }
 
-export interface userShema {
-    nick: string | undefined,
-    role: role[]
-}
 
-export interface fetchedUserShema {
-    nick: string,
-    status: role[]
-}
-
-export interface Answer {
-    id?: number
-    text: string
-    is_correct? : boolean
-}
-
-export interface Question {
-    id?: number
-    question_type: 'single' | 'multiple'
-    text: string,
-    answer_options: Answer[]
-}
-
-export interface Form {
-    title: string,
-    description: string,
-    questions: Question[]
-}
-
-export interface ShowFormShema {
-    form: Form,
-    setForm: (_:Form) => void
+export interface UserShema {
+    username: string,
+    name: string    
+    telegram_link: string
+    roles: role[]
 }
 
 
-export interface CreatedCourse {
-    created_by: string,
+export interface CreatedCourseBase {
+    created_by: UserShema,
+    description: string
     id: number,
     is_active: boolean,
     title: string
 }
 
 
+export interface CreatedCourse extends CreatedCourseBase {
+    student_count: number
+    topic_count: number
+    created_at: string
+}
+
 export interface UserCourse {
     id: number,
-    user: string,
+    user: UserShema,
     course: CreatedCourse,
     course_progress: number
     is_active: boolean
@@ -72,20 +55,20 @@ export interface UserCourse {
 }
 
 
-export interface FetchedCourse extends CreatedCourse {
+export interface FetchedCourse extends CreatedCourseBase {
     user_course: UserCourse | false
 }
 
 
-export interface CreatedTopic extends CreatedCourse {
-    description: string
+export interface CreatedTopic extends CreatedCourseBase {
     number_in_course: number
     question_count: number
-    by_course: number
+    by_course: CreatedCourse
 }
 
 export interface UserTopic {
     id: number
+    user: string
     topic: CreatedTopic
     by_user_course: UserCourse
     ready_to_pass: boolean
@@ -97,26 +80,52 @@ export interface AnswerOption {
     id?: number
     text: string
     is_correct: boolean
-    by_question: number
+    by_question: CreatedQuestion
 }
+
+export interface QuestionCreate {
+    text: string
+    answer_options: AnswerCreate[]
+}
+
+
+export interface AnswerCreate {
+    text: string
+    is_correct: boolean
+}
+
+
+export interface TextAnswerCreate {
+    text: string
+}
+
 
 export interface CreatedQuestion {
     id: number
     text: string
-    by_topic: number
-    question_type: 'single' | 'multiple'
+    by_topic: CreatedTopic
+    question_type: 'single' | 'multiple' | 'text'
     is_active: boolean
     answer_options: AnswerOption[]
 }
 
 export interface CompletedTopic {
     user_topic_id: number
-    questions: CompletedQuestion[]
+    questions: (CompletedQuestion | CompletedTextQuestion)[]
+}
+
+export interface CompletedTextQuestion {
+    id: number
+    text: string
+    by_topic: number
+    type: 'text'
 }
 
 export interface CompletedQuestion {
     id: number
     answer_options: CompletedOption[]
+    by_topic: number
+    type: 'choice'
 }
 
 export interface CompletedOption {
@@ -127,8 +136,8 @@ export interface CompletedOption {
 export interface QuestionToPass {
     id: number
     text: string
-    by_topic: number
-    question_type: 'single' | 'multiple'
+    by_topic: CreatedTopic
+    question_type: 'single' | 'multiple' | 'text'
     is_active: boolean
     answer_options: OptionToPass[]
 }
@@ -146,6 +155,30 @@ export interface TopicDetail {
     question_count: number
     average_score: number
     ready_to_pass: boolean
+    unsubmited_answers: UnsubmitedAnswer[]
+}
+
+export interface UnsubmitedAnswer {
+    id: number
+    user: UserShema
+    question: {
+        id: number
+        text: string
+        by_topic: number
+        question_type: 'text'
+        is_active: boolean
+    }
+    by_user_topic: UserTopic
+    for_user_question: {
+        id: number
+        user: string
+        by_user_topic: number
+        question: number
+        question_score: number
+    }
+    text: string
+    is_correct: false
+    is_active: true
 }
 
 export interface StudentStats {
@@ -166,7 +199,4 @@ export interface CourseStats {
     average_progress: number
     students: StudentStats[]
 }
-
-export interface FormCreate extends Partial<Form>{}
-
 

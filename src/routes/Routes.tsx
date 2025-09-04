@@ -5,19 +5,20 @@ import Regisration from "../Pages/users/Registration/Registration";
 import ForbiddenPage from "../Pages/errors/HTTP_403";
 import ServiceUnavailablePage from "../Pages/errors/HTTP_503";
 import HomePage from "../Pages/home/HomePage";
-import {TopicsPortal }from "../Pages/edit/course/EditCoursePortal";
+import {TopicsPortal }from "../Pages/edit/course/EditCoursePage";
 import { FollowedCoursePage } from '../Pages/course/CourseViewPage'
-import { userStore } from "../stores/userStore";
+import { useUserStore } from "../stores/useUserStore";
 import { use, useLayoutEffect } from "react";
 import { AppLayout } from "@/Layouts/AppLayout";
 import { AuthLayout } from "@/Layouts/AuthLayout";
 import { TopicPage } from "@/Pages/topic/PassTopicPage";
 import { Toaster } from "sonner";
 import { CourseStatisticsPage } from "@/Pages/stats/course/CourseStatsPage";
+import NotFoundPage from "@/Pages/errors/HTTP_404";
 
 
 export default function RoutePaths () {
-  const pingUser = userStore(s => s.pingUser)
+  const pingUser = useUserStore(s => s.pingUser)
 
   useLayoutEffect(() => {
     pingUser()
@@ -47,6 +48,8 @@ export default function RoutePaths () {
             </Route>
 
           </Route>
+          
+              <Route path="*" Component={NotFoundPage} />
         </Routes>
       </BrowserRouter>
     </>

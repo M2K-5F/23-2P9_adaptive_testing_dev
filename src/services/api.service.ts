@@ -1,8 +1,8 @@
 
 import { replace, useNavigate } from 'react-router-dom'
 import {apiUrl, APIUrls} from '../config/api.constants'
-import { userStore } from '../stores/userStore'
-import { CompletedTopic, CourseStats, CreatedCourse, CreatedTopic, FetchedCourse, Form, Question, QuestionToPass, UserTopic } from '../types/interfaces'
+import { useUserStore } from '../stores/useUserStore'
+import { CompletedTopic, CourseStats, CreatedCourse, CreatedTopic, FetchedCourse, QuestionCreate, QuestionToPass, UserShema, UserTopic } from '../types/interfaces'
 import axios from 'axios'
 
 class ApiServiceClass {
@@ -25,7 +25,7 @@ class ApiServiceClass {
 
         return fetch(`${URL}?${queryString}`, init)
         .catch(() => {
-            userStore.setState( state => ({...state, status: "serverunavailable"}))
+            useUserStore.setState( state => ({...state, status: "serverunavailable"}))
             throw Error('503')
         })
         .then((response) => {
@@ -38,7 +38,7 @@ class ApiServiceClass {
                     throw Error
                 }
                 if (response.status === 401 && !ignoreUnautorize) {
-                    userStore.setState(state => ({...state, status: 'unauthorized'}))
+                    useUserStore.setState(state => ({...state, status: 'unauthorized'}))
                     throw Error
                 }
                 throw Error(String(response.status))
@@ -61,7 +61,7 @@ export const logoutUser = async () => {
 }
 
 
-export const loginUser = (login: string, password: string) => {
+export const loginUser = (login: string, password: string, is_remember: boolean): Promise<UserShema> => {
     return  ApiService.requestToServer(
         APIUrls.logInURL,
         {
@@ -71,7 +71,7 @@ export const loginUser = (login: string, password: string) => {
                 'accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({username: login, password: password})
+            body: JSON.stringify({username: login, password: password, is_remember: is_remember})
         },
         undefined,
         true
@@ -93,7 +93,7 @@ export const registerUser = async (body: string) => {
 }
 
 
-export const createCourse = (title: string) => {
+export const createCourse = (title: string, description: string) => {
     return ApiService.requestToServer(
         APIUrls.createCourseURL,
         {
@@ -101,7 +101,8 @@ export const createCourse = (title: string) => {
             method: 'post',
         },
         {
-            "course_title": title
+            "course_title": title,
+            "course_description": description
         }
     )
 }
@@ -253,7 +254,7 @@ export const unfollowTopic = (topic_id: number) => {
 }
 
 
-export const createQuestion = (topic_id: number, question: Question) => {
+export const createQuestion = (topic_id: number, question: QuestionCreate) => {
     return ApiService.requestToServer(
         APIUrls.createQuestionURL,
         {
@@ -387,6 +388,20 @@ export const getCourseStats = (courseId: number): Promise<CourseStats> => {
         },
         {
             "course_id": courseId
+        }
+    )
+}
+
+export const submitQuestion = (user_answer_id: number, score: number) => {
+    return ApiService.requestToServer(
+        APIUrls.submitQuestionURL,
+        {
+            credentials: 'include',
+            method: 'post'
+        },
+        {
+            'user_answer_id': user_answer_id,
+            "score": score
         }
     )
 }

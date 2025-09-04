@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from fastapi.responses import JSONResponse
 
 from api_depends import get_user_from_request
-from ..cruds import get_question_list, arch_question, create_question
+from ..cruds import get_question_list, arch_question, create_question, submit_question
 from shemas import UserOut, Roles, QuestionBase
 
 
@@ -13,9 +13,9 @@ question_router = APIRouter(prefix='/question', tags=['Teacher/Question'])
 def create_teacher_question(
     current_user = Depends(get_user_from_request),
     topic_id = Query(),
-    question: QuestionBase = Body()
+    question: QuestionBase = Body(),
 ) -> JSONResponse:
-    return create_question(current_user, topic_id, question)
+    return create_question(current_user, topic_id, question, )
 
 
 @question_router.get('/get', summary='Get created by teacher questions at topic')
@@ -32,3 +32,12 @@ def arch_teacher_question(
     question_id = Query(),
 ) -> JSONResponse:
     return arch_question(current_user, question_id)
+
+
+@question_router.post('/submit')
+async def submit_text_questions(
+    curent_user = Depends(get_user_from_request),
+    user_answer_id = Query(),
+    score: float = Query()
+) -> JSONResponse:
+    return submit_question(curent_user, score, user_answer_id)

@@ -1,36 +1,35 @@
-import { AsidePanelLayout } from "@/Components/layout/aside"
+import { AsidePanel, AsideSummary } from "@/Components/layout/aside"
 import useWindowSize from "@/hooks/useWindowSize";
 import React, { createContext, FC, memo, RefObject, useLayoutEffect, useState } from "react"
-import { Outlet } from "react-router-dom"
+import { Link, Outlet, useNavigate } from "react-router-dom"
 import { Toaster } from "@/Components/ui/sonner";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import clsx from "clsx";
+import { SearchContainer } from "@/Components";
+import { routes } from "@/config/routes.config";
+import { searchCourses } from "@/services/api.service";
 
 interface asideSectionsVisibilityStore {
     timer: number
     isOpen: boolean, 
-    isSummaryVisible: boolean, 
     isDetailVisible: boolean,
     setIsOpen: (isOpen: boolean) => void
 }
 
 export const useAsideVisibilityStore = create<asideSectionsVisibilityStore>()(immer((set, get) => {
-        const isOpen = window.innerWidth > 1024
         return {
             timer: 0,
-            isOpen: isOpen, 
-            isDetailVisible: isOpen, 
-            isSummaryVisible: !isOpen,
+            isOpen: false, 
+            isDetailVisible: false, 
             setIsOpen: (isOpen) => {
                 set(d => {
                     clearTimeout(get().timer)
                     d.isOpen = isOpen
                     if (isOpen) {
                         d.isDetailVisible = true
-                        d.timer = setTimeout(() => set(d => {d.isSummaryVisible = false}), 1000)
                     } else {
-                        d.isSummaryVisible = true
-                        d.timer = setTimeout(() => set(d => {d.isDetailVisible = false}), 1000)
+                        d.timer = setTimeout(() => set(d => {d.isDetailVisible = false}), 500) as unknown as number
                     }
                 })
             }
@@ -39,21 +38,40 @@ export const useAsideVisibilityStore = create<asideSectionsVisibilityStore>()(im
 
 
 export const AppLayout: FC = memo(() => {
-    useWindowSize()
-    const {isOpen, setIsOpen} = useAsideVisibilityStore()
-
-    useLayoutEffect(() => {
-        isOpen && window.innerWidth < 1024 && setIsOpen(false)
-
-        !isOpen && window.innerWidth > 1024 && setIsOpen(true)
-    }, [window.innerWidth])
-
+    const navigate = useNavigate()
     return(
         <React.Fragment>
-            <div className='flex h-dvh overflow-hidden scroll-auto w-dvw'>
-                <AsidePanelLayout /> 
-                <main className="p-1 md:p-4 grow will-change-transform overflow-y-scroll max-lg:ml-[60px] h-dvh" style={{willChange: 'width'}}>    
-                    <Outlet />
+            <div className='h-dvh max-h-dvh w-dvw'>
+                <AsidePanel />
+                <main className="h-full max-h-full">    
+                    <header 
+                        className={clsx(
+                            'w-full fixed bg-[var(--aside)] grid-cols-3',
+                            'items-center justify-items-center', 
+                            'content-center grid h-14'
+                        )} 
+                    >
+                        <div className="w-full flex gap-2 pl-4">
+                            <AsideSummary />   
+                            <Link 
+                                to="/" 
+                                className="text-sm font-medium text-primary hover:underline flex items-center"
+                            >
+                                ← На главную
+                            </Link> 
+                        </div>
+                        <SearchContainer
+                            className="max-sm:w-45 max-md:w-75 max-lg:w-100 w-120"
+                            searchfn={(query, callbackfn) => {
+                                searchCourses(query)
+                                .then(data => callbackfn(data))
+                            }}
+                            callbackfn={(course) => {navigate(routes.viewCourse(course.id))}}
+                        />
+                    </header>
+                    <div className="max-h-dvh h-dvh scrollbar-hidden overflow-y-scroll pt-14">    
+                        <Outlet />
+                    </div>
                 </main>
             </div>
         </React.Fragment>

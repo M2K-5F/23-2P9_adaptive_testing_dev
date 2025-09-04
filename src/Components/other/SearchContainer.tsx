@@ -1,4 +1,4 @@
-import React, { ChangeEvent, RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, { act, ChangeEvent, RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useDebounce } from "../../hooks/useDebounce"
 import { CreatedCourse } from "../../types/interfaces"
 import { Input } from "../ui/input"
@@ -21,10 +21,12 @@ interface props<T> {
 export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
     const [searchedCourses, setSearchedCourses] = useState<T[]>([])
     const [searchQuery, setSearchQuery] = useState<string>('')
+    const [active, setActive] = useState<boolean>(false)
     const input = useRef<null | HTMLInputElement>(null)
     
     const searchCourses = useDebounce((query: string) => {
         props.searchfn(query.trim(), (courses) => setSearchedCourses(courses))
+        setActive(true)
     }, props.delay)
 
 
@@ -35,18 +37,15 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
                 input.current?.focus()
             }
         }
-        const handleEvent = (e: Event) => {
-            if (document.activeElement === input.current) return
-
-            e.preventDefault()
-            input.current?.focus()
+        const handleOutsideClick = (e: MouseEvent) => {
+            setActive(false)
         }
 
         document.addEventListener('keypress', handleKB)
-        document.addEventListener('searchactivate', handleEvent)
+        document.addEventListener('click', handleOutsideClick)
         return () => {
+            document.removeEventListener('click', handleOutsideClick)
             document.removeEventListener('keypress', handleKB)
-            document.removeEventListener('searchactivate', handleEvent)
         }
     }, [])
 
@@ -55,10 +54,10 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
         ?   searchCourses(searchQuery)
         :   setSearchedCourses([])
     }, [searchQuery])
-
+    
 
     return(
-        <search className={`h-fit ${props.className}`} >
+        <search className={`relative h-fit ${props.className}`} >
             <div className="relative w-full h-fit">
                 <Input
                     ref={input}
@@ -67,10 +66,11 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
                     max={props.maxlengh ?? 60}
                     value={searchQuery}
                     onChange={e => {
+                        setActive(true)
                         setSearchQuery(e.currentTarget.value.trimStart())
                     }}
                 />
-                <div onClick={() => input.current?.focus()} className=" select-none w-fit h-full cursor-text items-center pl-2 flex top-0 gap-1 absolute text-[14px]">
+                <div onClick={(e) => {input.current?.focus(), setActive(true), e.stopPropagation()}} className=" select-none w-fit h-full cursor-text items-center pl-2 flex top-0 gap-1 absolute text-[14px]">
                     <svg aria-hidden="true" className="fill-black dark:fill-white" color="#ffffff" height="16" viewBox="0 0 16 16" width="16" >
                         <path 
                             d="M10.68 11.74a6 6 0 0 1-7.922-8.982 
@@ -81,21 +81,27 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
                         >
                         </path>
                     </svg>
-                    <div className="flex gap-1 items-baseline srch-placeholder ">
-                        Нажми
-                        <span className={clsx(
-                            "border-foreground border inline-grid content-end", 
-                            "rounded-sm justify-center text-[12px] h-4.5 w-4.5"
-                        )}
-                        >/
-                        </span>
-                        для поиска
-                    </div>
+                    {!props.placeholder 
+                        ?   <div className="flex gap-1 items-baseline srch-placeholder ">
+                                Нажми
+                                <span className={clsx(
+                                    "border-foreground border inline-grid content-end", 
+                                    "rounded-sm justify-center text-[12px] h-4.5 w-4.5"
+                                )}
+                                >/
+                                </span>
+                                для поиска 
+                            </div>
+                        :   <div className="srch-placeholder">{props.placeholder}</div>
+                    }
                 </div>
             </div>
         
-            {searchedCourses.length > 0 && searchQuery && 
-                <div className="p-2 h-fit w-11/12 m-auto bg-card dark:bg-input/80 rounded-b-md border border-t-">
+            {searchedCourses.length > 0 && searchQuery && active && 
+                <div 
+                    className="p-2 mx-5 absolute m-auto bg-[var(--search)] outline-0 rounded-b-md border border-t-0"
+                    style={{width:'calc(100% - 40px)'}}
+                >
                     <h4 className="text-xs text-gray-500 dark:text-gray-400">Найденные курсы:</h4>
                     {searchedCourses.length
                         ?   searchedCourses.map(course => 

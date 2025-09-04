@@ -8,8 +8,6 @@ import {
     Badge
 } from "@/Components"
 import { FC, memo, useEffect, useId, useState } from "react"
-import { userStore } from "@/stores/userStore"
-import { useCreateCourse } from "@/hooks/useCreateCourse"
 import { PropsVariant } from "@/types/types"
 import { set } from "react-hook-form"
 import { RotateCcw } from "lucide-react"
@@ -18,7 +16,7 @@ import { toast } from "sonner"
 import { useTopicStore } from "@/stores/useTopicStore"
 
 
-export const ClearUCProgressDialog: FC<{className?: string, variant?: PropsVariant, userCourseId: number, isBadge?: boolean}> = memo(({isBadge, userCourseId, className, variant}) => {
+export const ClearUCProgressDialog: FC<{className?: string, variant?: PropsVariant, userCourseId: number, isBadge?: boolean, callback: (id: number) => void}> = memo(({isBadge, userCourseId, className, variant, callback}) => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isClearing, setIsClearing] = useState<boolean>(false)
     const fetchFollowedTopics = useTopicStore(s => s.fetchFollowedTopics)
@@ -27,7 +25,7 @@ export const ClearUCProgressDialog: FC<{className?: string, variant?: PropsVaria
         try {
             await clearUCProgress(userCourseId)
             toast.success('Прогресс успешно сброшен!')
-            fetchFollowedTopics(userCourseId)
+            callback(userCourseId)
             setIsOpen(false)
         } catch {
             toast.error('Не удалось сбросить прогресс.')

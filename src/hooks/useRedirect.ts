@@ -1,6 +1,6 @@
 import { Pathname } from "history"
 import { useNavigate } from "react-router-dom"
-import { userStore } from "../stores/userStore"
+import { userStore } from "../stores/useUserStore"
 import { useEffect } from "react"
 import { isPathAvailable, Paths } from "../config/routes.config"
 

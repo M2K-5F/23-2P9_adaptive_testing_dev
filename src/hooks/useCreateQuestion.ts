@@ -1,8 +1,8 @@
 import { createQuestion } from "@/services/api.service"
-import { Question } from "@/types/interfaces"
+import { CreatedQuestion, QuestionCreate } from "@/types/interfaces"
 import { toast } from "sonner"
 
-export const useCreateQuestion = () => (question: Question, topicId: number, onResolve: () => void, onReject: () => void) => {
+export const useCreateQuestion = () => (question: QuestionCreate & {question_type: 'text'|'choice'}, topicId: number, onResolve: () => void, onReject: () => void) => {
         let description: string | undefined
         const correctAnswersCount = question.answer_options.filter(answer => answer.is_correct).length
 
@@ -15,10 +15,10 @@ export const useCreateQuestion = () => (question: Question, topicId: number, onR
         else if (question.answer_options.filter(answer => answer.text).length !== question.answer_options.length) {
             description = 'Вы заполнили не все поля с ответами'
         }
-        else if (correctAnswersCount === 0) {
+        else if (question.question_type !== 'text' && correctAnswersCount === 0) {
             description = 'Выберите хотя бы один верный вариант ответа'
         }
-        else if (correctAnswersCount === question.answer_options.length) {
+        else if (question.question_type !== 'text' && correctAnswersCount === question.answer_options.length) {
             description = 'Верными не могут быть все ответы'
         }
 
@@ -28,15 +28,8 @@ export const useCreateQuestion = () => (question: Question, topicId: number, onR
             return
         }
 
-        const toCreate: Question = {
-            text: question.text, 
-            question_type: question.question_type, 
-            answer_options: question.answer_options.map(answer => ({
-                text: answer.text, is_correct: answer.is_correct
-            }))
-        }
 
-        createQuestion(topicId, toCreate)
+        createQuestion(topicId, question)
         .then(() => {
             onResolve()
         })
