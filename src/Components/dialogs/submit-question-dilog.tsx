@@ -51,18 +51,18 @@ export const SubmitTextQuestionsDialog: FC<{answers: UnsubmitedAnswer[], onSucce
         }
     }
 
-    const handleSubmit = () => {
-        try {
-            answers.forEach( async (answer) => {
-                await submitQuestion(answer.id, scores[answer.id].score)
-            })
-            toast.success('Результаты ответов сохранены')
-            onSuccess()
-        } catch {
-            toast.error('Не удалось сохранить результаты')
+    const handleSubmit = async () => {
+    try {
+        for (const answer of answers) {
+            await submitQuestion(answer.id, scores[answer.id].score);
         }
-
+        
+        toast.success('Результаты ответов сохранены');
+        onSuccess();
+    } catch (error) {
+        toast.error('Не удалось сохранить результаты');
     }
+}
 
 
     if (!currentAnswer) return null

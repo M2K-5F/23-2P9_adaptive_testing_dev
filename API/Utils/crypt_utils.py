@@ -1,7 +1,7 @@
 """utils"""
 import jwt
 from passlib.context import CryptContext
-from Config import settings, oauth2_scheme
+from config import settings, oauth2_scheme
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -4,7 +4,7 @@ from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanF
 from playhouse.shortcuts import model_to_dict
 
 from shemas import Roles, UserOut
-from Utils import get_password_hash
+from utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
@@ -138,6 +138,7 @@ class UserTextAnswer(Table):
 
 if __name__ == "__main__":
     database.connect()
+    database.register_function(lambda x: x.lower(), 'lower')
     database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion, UserTextAnswer])
     database.close()
 

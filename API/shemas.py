@@ -23,7 +23,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = "your_password"
-    role: Roles
+    role: Literal['student', 'teacher']
 
 
 class UserOut(UserBase):
