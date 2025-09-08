@@ -52,9 +52,8 @@ export const RedirectWrapper: FC = () => {
         )
     }
 
-    if (shouldRedirect) {
+    if (shouldRedirect) 
         return null
-    }
     
 
     return(

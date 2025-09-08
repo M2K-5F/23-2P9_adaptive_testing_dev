@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 export default function HomePage() {
     const roles = useUserStore(s => s.roles)
 
+
     return (
         <div className="p-4 h-full">
             <Accordion defaultValue={['followed', 'created']} type='multiple' >
@@ -18,6 +19,7 @@ export default function HomePage() {
         </div>
     )
 }
+
 
 export function CreatedCoursesSection() {
     const createdCourses = useCourseStore(s => s.createdCourses)

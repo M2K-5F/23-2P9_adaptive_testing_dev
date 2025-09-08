@@ -4,7 +4,7 @@ from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanF
 from playhouse.shortcuts import model_to_dict
 
 from shemas import Roles, UserOut
-from Utils import get_password_hash
+from utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
@@ -22,6 +22,7 @@ def convert(obj):
     else:
         return obj
 
+
 class Table(Model):
     id = AutoField()
     class Meta:
@@ -37,6 +38,9 @@ class Table(Model):
     def recdump(self):
         data = model_to_dict(self, recurse=True, max_depth=2)
         return dict(convert(data))
+
+
+
 
 class User(Table):
     username = CharField(unique=True)
@@ -138,6 +142,7 @@ class UserTextAnswer(Table):
 
 if __name__ == "__main__":
     database.connect()
+    database.register_function(lambda x: x.lower(), 'lower')
     database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion, UserTextAnswer])
     database.close()
 

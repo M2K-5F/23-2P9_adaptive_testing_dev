@@ -4,7 +4,7 @@ import { useTopicStore } from "@/stores/useTopicStore"
 import { Button, Badge } from "@/Components"
 import { CreatedQuestion, QuestionConstructor } from "@/Components"
 import { CreatedTopic as CT } from "@/types/interfaces"
-import { getQuestions, archTopic } from "@/services/api.service"
+import { getQuestions, archTopic, unarchTopic } from "@/services/api.service"
 import clsx from "clsx"
 import { 
   Archive, 
@@ -51,11 +51,10 @@ export const CreatedTopic = memo(({ topic, index }: {
     }
 
     const handleArchTopic = () => {
-        archTopic(topic.id)
-        .then(() => {fetchTopics(courseId)})
-        .catch(err => {
-            console.error('Error archiving topic:', err)
-        })
+        (topic.is_active 
+            ? archTopic(topic.id)
+            : unarchTopic(topic.id)
+        ).then(() => {fetchTopics(courseId)})
     }
 
     useEffect(() => {

@@ -1,1 +1,0 @@
-from .user import is_student, is_teacher, get_user_from_request

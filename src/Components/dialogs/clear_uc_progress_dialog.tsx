@@ -19,12 +19,13 @@ import { useTopicStore } from "@/stores/useTopicStore"
 export const ClearUCProgressDialog: FC<{className?: string, variant?: PropsVariant, userCourseId: number, isBadge?: boolean, callback: (id: number) => void}> = memo(({isBadge, userCourseId, className, variant, callback}) => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isClearing, setIsClearing] = useState<boolean>(false)
-    const fetchFollowedTopics = useTopicStore(s => s.fetchFollowedTopics)
+    const fetchFollowedCourses = useCourseStore(s => s.fetchFollowedCourses)
 
     const handleClear = async () => {
         try {
             await clearUCProgress(userCourseId)
             toast.success('Прогресс успешно сброшен!')
+            await fetchFollowedCourses()
             callback(userCourseId)
             setIsOpen(false)
         } catch {

@@ -1,9 +1,9 @@
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from fastapi import FastAPI, Request, Response, HTTPException, status
 from fastapi.responses import JSONResponse
-from shared.cruds.auth import get_user
-from Config import oauth2_scheme
-from Utils import decode_jwt
+from dependencies.dependencies import get_user_repository
+from config import oauth2_scheme
+from utils.crypt_utils import decode_jwt
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
@@ -42,7 +42,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
 
 
         username: str = payload.get("sub")
-        current_user = get_user(username)
+        current_user = get_user_repository().get_user_by_username(username)
 
         if username is None or current_user is None:
             return credentials_exception

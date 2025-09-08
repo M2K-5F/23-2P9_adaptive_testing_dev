@@ -1,7 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from fastapi import FastAPI, Request, Response
 from datetime import datetime, timedelta, timezone
-from Utils import encode_jwt
+from utils import encode_jwt
 
 
 class CookieRefreshMiddleware(BaseHTTPMiddleware):

@@ -1,6 +1,6 @@
 import { Dispatch, FC, SetStateAction } from "react"
 import { CreatedCourse as CC } from "../../types/interfaces"
-import { archCourse } from "../../services/api.service"
+import { archCourse, unarchCourse } from "../../services/api.service"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/Components/ui/button"
 import { useCourseStore } from "@/stores/useCourseStore"
@@ -24,8 +24,10 @@ export const CreatedCourse: FC<{course: CC}> = ({course}) => {
     const navigate = useNavigate()
 
     const handleArchTopic = () => {
-            archCourse(course.id)
-            .then(() => {fetchCourses()})
+            (course.is_active 
+                ?   archCourse(course.id) 
+                :   unarchCourse(course.id)
+            ).then(() => {fetchCourses()})
     }
 
     const formatDate = (dateString: string) => {
