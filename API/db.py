@@ -22,6 +22,7 @@ def convert(obj):
     else:
         return obj
 
+
 class Table(Model):
     id = AutoField()
     class Meta:
@@ -37,6 +38,9 @@ class Table(Model):
     def recdump(self):
         data = model_to_dict(self, recurse=True, max_depth=2)
         return dict(convert(data))
+
+
+
 
 class User(Table):
     username = CharField(unique=True)

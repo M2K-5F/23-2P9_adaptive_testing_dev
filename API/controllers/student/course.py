@@ -15,6 +15,7 @@ async def get_followed_teacher_courses(
 ) -> JSONResponse:
     return course_service.get_followed_courses(current_user)
 
+
 @course_router.post("/follow")
 def follow_teacher_course(
     current_user: UserOut = Depends(get_user_from_request),
@@ -31,6 +32,7 @@ def unfollow_teacher_course(
     course_service: CourseService = Depends(get_student_course_service)
 ) -> JSONResponse:
     return course_service.unfollow_course(current_user, course_id)
+
 
 @course_router.get('/get_by_id', summary="Get course, is_followed by course_id")
 async def get_course(

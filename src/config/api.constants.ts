@@ -14,6 +14,7 @@ export const APIUrls = {
     getCoursesURL: `${tURL}/course/get`,
     getFollowedCoursesURL: `${sURL}/course/get_followed`,
     archCourseURL: `${tURL}/course/arch`,
+    unarchCourseURL: `${tURL}/course/unarch`,
     followCourseURL: `${sURL}/course/follow`,
     unfollowCourseURL: `${sURL}/course/unfollow`,
     getCourseURL: `${sURL}/course/get_by_id`,
@@ -25,6 +26,7 @@ export const APIUrls = {
     getTopicsURL: `${sURL}/topic/get`,
     getFollowedTopicsURL: `${sURL}/topic/get_followed`,
     archTopicURL: `${tURL}/topic/arch`,
+    unarchTopicURL: `${tURL}/topic/unarch`,
     followTopicURL: `${sURL}/topic/follow`,
     unfollowTopicURL: `${sURL}/topic/unfollow`,
     startPassingTopicURL: `${sURL}/topic/start`,
@@ -33,6 +35,7 @@ export const APIUrls = {
     createQuestionURL: `${tURL}/question/create`,
     getQuestionsURL: `${tURL}/question/get`,
     archQuestionURL: `${tURL}/question/arch`,
+    unarchQuestionURL: `${tURL}/question/unarch`,
     submitQuestionURL: `${tURL}/question/submit`,
 
     searchCourseURL: `${searchUrl}/course`,

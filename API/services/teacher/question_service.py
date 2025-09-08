@@ -71,9 +71,7 @@ class QuestionService:
                 is_correct = True if question_to_create.question_type == "text" else answer_option.is_correct,
                 by_question = created_question
             )
-        
-        current_topic.question_count += 1
-        current_topic.save()
+        current_topic = self.topic_repo.update_by_instance(current_topic, {'question_count': current_topic.question_count + 1})
         return JSONResponse(created_question.dump)
 
 
@@ -92,13 +90,11 @@ class QuestionService:
                 status.HTTP_400_BAD_REQUEST,
                 "Already archivated"
             )
-        current_question.is_active = False
-        current_question.save()
+        current_question = self.question_repo.update_by_instance(current_question, {'is_active': False})
 
         
         by_topic: Topic = current_question.by_topic  # pyright: ignore
-        by_topic.question_count = len(self.question_repo.get_active_questions_by_topic(by_topic))
-        by_topic.save()
+        by_topic = self.topic_repo.update_by_instance(by_topic, {'question_count': by_topic.question_count - 1})
 
         return JSONResponse(current_question.dump)
 
@@ -118,19 +114,18 @@ class QuestionService:
                 status.HTTP_400_BAD_REQUEST,
                 "Already active"
             )
-        current_question.is_active = True
-        current_question.save()
+
+        current_question = self.question_repo.update_by_instance(current_question, {'is_active': True})
 
         
         by_topic: Topic = current_question.by_topic  # pyright: ignore
-        by_topic.question_count = len(self.question_repo.get_active_questions_by_topic(by_topic))
-        by_topic.save()
+        by_topic = self.topic_repo.update_by_instance(by_topic, {'question_count': by_topic.question_count + 1})
 
         return JSONResponse(current_question.dump)
 
 
     @database.atomic()
-    def get_question_list(self, user: UserOut, topic_id: str):
+    def get_question_list(self, user: UserOut, topic_id: int):
         current_topic = self.topic_repo.get_or_none(True, 
             id = topic_id, 
             created_by = user.username
@@ -153,15 +148,29 @@ class QuestionService:
             is_active = True
         )
 
-        user_answer.is_correct = False if score == 0 else True
-        user_answer.is_active = False
-        user_answer.save()
+        if user_answer.by_user_topic.topic.created_by.username != user.username:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Question wasn`t created by you"
+            )
+
+        user_answer = self.user_text_answer_repo.update_by_instance(user_answer, {
+            'is_correct': score != 0,
+            'is_active': False
+        })
 
         user_question: UserQuestion = user_answer.for_user_question  # pyright: ignore
-        user_question.question_score = score
-        user_question.save()
+        user_question = self.user_question_repo.update_by_instance(user_question, {
+            'question_score': score
+        })
 
         user_topic: UserTopic = user_question.by_user_topic  # pyright: ignore
+        user_topic = self.update_user_topic_progress(user_topic)
+        
+        return JSONResponse(user_topic.dump)
+
+
+    def update_user_topic_progress(self, user_topic: UserTopic):
         user_questions_by_topic = self.user_question_repo.get_by_user_topic(user_topic)
         topic_score = 0 
 
@@ -174,24 +183,29 @@ class QuestionService:
         topic_score = max(topic_score, user_topic.topic_progress)
         
         if topic_score >= 0.8:
-            user_topic.is_completed = True
+            user_topic = self.user_topic_repo.update_by_instance(user_topic, {
+                'is_completed': True
+            })
+            
             next_ut = self.user_topic_repo.get_next_user_topic(user_topic)
             if next_ut:
-                next_ut.ready_to_pass = True
-                next_ut.save()
+                next_ut = self.user_topic_repo.update_by_instance(next_ut, {
+                    'ready_to_pass': True
+                })
 
-        user_topic.topic_progress = topic_score
-        user_topic.save()
-        user_course = user_topic.by_user_course
-        user_topics_by_course = UserTopic.select().where(UserTopic.by_user_course == user_course)
+        user_topic = self.user_topic_repo.update_by_instance(user_topic, {
+            'topic_progress': topic_score
+        })
+
+        user_course: UserCourse = user_topic.by_user_course # pyright: ignore
+        user_topics_by_course  = self.user_topic_repo.get_user_topics_by_user_course(user_course)
         course_progress = 0
 
         for t in user_topics_by_course:
-            if t.topic_progress >= 0.8:
+            if t.topic_progress >= 0.8: # pyright: ignore
                 course_progress += 100 / len(user_topics_by_course)
 
         user_course.course_progress = course_progress
         user_course.save()
 
-        return JSONResponse(user_topic.dump)
-        
+        return user_topic

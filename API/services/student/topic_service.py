@@ -46,7 +46,7 @@ class TopicService:
     @database.atomic()
     def get_topics_by_course(self, course_id: int) -> JSONResponse:
         current_course = self.course_repo.get_by_id(course_id, True)
-        topics = self.topic_repo.get_active_topics_by_course(current_course)
+        topics = self.topic_repo.select_where(by_course = current_course)
 
         return JSONResponse([topic.dump for topic in topics])
 

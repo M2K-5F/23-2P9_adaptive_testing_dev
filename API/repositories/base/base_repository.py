@@ -21,6 +21,7 @@ class BaseRepository(Generic[T]):
             status.HTTP_404_NOT_FOUND,
             f'Object of type {self.model.__name__} not found'
         )
+        self._field_not_exist = lambda field: ValueError(f"Field {field} does not exist in {self.model.__name__}")
 
 
     @overload
@@ -36,10 +37,7 @@ class BaseRepository(Generic[T]):
             if not auto_error:
                 return None
             else:
-                raise HTTPException(
-                    status.HTTP_400_BAD_REQUEST,
-                    f'Object not found: {self.model.__name__} with id {id}'
-                )
+                raise self._400_does_not_exist
 
 
     @overload
@@ -81,6 +79,15 @@ class BaseRepository(Generic[T]):
                 raise self._400_does_not_exist
 
 
+    def update_by_instance(self, instance: T, update_data: Dict[str, Any]) -> T:
+        for key, value in update_data.items():
+            if hasattr(self.model, key):
+                setattr(instance, key, value)
+            else: raise ValueError
+        instance.save()
+        return instance
+
+
     @overload
     def update(self, update_data: Dict[str, Any], auto_error: Literal[True], **where) -> T: ...
 
@@ -91,15 +98,16 @@ class BaseRepository(Generic[T]):
         try:
             query = []
             for field, value in where.items():
-                if hasattr(T, field):
-                    query.append(getattr(T, field) == value)
+                if hasattr(self.model, field):
+                    query.append(getattr(self.model, field) == value)
                 else:
-                    raise ValueError
+                    raise self._field_not_exist(field)
             instance = self.model.get(*query)
             for key, value in update_data.items():
                 setattr(instance, key, value)
             instance.save()
             return instance
+
         except DoesNotExist:
             if not auto_error:
                 return None
@@ -107,20 +115,13 @@ class BaseRepository(Generic[T]):
                 raise self._400_does_not_exist
 
     
-    def update_all(self, update_data: Dict[str, Any], **where) -> List[T]:
-        select = self.model.select()
+    def update_all(self, update_data: Dict[str, Any], **where) -> int:
+        query = self.model.update(**update_data)
         for field, value in where.items():
-            if hasattr(self.model, field):
-                select = select.where(getattr(self.model, field) == value)
-            else:
-                raise ValueError
-        to_return = []
-        for instance in select:
-            for key, value in update_data.items():
-                setattr(instance, key, value)
-            instance.save()
-            to_return.append(instance)
-        return to_return
+            if not hasattr(self.model, field):
+                raise self._field_not_exist(field)
+            query = query.where(getattr(self.model, field) == value)
+        return query.execute()
 
 
     @overload
@@ -136,7 +137,7 @@ class BaseRepository(Generic[T]):
                 if hasattr(self.model, field):
                     query.append(getattr(self.model, field) == value)
                 else:
-                    raise ValueError
+                    raise self._field_not_exist(field)
             instance = self.model.get(*query)
             return instance
         except DoesNotExist:
@@ -152,7 +153,7 @@ class BaseRepository(Generic[T]):
             if hasattr(self.model, field):
                 select = select.where(getattr(self.model, field) == value)
             else:
-                raise ValueError
+                raise self._field_not_exist(field)
         return list(select)
 
     def exists(self, **kwargs) -> bool:
@@ -161,7 +162,7 @@ class BaseRepository(Generic[T]):
             if hasattr(self.model, field):
                 select = select.where(getattr(self.model, field) == value)
             else:
-                raise ValueError
+                raise self._field_not_exist(field)
         return select.exists()
 
     def count(self, **kwargs) -> int:
@@ -170,7 +171,7 @@ class BaseRepository(Generic[T]):
             if hasattr(self.model, field):
                 select = select.where(getattr(self.model, field) == value)
             else:
-                raise ValueError
+                raise self._field_not_exist(field)
         return select.count()
 
     def delete_by_instance(self, instance: T) -> None:
@@ -188,7 +189,6 @@ class BaseRepository(Generic[T]):
             if hasattr(self.model, field):
                 select = select.where(getattr(self.model, field) == value)
             else:
-                raise ValueError
+                raise self._field_not_exist(field)
         for instance in select:
             instance.delete_instance()
-

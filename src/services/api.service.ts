@@ -142,6 +142,20 @@ export const archCourse = (course_id: number) => {
 }
 
 
+export const unarchCourse = (course_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.unarchCourseURL,
+        {
+            credentials: 'include',
+            method: 'put',
+        },
+        {
+            "course_id": course_id
+        }
+    )
+}
+
+
 export const followCourse = (course_id: number) => {
     return ApiService.requestToServer(
         APIUrls.followCourseURL,
@@ -226,6 +240,20 @@ export const archTopic = (topic_id: number) => {
 }
 
 
+export const unarchTopic = (topic_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.unarchTopicURL,
+        {
+            credentials: 'include',
+            method: 'put',
+        },
+        {
+            "topic_id": topic_id
+        }
+    )
+}
+
+
 export const followTopic = (topic_id: number) => {
     return ApiService.requestToServer(
         APIUrls.followTopicURL,
@@ -288,6 +316,20 @@ export const getQuestions = (topic_id: number) => {
 export const archQuestion = (question_id: number) => {
     return ApiService.requestToServer(
         APIUrls.archQuestionURL,
+        {
+            credentials: 'include',
+            method: "put",
+        },
+        {
+            "question_id": question_id
+        }
+    )
+}
+
+
+export const unarchQuestion = (question_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.unarchQuestionURL,
         {
             credentials: 'include',
             method: "put",
