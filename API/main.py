@@ -17,12 +17,12 @@ app = add_cors_middleware(app)
 app = add_routers_to_app(app)
 
 
-# app.mount("/assets", StaticFiles(directory="../dist/assets"), name="assets")
-# app.mount('/public', StaticFiles(directory='../public', html=False,), name='public')
+app.mount("/assets", StaticFiles(directory="../dist/assets"), name="assets")
+app.mount('/public', StaticFiles(directory='../public', html=False,), name='public')
 
-# @app.get("/{full_path:path}")
-# async def serve_spa():
-#     return FileResponse("../dist/index.html")
+@app.get("/{full_path:path}")
+async def serve_spa():
+    return FileResponse("../dist/index.html")
 
 
 
