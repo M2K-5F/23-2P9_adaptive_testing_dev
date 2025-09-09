@@ -62,6 +62,8 @@ class CourseService:
         current_course.is_active = False
         current_course.save()
 
+        self.user_topic_repo.disable_activeness_by_course(current_course)
+
         return JSONResponse(current_course.dump)
 
     
@@ -81,11 +83,15 @@ class CourseService:
                 "Course wasn`t created by you"
             )
 
-        current_course.is_active = True
-        current_course.save()
+        current_course = self.course_repo.update_by_instance(current_course, {
+            'is_active': True
+        })
+
+        self.user_topic_repo.enable_activeness_by_course(current_course)
 
         return JSONResponse(current_course.dump)
-            
+    
+    
     @database.atomic()
     def get_created_by_teacher_courses(self, user: UserOut):
             courses = self.course_repo.select_where(created_by = user.username)
@@ -127,13 +133,11 @@ class CourseService:
                 }
                 
                 for topic in topics:
-                        user_topic = self.user_topic_repo.get_or_none(True,
+                        user_topic = self.user_topic_repo.get_or_none(False,
                             user = student.username,
                             topic = topic.id,
                             by_user_course = user_course.id
                         )
-
-                        unsubmited_text_answers = self.user_text_answer_repo.get_unsubmited_answers_by_user_topic(user_topic)
                         
                         if not user_topic:
                             student_stats['topics_details'].append({
@@ -144,8 +148,11 @@ class CourseService:
                                 'question_count': topic.question_count,
                                 'average_score': 0,
                                 'ready_to_pass': False,
+                                'unsubmited_answers': []
                             })
                         else:
+                            unsubmited_text_answers = self.user_text_answer_repo.get_unsubmited_answers_by_user_topic(user_topic)
+                        
                             student_stats['topics_details'].append({
                                 'topic_id': topic.id,
                                 'topic_title': topic.title,

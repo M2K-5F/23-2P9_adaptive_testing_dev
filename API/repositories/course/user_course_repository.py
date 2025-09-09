@@ -40,3 +40,18 @@ class UserCourseRepository(BaseRepository[UserCourse]):
 
     def get_user_courses_by_course(self, course: Course):
         return self.select_where(course = course)
+
+
+    def update_user_courses_progress(self, course: Course) -> int:
+        user_courses = self.select_where(course = course)
+        counter = 0
+        for user_course in user_courses:
+            self.update_by_instance(
+                user_course, 
+                {
+                    'course_progress': user_course.completed_topic_number / user_course.course.topic_count * 100
+                }
+            )
+            counter += 1
+
+        return counter

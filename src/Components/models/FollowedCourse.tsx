@@ -79,7 +79,7 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                         variant={userCourse.is_active ? 'default' : 'secondary'}
                         className="flex items-center gap-1"
                     >
-                        {userCourse.is_active 
+                        {userCourse.course.is_active 
                             ?   <>
                                     <Unlock className="h-3.5 w-3.5" />
                                     Активный

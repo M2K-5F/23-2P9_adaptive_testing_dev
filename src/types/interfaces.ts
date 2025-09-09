@@ -74,6 +74,7 @@ export interface UserTopic {
     ready_to_pass: boolean
     is_completed: boolean
     topic_progress: number
+    is_active: boolean
 }
 
 export interface AnswerOption {

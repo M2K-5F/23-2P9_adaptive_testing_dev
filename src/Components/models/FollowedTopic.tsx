@@ -87,7 +87,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                                                     </div>
                                             : <></>
                                         }
-                                        {userTopic.ready_to_pass
+                                        {(userTopic.ready_to_pass && userTopic.is_active)
                                             ? topic.question_count
                                                 ?   <span className="text-green-500">Доступно для прохождения</span>
                                                 :   <span className="text-red-500">В данной теме нет вопросов<br />Заблокировано для прохождения</span>
@@ -125,7 +125,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                         {userTopic
                             ?   <>
                                     <div className="shrink grow"></div>
-                                    {userTopic.ready_to_pass && topic.question_count > 0 && (
+                                    {userTopic.ready_to_pass && topic.question_count > 0 && userTopic.is_active && (
                                         <Button size="sm" variant='default'
                                             onClick={() => navigate(`/topic?utopic_id=${userTopic.id}&title=${topic.title}`, {state: {from: `${userTopic.id}`}})}
                                         >

@@ -65,6 +65,7 @@ class TopicService:
             )
 
         user_courses = self.user_course_repo.get_user_courses_by_course(current_course)
+
         
         for user_course in user_courses:
             is_ready = False
@@ -80,6 +81,10 @@ class TopicService:
 
         current_course.topic_count += 1
         current_course.save()
+
+        
+        self.user_course_repo.update_user_courses_progress(current_course)
+
         return JSONResponse(created_topic.dump)
 
 
@@ -97,6 +102,9 @@ class TopicService:
         
         current_topic.is_active = False
         current_topic.save()
+
+        self.user_topic_repo.disable_activeness_by_topic(current_topic)
+
         return JSONResponse(current_topic.dump)
     
 
@@ -114,4 +122,7 @@ class TopicService:
         
         current_topic.is_active = True
         current_topic.save()
+
+        self.user_topic_repo.enable_activeness_by_topic(current_topic)
+
         return JSONResponse(current_topic.dump)

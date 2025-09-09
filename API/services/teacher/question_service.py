@@ -204,6 +204,7 @@ class QuestionService:
         for t in user_topics_by_course:
             if t.topic_progress >= 0.8: # pyright: ignore
                 course_progress += 100 / len(user_topics_by_course)
+                user_course.completed_topic_number += 1
 
         user_course.course_progress = course_progress
         user_course.save()

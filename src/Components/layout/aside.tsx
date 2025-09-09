@@ -30,7 +30,7 @@ export const AsidePanel: React.FC<{}> = memo(() => {
         <div
             className={clsx(
                 'fixed select-none',
-                'h-dvh z-10',
+                'h-dvh z-30',
             )}
         >
             <aside

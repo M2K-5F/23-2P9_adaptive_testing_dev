@@ -83,7 +83,8 @@ class BaseRepository(Generic[T]):
         for key, value in update_data.items():
             if hasattr(self.model, key):
                 setattr(instance, key, value)
-            else: raise ValueError
+            else: 
+                raise self._field_not_exist(key)
         instance.save()
         return instance
 

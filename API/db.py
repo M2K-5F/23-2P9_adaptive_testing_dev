@@ -113,6 +113,7 @@ class UserTopic(Table):
     ready_to_pass = BooleanField(default=False)
     is_completed = BooleanField(default=False)
     topic_progress = FloatField(default=0)
+    is_active = BooleanField(default=True)
 
 
 class AdaptiveQuestion(Table):

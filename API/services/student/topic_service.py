@@ -55,12 +55,6 @@ class TopicService:
     def get_user_topics_by_followed_course(self, user: UserOut, user_course_id: int) -> JSONResponse:
         user_course = self.user_course_repo.get_active_user_course_from_user_and_id(user, user_course_id)
         user_topics = self.user_topic_repo.get_user_topics_by_user_course(user_course)
-
-        is_user_course_active = user_course.course.is_active
-        for user_topic in user_topics:
-            if not user_topic.topic.is_active or not is_user_course_active:
-                user_topic.ready_to_pass = False
-                user_topic.save()
         
         return JSONResponse([user_topic.dump for user_topic in user_topics])
 
@@ -97,16 +91,11 @@ class TopicService:
     @database.atomic()
     def start_topic_by_user_topic(self, user: UserOut, user_topic_id: int) -> JSONResponse:
         user_topic = self.user_topic_repo.get_by_user_and_id(user, user_topic_id)
-        if not user_topic.topic.is_active:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, 
-                'This topic are inactive'
-            )
 
-        if not user_topic.by_user_course.is_active:
+        if not user_topic.is_active:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, 
-                'This course are inactive'
+                'This user_topic are inactive'
             )
 
         if not user_topic.ready_to_pass:
@@ -141,10 +130,10 @@ class TopicService:
         user_topic = self.user_topic_repo.get_by_user_and_id(user, topic_answers.user_topic_id)
         current_topic: Topic = user_topic.topic # pyright: ignore
 
-        if not user_topic.topic.is_active:
+        if not user_topic.is_active:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, 
-                "This topic are inactive"
+                "This user_topic are inactive"
             )
 
         if not user_topic.ready_to_pass:
@@ -202,7 +191,7 @@ class TopicService:
         return response
 
 
-    
+
     def get_question_score(
         self, topic_score: float, submit_question: SubmitQuestion, 
         created_question: Question, questions_count: int
@@ -290,6 +279,7 @@ class TopicService:
                 submit_question, question_score
             )
 
+
     def save_static_question_results( 
         self, user: UserOut, user_topic: UserTopic, created_question: Question, 
         submit_question: SubmitQuestion, question_score: float
@@ -363,25 +353,27 @@ class TopicService:
 
     def save_user_topic_result(self, user_topic: UserTopic, topic_score: float):
         if user_topic.topic_progress < topic_score:  # pyright: ignore
-            user_topic.topic_progress = round(topic_score, 3)
-
-        user_course: UserCourse = user_topic.by_user_course  # pyright: ignore
+            user_topic.topic_progress = round(topic_score, 3)  
 
         if user_topic.topic_progress >= 0.8 and not user_topic.is_completed:  # pyright: ignore
-            user_course.completed_topic_number += 1
+            user_course: UserCourse = user_topic.by_user_course  # pyright: ignore
+            
+            user_course.completed_topic_number = user_course.completed_topic_number + 1
             user_topic.is_completed = True
             user_course.course_progress = (
                 user_course.completed_topic_number / 
                 len(self.topic_repo.get_active_topics_by_course(user_course.course))  # pyright: ignore
             ) * 100
+            
+            user_course.save()
 
             next_user_topic = self.user_topic_repo.get_next_user_topic(user_topic)
 
             if next_user_topic:
                 next_user_topic.ready_to_pass = True
                 next_user_topic.save()
-
-        user_course.save()
+        
         user_topic.save()
+
 
         return JSONResponse({'score': round(topic_score, 3)})

@@ -72,7 +72,7 @@ export const CreatedTopic = memo(({ topic, index }: {
             isExpanded && 'sm:col-span-2',
             !topic.is_active &&  'opacity-70'
         )}>
-            <section className="p-5 bg-muted">
+            <section className="p-5 bg-card">
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 bg-primary/10 rounded-lg mt-1">
@@ -121,11 +121,11 @@ export const CreatedTopic = memo(({ topic, index }: {
                     >
                         {topic.is_active 
                             ?   <>
-                                    <CheckCircle className="h-3.5 w-3.5" />
+                                    <div className="h-2 w-2 rounded-full bg-background animate-pulse"></div>
                                     Активный
                                 </>
                             :   <>
-                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    <Archive className="h-3 w-3" />
                                     В архиве
                                 </>
                         }
