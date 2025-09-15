@@ -1,5 +1,5 @@
 from typing import Type, List
-from db import Course, UserCourse, database, Topic
+from models import Course, UserCourse, database, Topic
 from ..base.base_repository import BaseRepository
 from shemas import UserOut
 

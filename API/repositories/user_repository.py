@@ -1,5 +1,5 @@
 from typing import Literal
-from db import Role, User, UserRole
+from models import Role, User, UserRole
 from peewee import IntegrityError
 from fastapi import status, HTTPException
 from shemas import Roles, UserOut

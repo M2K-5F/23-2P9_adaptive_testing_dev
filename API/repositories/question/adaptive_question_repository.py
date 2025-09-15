@@ -1,5 +1,5 @@
 from typing import Type
-from db import AdaptiveQuestion, Question, UserQuestion, UserTopic
+from models import AdaptiveQuestion, Question, UserQuestion, UserTopic
 from shemas import UserOut
 from ..base.base_repository import BaseRepository
 

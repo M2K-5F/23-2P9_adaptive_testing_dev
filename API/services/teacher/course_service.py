@@ -5,7 +5,7 @@ from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
 from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
-from db import database
+from models import database
 from fastapi import HTTPException, status
 from shemas import UserOut
 from fastapi.responses import JSONResponse
@@ -58,9 +58,11 @@ class CourseService:
                 status.HTTP_400_BAD_REQUEST,
                 "Course wasn`t created by you"
             )
-
-        current_course.is_active = False
-        current_course.save()
+        
+        current_course = self.course_repo.update(
+            current_course,
+            is_active = False
+        )
 
         self.user_topic_repo.disable_activeness_by_course(current_course)
 

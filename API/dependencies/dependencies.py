@@ -1,7 +1,7 @@
 from functools import lru_cache
 from fastapi import Depends
 from services import (
-    US, SCS, STS, TCS, TQS, TTS
+    US, SCS, STS, TCS, TQS, TTS, PS
 )
 from repositories import (
     UserRepository, CourseRepository, UserCourseRepository,
@@ -61,6 +61,24 @@ def get_adaptive_question_repository() -> AdaptiveQuestionRepository:
     return AdaptiveQuestionRepository()
 
 
+def get_progress_service(
+    user_topic_repo = Depends(get_user_topic_repository),
+    user_question_repo = Depends(get_user_question_repository),
+    user_course_repo = Depends(get_user_course_repository),
+    topic_repo = Depends(get_topic_repository),
+    adaptive_question_repo = Depends(get_adaptive_question_repository),
+    text_answer_repo = Depends(get_user_text_answer_repository)
+):
+    return PS(
+        user_topic_repo,
+        user_course_repo,
+        user_question_repo,
+        topic_repo,
+        adaptive_question_repo,
+        text_answer_repo
+    )
+
+
 def get_user_service(
     user_repo = Depends(get_user_repository)
 ) -> US:
@@ -73,18 +91,16 @@ def get_student_course_service(
     user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
-    user_qustion_repo = Depends(get_user_question_repository),
     adaptive_question_repo = Depends(get_adaptive_question_repository),
-    user_text_answer_repo = Depends(get_user_text_answer_repository)
+    progress_service = Depends(get_progress_service)
 ) -> SCS:
     return SCS(
         course_repo,
         user_course_repo,
         topic_repo,
         user_topic_repo,
-        user_qustion_repo,
         adaptive_question_repo,
-        user_text_answer_repo
+        progress_service
     )
 
 
@@ -96,8 +112,8 @@ def get_student_topic_service(
     user_question_repo = Depends(get_user_question_repository),
     adaptive_question_repo = Depends(get_adaptive_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
-    answer_repo = Depends(get_answer_repository),
-    question_repo = Depends(get_question_repository)
+    question_repo = Depends(get_question_repository),
+    progress_service = Depends(get_progress_service)
 ):
     return STS(
         course_repo,
@@ -107,8 +123,8 @@ def get_student_topic_service(
         user_question_repo,
         adaptive_question_repo,
         user_text_answer_repo,
-        answer_repo,
-        question_repo
+        question_repo,
+        progress_service
     )
 
 

@@ -7,7 +7,6 @@ import { s } from 'node_modules/shadcn/dist/index-8c784f6a';
 import { useClipboard } from '@/hooks/useClipboard';
 import { CourseStats } from '@/types/interfaces';
 import { getCourseStats } from '@/services/api.service';
-import { Separator } from '@radix-ui/react-select';
 import { SubmitTextQuestionsDialog } from '@/Components/dialogs/submit-question-dilog';
 
 

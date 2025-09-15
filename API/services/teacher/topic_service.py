@@ -10,7 +10,7 @@ from repositories.question.adaptive_question_repository import AdaptiveQuestionR
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
-from db import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
+from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
 from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -44,7 +44,7 @@ class TopicService:
 
     
     @database.atomic()
-    def create_topic(self, user: UserOut, title: str, description:str, course_id: int):
+    def create_topic(self, user: UserOut, title: str, description: str, course_id: int):
         current_course = self.course_repo.get_by_id(course_id, True)
 
         topics_by_course = self.topic_repo.get_active_topics_by_course(current_course)

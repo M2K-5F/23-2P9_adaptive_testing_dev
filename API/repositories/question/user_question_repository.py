@@ -1,5 +1,5 @@
-from typing import List, Type
-from db import Question, Topic, UserQuestion, UserTopic
+from typing import List, Type, Union
+from models import Question, Topic, UserQuestion, UserTopic
 from shemas import UserOut
 from ..base.base_repository import BaseRepository
 
@@ -21,10 +21,10 @@ class UserQuestionRepository(BaseRepository[UserQuestion]):
         )
         return user_questions
     
-    def create_user_question(self, user: UserOut, by_user_topic: UserTopic, question: Question):
+    def get_or_create_user_question(self, username: str, by_user_topic: Union[UserTopic, int], question: Question):
         user_question, is_created = self.get_or_create(
             False, {},
-            user = user.username,
+            user = username,
             by_user_topic = by_user_topic,
             question = question
         )

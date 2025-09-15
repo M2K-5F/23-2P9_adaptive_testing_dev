@@ -1,5 +1,5 @@
 from typing import Type, List
-from db import Course, UserCourse, UserTopic, Topic
+from models import Course, UserCourse, UserTopic, Topic
 from shemas import UserOut
 from ..base.base_repository import BaseRepository
 
@@ -31,10 +31,12 @@ class UserTopicRepository(BaseRepository[UserTopic]):
         return user_topics
     
     def clear_user_topic_progress(self, user_topic: UserTopic) -> UserTopic: 
-        user_topic.topic_progress = 0 
-        user_topic.is_completed = 0
-        user_topic.ready_to_pass = False if user_topic.topic.number_in_course else True
-        user_topic.save()
+        user_topic = self.update(user_topic,
+            topic_progress = 0,
+            is_completed = 0,
+            ready_to_pass = False if user_topic.topic.number_in_course else True
+        )
+
         return user_topic
     
     def get_by_user_and_id(self, user: UserOut, user_topic_id: int) -> UserTopic:

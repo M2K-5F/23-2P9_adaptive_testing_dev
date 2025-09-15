@@ -1,6 +1,6 @@
 from typing import List, Type
 from shemas import UserOut
-from db import Course
+from models import Course
 from peewee import fn
 from ..base.base_repository import BaseRepository
 

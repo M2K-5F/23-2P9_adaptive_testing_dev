@@ -126,7 +126,7 @@ class AdaptiveQuestion(Table):
 
 class UserQuestion(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_questions")
-    by_user_topic = ForeignKeyField(UserTopic)
+    by_user_topic = ForeignKeyField(UserTopic, backref='user_questions')
     question = ForeignKeyField(Question)
     question_score = FloatField(default=0)
 
@@ -135,7 +135,7 @@ class UserTextAnswer(Table):
     user = ForeignKeyField(User, field=User.username)
     question = ForeignKeyField(Question)
     by_user_topic = ForeignKeyField(UserTopic)
-    for_user_question = ForeignKeyField(UserQuestion)
+    for_user_question = ForeignKeyField(UserQuestion, backref='user_text_answers')
     text = CharField(max_length=60)
     is_correct = BooleanField(default=False)
     is_active = BooleanField(default=True)

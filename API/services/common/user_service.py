@@ -1,7 +1,7 @@
 from typing import Literal
 from fastapi.responses import JSONResponse
-from utils.crypt_utils import get_password_hash
-from db import User, database
+from utils import get_password_hash
+from models import User, database
 from repositories.user_repository import UserRepository
 
 class UserService:
@@ -10,6 +10,7 @@ class UserService:
         user_repo: UserRepository
     ) -> None:
         self.user_repo = user_repo
+
 
     @database.atomic()
     def create_user(
@@ -30,9 +31,11 @@ class UserService:
 
         return JSONResponse(created_user.dump)
 
+
     @database.atomic()
     def get_user_by_username(self, username: str):
         return self.user_repo.get_user_by_username(username)
+
 
     @database.atomic()
     def get_password_hash_by_username(self, username: str):

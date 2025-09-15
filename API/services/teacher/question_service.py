@@ -10,7 +10,7 @@ from repositories.question.adaptive_question_repository import AdaptiveQuestionR
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
-from db import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
+from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
 from shemas import QuestionBase, SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -172,7 +172,7 @@ class QuestionService:
 
     def update_user_topic_progress(self, user_topic: UserTopic):
         user_questions_by_topic = self.user_question_repo.get_by_user_topic(user_topic)
-        topic_score = 0 
+        topic_score: float = 0 
 
         for q in user_questions_by_topic:
             topic_score += (
@@ -180,7 +180,7 @@ class QuestionService:
                 len(user_questions_by_topic)
             )
 
-        topic_score = max(topic_score, user_topic.topic_progress)
+        topic_score = max(topic_score, user_topic.topic_progress) #pyright: ignore
         
         if topic_score >= 0.8:
             user_topic = self.user_topic_repo.update_by_instance(user_topic, {

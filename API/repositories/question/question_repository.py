@@ -1,5 +1,5 @@
 from typing import List, Type
-from db import Question, Topic
+from models import Question, Topic
 from ..base.base_repository import BaseRepository
 
 class QuestionRepository(BaseRepository[Question]):
