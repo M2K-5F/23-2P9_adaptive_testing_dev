@@ -3,20 +3,18 @@ from fastapi.responses import JSONResponse
 
 from dependencies.user import get_user_from_request
 from dependencies.dependencies import get_techer_topic_service, TTS
-from shemas import UserOut
+from shemas import TopicToCreate, UserOut
 
 topic_router = APIRouter(prefix="/topic", tags=["Teacher/Topics"])
 
 @topic_router.post('/create')
 def create_teacher_topic(
     current_user: UserOut = Depends(get_user_from_request),
-    topic_title = Query("topic"),
-    description = Query("some_description"),
-    course_id = Query(),
+    created_topic: TopicToCreate = Body(),
     service: TTS = Depends(get_techer_topic_service)
 ) -> JSONResponse:
 
-    return service.create_topic(current_user, topic_title, description, course_id)
+    return service.create_topic(current_user, created_topic)
 
 
 @topic_router.put('/arch')

@@ -17,7 +17,8 @@ import {
   FileText,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  KeyRound
 } from "lucide-react"
 
 export const CreatedTopic = memo(({ topic, index }: {
@@ -112,6 +113,11 @@ export const CreatedTopic = memo(({ topic, index }: {
                         {activeQuestionsCount > 0 && (
                             <span className="text-green-600">({activeQuestionsCount} актив.)</span>
                         )}
+                    </div>
+
+                    <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
+                        <KeyRound className="h-3.5 w-3.5" />
+                        Мин. {topic.score_for_pass} баллов
                     </div>
                     
                     <Badge 

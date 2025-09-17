@@ -184,17 +184,21 @@ export const unfollowCourse = (course_id: number) => {
 }
 
 
-export const createTopic = (topic_title: string, description: string, course_id: string) => {
+export const createTopic = (topic_title: string, description: string, course_id: number, score_to_pass: number) => {
     return ApiService.requestToServer(
         APIUrls.createTopicURL,
         {
             credentials: 'include',
             method: 'post',
-        },
-        {
-            "topic_title": topic_title,
-            "description": description,
-            "course_id": course_id,
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: topic_title,
+                description: description,
+                course_id: course_id,
+                score_for_pass: score_to_pass
+            })
         }
     )
 }

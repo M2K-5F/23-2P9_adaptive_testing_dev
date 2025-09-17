@@ -28,9 +28,11 @@ class UserCourseRepository(BaseRepository[UserCourse]):
         return user_course
     
     def clear_user_course_progress(self, user_course: UserCourse) -> UserCourse:
-        user_course.course_progress = 0
-        user_course.completed_topic_number = 0
-        user_course.save()
+        user_course = self.update(
+            user_course,
+            course_progress = 0,
+            completed_topic_count = 0
+        )
         return user_course
 
     def get_active_user_course_from_user_and_id(self, user: UserOut, user_course_id: int) -> UserCourse:
@@ -49,7 +51,7 @@ class UserCourseRepository(BaseRepository[UserCourse]):
             self.update_by_instance(
                 user_course, 
                 {
-                    'course_progress': user_course.completed_topic_number / user_course.course.topic_count * 100
+                    'course_progress': user_course.completed_topic_count / user_course.course.topic_count * 100
                 }
             )
             counter += 1

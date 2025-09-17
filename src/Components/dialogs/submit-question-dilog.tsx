@@ -35,7 +35,7 @@ export const SubmitTextQuestionsDialog: FC<{answers: UnsubmitedAnswer[], onSucce
                 score = 1
                 break
             case 'partial':
-                score = 0.5
+                score = 0.55
                 break
             case 'incorrect':
                 score = 0

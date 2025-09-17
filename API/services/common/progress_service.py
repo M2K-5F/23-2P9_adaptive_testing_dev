@@ -77,15 +77,15 @@ class ProgressService:
             )
             
 
-        if user_topic.topic_progress >= 0.8 and not user_topic.is_completed:  # pyright: ignore
+        if user_topic.topic_progress >= user_topic.topic.score_for_pass and not user_topic.is_completed:  # pyright: ignore
             user_topic = self._user_topic_repo.update(user_topic, is_completed = True)
 
             user_course: UserCourse = user_topic.by_user_course  # pyright: ignore
             user_course = self._user_course_repo.update(
                 user_course,
-                completed_topic_number = user_course.completed_topic_number + 1,
+                completed_topic_count = user_course.completed_topic_count + 1,
                 course_progress = (
-                    (user_course.completed_topic_number + 1) / 
+                    (user_course.completed_topic_count + 1) / 
                     len(self._topic_repo.get_active_topics_by_course(user_course.course))  # pyright: ignore
                 ) * 100
             )
@@ -157,7 +157,7 @@ class ProgressService:
 
         topic_score = max(topic_score, user_topic.topic_progress) #pyright: ignore
         
-        if topic_score >= 0.8:
+        if topic_score >= user_topic.topic.score_for_pass:
             user_topic = self._user_topic_repo.update_by_instance(user_topic, {
                 'is_completed': True
             })
@@ -177,13 +177,13 @@ class ProgressService:
         user_course: UserCourse = user_topic.by_user_course # pyright: ignore
         user_topics_by_course  = self._user_topic_repo.get_user_topics_by_user_course(user_course)
 
-        completed_topic_number = len(list(filter(lambda t: t.topic_progress >= 0.8, user_topics_by_course)))
-        course_progress = 100 * completed_topic_number / len(user_topics_by_course)
+        completed_topic_count = len(list(filter(lambda t: t.topic_progress >= user_topic.topic.score_for_pass, user_topics_by_course)))
+        course_progress = 100 * completed_topic_count / len(user_topics_by_course)
         
         user_course = self._user_course_repo.update(
             user_course,
             course_progress = course_progress,
-            completed_topic_number = completed_topic_number
+            completed_topic_count = completed_topic_count
         )
 
         return user_topic

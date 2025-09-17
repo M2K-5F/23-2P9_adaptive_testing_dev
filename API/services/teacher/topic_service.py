@@ -11,7 +11,7 @@ from repositories.answer.user_text_answer_repository import UserTextAnswerReposi
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
 from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
-from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers
+from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, TopicToCreate, UserOut, TopicSubmitAnswers
 from fastapi.responses import JSONResponse
 from fastapi import status
 
@@ -38,18 +38,14 @@ class TopicService:
     @database.atomic()
     def create_topic(
         self, 
-        user: UserOut, 
-        title: str, 
-        description: str, 
-        course_id: int
+        user: UserOut,
+        topic_data: TopicToCreate
     ):
         """Create a new topic in specified course and initialize user topics
 
         Args:
             user (UserOut): current user (teacher)
-            title (str): title of the new topic
-            description (str): description of the new topic
-            course_id (int): ID of the course where topic will be created
+            ...
 
         Raises:
             HTTPException(400): if topic with same title and description already exists
@@ -57,7 +53,7 @@ class TopicService:
         Returns:
             JSONResponse: created topic instance
         """
-        current_course = self._course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(topic_data.course_id, True)
 
         topics_by_course = self._topic_repo.get_active_topics_by_course(current_course)
         count_topics = len(topics_by_course)
@@ -66,9 +62,10 @@ class TopicService:
             False, {},
             by_course = current_course,
             created_by = user.username,
-            title = title,
-            description = description,
-            number_in_course = count_topics
+            title = topic_data.title,
+            description = topic_data.description,
+            number_in_course = count_topics,
+            score_for_pass = topic_data.score_for_pass
         )
         if not is_created:
             raise HTTPException(

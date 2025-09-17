@@ -51,7 +51,7 @@ export interface UserCourse {
     course: CreatedCourse,
     course_progress: number
     is_active: boolean
-    completed_topic_number: number
+    completed_topic_count: number
 }
 
 
@@ -64,6 +64,7 @@ export interface CreatedTopic extends CreatedCourseBase {
     number_in_course: number
     question_count: number
     by_course: CreatedCourse
+    score_for_pass: number
 }
 
 export interface UserTopic {
@@ -151,6 +152,7 @@ export interface OptionToPass {
 export interface TopicDetail {
     topic_id: number
     topic_title: string
+    score_for_pass: number
     is_completed: boolean
     topic_progress: number
     question_count: number

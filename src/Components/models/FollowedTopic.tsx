@@ -8,8 +8,6 @@ import { useAddTopicToUC } from "@/hooks/useAddTopic";
 import { useNavigate } from "react-router-dom";
 
 
-const MIN_COMPLETION_PERCENT = 80
-
 export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: UserTopic | undefined, isCourseFollowed: boolean}> = ({topic, index, isCourseFollowed, userTopic}) => {
     const handler = useAddTopicToUC()
     const navigate = useNavigate()
@@ -82,7 +80,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                                                             Баллы: {userTopic.topic_progress.toFixed(1)}/1
                                                         </Badge>
                                                         <div className="text-xs text-red-600">
-                                                            Минимум: {MIN_COMPLETION_PERCENT/100} для зачета
+                                                            Минимум: {topic.score_for_pass} для зачета
                                                         </div>
                                                     </div>
                                             : <></>

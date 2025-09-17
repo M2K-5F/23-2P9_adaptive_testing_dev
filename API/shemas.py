@@ -79,3 +79,9 @@ class Course(BaseModel):
     title: str
     is_active: bool
 
+
+class TopicToCreate(BaseModel):
+    title: str
+    description: str
+    course_id: int
+    score_for_pass: float

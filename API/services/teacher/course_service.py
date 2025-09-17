@@ -184,7 +184,7 @@ class CourseService:
                     "telegram_link": student.telegram_link,
                     'name': student.name,
                     'course_progress': round(user_course.course_progress, 2), # pyright: ignore
-                    'completed_topics': user_course.completed_topic_number,
+                    'completed_topics': user_course.completed_topic_count,
                     'total_topics': len(topics),
                     'topics_details': []
                 }
@@ -214,6 +214,7 @@ class CourseService:
                                 'topic_id': topic.id,
                                 'topic_title': topic.title,
                                 'is_completed': user_topic.is_completed,
+                                'score_for_pass': topic.score_for_pass,
                                 'topic_progress': round(user_topic.topic_progress, 3), # pyright: ignore
                                 'question_count': topic.question_count,
                                 'average_score': round(user_topic.topic_progress * 100, 2), # pyright: ignore

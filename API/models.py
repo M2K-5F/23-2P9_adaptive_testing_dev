@@ -82,6 +82,7 @@ class Topic(Table):
     is_active = BooleanField(default=True)
     number_in_course = IntegerField()
     question_count = IntegerField(default=0)
+    score_for_pass = FloatField(default=80)
 
 
 class Question(Table):
@@ -101,7 +102,7 @@ class UserCourse(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_courses")
     course = ForeignKeyField(Course, backref="user_courses")
     is_active = BooleanField(default=True)
-    completed_topic_number = IntegerField(default=0)
+    completed_topic_count = IntegerField(default=0)
     followed_at = DateTimeField(default=datetime.now)
     course_progress = FloatField(default=0)
 
