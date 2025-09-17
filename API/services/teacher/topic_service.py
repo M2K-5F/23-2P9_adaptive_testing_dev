@@ -29,10 +29,10 @@ class TopicService:
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository
     ):
-        self.course_repo = course_repo
-        self.topic_repo = topic_repository
-        self.user_course_repo = user_course_repo
-        self.user_topic_repo = user_topic_repository
+        self._course_repo = course_repo
+        self._topic_repo = topic_repository
+        self._user_course_repo = user_course_repo
+        self._user_topic_repo = user_topic_repository
 
     
     @database.atomic()
@@ -57,12 +57,12 @@ class TopicService:
         Returns:
             JSONResponse: created topic instance
         """
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
 
-        topics_by_course = self.topic_repo.get_active_topics_by_course(current_course)
+        topics_by_course = self._topic_repo.get_active_topics_by_course(current_course)
         count_topics = len(topics_by_course)
 
-        created_topic, is_created = self.topic_repo.get_or_create(
+        created_topic, is_created = self._topic_repo.get_or_create(
             False, {},
             by_course = current_course,
             created_by = user.username,
@@ -76,31 +76,31 @@ class TopicService:
                 "Topic with this title and description already created"
             )
 
-        user_courses = self.user_course_repo.get_user_courses_by_course(current_course)
+        user_courses = self._user_course_repo.get_user_courses_by_course(current_course)
 
         
         for user_course in user_courses:
             is_ready = False
-            prev = self.user_topic_repo.get_prev_user_topic(user_course, created_topic)
+            prev = self._user_topic_repo.get_prev_user_topic(user_course, created_topic)
             if not prev:
                 is_ready = True
             else:
                 is_ready = bool(prev.is_completed)
 
-            self.user_topic_repo.create_user_topic(
+            self._user_topic_repo.create_user_topic(
                 created_topic, 
                 user.username, 
                 user_course, 
                 is_ready
             )
 
-        current_course = self.course_repo.update(
+        current_course = self._course_repo.update(
             current_course,
             topics_count = current_course.topic_count + 1
         )
 
         
-        self.user_course_repo.update_user_courses_progress(current_course)
+        self._user_course_repo.update_user_courses_progress(current_course)
 
         return JSONResponse(created_topic.dump)
 
@@ -119,7 +119,7 @@ class TopicService:
         Returns:
             JSONResponse: archived topic instance
         """   
-        current_topic = self.topic_repo.get_or_none(True,
+        current_topic = self._topic_repo.get_or_none(True,
             created_by = user.username,
             id = topic_id
         )
@@ -129,12 +129,12 @@ class TopicService:
                 "Topic already archivated"
             )
         
-        current_topic = self.topic_repo.update(
+        current_topic = self._topic_repo.update(
             current_topic,
             is_active = False
         )
 
-        self.user_topic_repo.disable_activeness_by_topic(current_topic)
+        self._user_topic_repo.disable_activeness_by_topic(current_topic)
 
         return JSONResponse(current_topic.dump)
     
@@ -153,7 +153,7 @@ class TopicService:
         Returns:
             JSONResponse: unarchived topic instance
         """   
-        current_topic = self.topic_repo.get_or_none(True,
+        current_topic = self._topic_repo.get_or_none(True,
             created_by = user.username,
             id = topic_id
         )
@@ -163,11 +163,11 @@ class TopicService:
                 "Topic already active"
             )
         
-        current_topic = self.topic_repo.update(
+        current_topic = self._topic_repo.update(
             current_topic,
             is_active = True
         )
 
-        self.user_topic_repo.enable_activeness_by_topic(current_topic)
+        self._user_topic_repo.enable_activeness_by_topic(current_topic)
 
         return JSONResponse(current_topic.dump)

@@ -101,7 +101,7 @@ class AdaptivityServise:
             user_topic_by_adaptive_question,
             max(
                 user_topic_score, 
-                user_topic_by_question.topic_progress # pyright: ignore
+                user_topic_by_adaptive_question.topic_progress # pyright: ignore
             )
         )
 
@@ -111,28 +111,29 @@ class AdaptivityServise:
         )    
 
 
-    def add_adaptive_questions_to_list(
+    def get_adaptive_questions_to_list(
         self,
         user_topic: UserTopic,
-        questions_list: List[Question],
+        questions_list: List[SubmitQuestion],
     ) -> List[Question]:
-        """Method which get list of adaptive questions and return list of questions with adaptive questions
+        """Method which get list of adaptive questions
 
         Args:
             user_topic (UserTopic): user topic 
             questions_list (List[Question]): list of created questions from database
 
         Returns:
-            List[Question]: list of created questions with adaptive questions
+            List[Question]: list of adaptive questions
         """
         
         submit_adaptive_questions: List[SubmitQuestion] = list(
             filter(lambda q: q.by_topic != user_topic.topic.id, questions_list)
         )
+        to_return = []
 
         for q in submit_adaptive_questions:
             adaptive_question = self._adaptive_question_repo.get_adaptive_question(q.id, user_topic)
             current_question: Question = adaptive_question.question # pyright: ignore
-            questions_list.append(current_question)
+            to_return.append(current_question)
         
-        return questions_list
+        return to_return

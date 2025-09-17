@@ -35,14 +35,14 @@ class TopicService:
         progress_service: ProgressService,
         adaptivity_service: AdaptivityServise
     ):
-        self.course_repo = course_repo
-        self.topic_repo = topic_repository
-        self.user_course_repo = user_course_repo
-        self.user_topic_repo = user_topic_repository
-        self.user_question_repo = user_question_repository
-        self.user_text_answer_repo = user_text_answer_repo
-        self.question_repo = question_repo
-        self.progress_service = progress_service
+        self._course_repo = course_repo
+        self._topic_repo = topic_repository
+        self._user_course_repo = user_course_repo
+        self._user_topic_repo = user_topic_repository
+        self._user_question_repo = user_question_repository
+        self._user_text_answer_repo = user_text_answer_repo
+        self._question_repo = question_repo
+        self._progress_service = progress_service
         self._adaptivity_service = adaptivity_service
     
 
@@ -60,8 +60,8 @@ class TopicService:
             JSONResponse: response with list of topic 
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
-        topics = self.topic_repo.select_where(by_course = current_course)
+        current_course = self._course_repo.get_by_id(course_id, True)
+        topics = self._topic_repo.select_where(by_course = current_course)
 
         return JSONResponse([topic.dump for topic in topics])
 
@@ -82,8 +82,8 @@ class TopicService:
             JSONResponse: response with list of user topics in the specified user course
         """
 
-        user_course = self.user_course_repo.get_active_user_course_from_user_and_id(user, user_course_id)
-        user_topics = self.user_topic_repo.get_user_topics_by_user_course(user_course)
+        user_course = self._user_course_repo.get_active_user_course_from_user_and_id(user, user_course_id)
+        user_topics = self._user_topic_repo.get_user_topics_by_user_course(user_course)
         
         return JSONResponse([user_topic.dump for user_topic in user_topics])
     
@@ -104,13 +104,13 @@ class TopicService:
             JSONResponse: response with list of formatted questions to pass
         """
 
-        user_topic = self.user_topic_repo.get_by_user_and_id(user, user_topic_id)
+        user_topic = self._user_topic_repo.get_by_user_and_id(user, user_topic_id)
 
-        self.progress_service.validate_topic_acess(user_topic)
+        self._progress_service.validate_topic_acess(user_topic)
         
         current_topic: Topic = user_topic.topic # pyright: ignore
 
-        questions = self.question_repo.get_active_questions_by_topic(current_topic)
+        questions = self._question_repo.get_active_questions_by_topic(current_topic)
 
         questions_with_answers = []
         for question in questions:
@@ -150,17 +150,21 @@ class TopicService:
             JSONResponce: response with topic score
         """
 
-        user_topic = self.user_topic_repo.get_by_user_and_id(user, topic_answers.user_topic_id)
+        user_topic = self._user_topic_repo.get_by_user_and_id(user, topic_answers.user_topic_id)
         current_topic: Topic = user_topic.topic # pyright: ignore
         topic_score = 0
 
-        self.progress_service.validate_topic_acess(user_topic)
+        self._progress_service.validate_topic_acess(user_topic)
 
 
         submit_questions = topic_answers.questions
-        created_questions = self._adaptivity_service.add_adaptive_questions_to_list(
-            user_topic,
-            self.question_repo.get_active_questions_by_topic(current_topic)
+
+        created_questions = self._question_repo.get_active_questions_by_topic(current_topic)
+        created_questions.extend(
+            self._adaptivity_service.get_adaptive_questions_to_list(
+                user_topic,
+                submit_questions
+            )
         )
         
         created_questions.sort(key=lambda q: getattr(q, "id"))
@@ -172,7 +176,7 @@ class TopicService:
                 status.HTTP_400_BAD_REQUEST, 
                 "u didn`t answer all questions"
             )
-
+            
         question_count = len(submit_questions)
         
         for index, submit_question in enumerate(submit_questions):
@@ -194,7 +198,7 @@ class TopicService:
                 submit_question, question_score
             )
             
-        self.progress_service.update_user_topic_score(
+        self._progress_service.update_user_topic_score(
             user_topic, topic_score
         )
 
@@ -221,13 +225,13 @@ class TopicService:
             question_score (float): score of question to save result
         """
 
-        user_question = self.user_question_repo.get_or_create_user_question(
+        user_question = self._user_question_repo.get_or_create_user_question(
             user.username, 
             submit_question.by_topic, 
             created_question
         )
 
-        user_question = self.user_question_repo.update(
+        user_question = self._user_question_repo.update(
             user_question,
             question_score = max(
                 question_score, 
@@ -236,7 +240,7 @@ class TopicService:
         )
 
         if submit_question.type == 'text':
-            user_answer = self.user_text_answer_repo.create_user_text_answer(
+            user_answer = self._user_text_answer_repo.create_user_text_answer(
                 user, 
                 created_question, 
                 submit_question.by_topic, 
@@ -244,14 +248,13 @@ class TopicService:
                 submit_question.text
             )
 
-            self.user_text_answer_repo.update(
+            self._user_text_answer_repo.update(
                 user_answer,
                 is_correct = max(
                     user_answer.is_correct, # pyright: ignore
                     bool(question_score)
                 )
             )
-        
         if submit_question.by_topic != user_topic.topic.id:
             self._adaptivity_service.save_adaptive_question_results(
                 user, 

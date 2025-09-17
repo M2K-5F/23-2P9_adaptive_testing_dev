@@ -32,12 +32,12 @@ class QuestionService:
         question_repo: QuestionRepository,
         progress_service: ProgressService
     ):
-        self.topic_repo = topic_repository
-        self.user_question_repo = user_question_repository
-        self.user_text_answer_repo = user_text_answer_repo
-        self.answer_repo = answer_repo
-        self.question_repo = question_repo
-        self.progress_service = progress_service
+        self._topic_repo = topic_repository
+        self._user_question_repo = user_question_repository
+        self._user_text_answer_repo = user_text_answer_repo
+        self._answer_repo = answer_repo
+        self._question_repo = question_repo
+        self._progress_service = progress_service
 
     
     @database.atomic()
@@ -55,7 +55,7 @@ class QuestionService:
         Returns:
             JSONResponse: created question instance with answers
         """
-        current_topic = self.topic_repo.get_by_id(topic_id, True)
+        current_topic = self._topic_repo.get_by_id(topic_id, True)
 
         question_type = question_to_create.question_type
 
@@ -74,7 +74,7 @@ class QuestionService:
                 )
 
 
-        created_question = self.question_repo.get_or_create(
+        created_question = self._question_repo.get_or_create(
             True, {"question_type": question_type},
             text = question_to_create.text,
             by_topic = current_topic
@@ -82,12 +82,12 @@ class QuestionService:
 
         for answer_option in question_to_create.answer_options:
 
-            self.answer_repo.get_or_create(True, {},
+            self._answer_repo.get_or_create(True, {},
                 text = answer_option.text,
                 is_correct = True if question_to_create.question_type == "text" else answer_option.is_correct,
                 by_question = created_question
             )
-        current_topic = self.topic_repo.update_by_instance(current_topic, {'question_count': current_topic.question_count + 1})
+        current_topic = self._topic_repo.update_by_instance(current_topic, {'question_count': current_topic.question_count + 1})
         return JSONResponse(created_question.dump)
 
 
@@ -105,7 +105,7 @@ class QuestionService:
         Returns:
             JSONResponse: archived question instance
         """
-        current_question = self.question_repo.get_by_id(question_id, True)
+        current_question = self._question_repo.get_by_id(question_id, True)
 
         if current_question.by_topic.created_by.username != user.username:
             raise HTTPException(
@@ -118,11 +118,11 @@ class QuestionService:
                 status.HTTP_400_BAD_REQUEST,
                 "Already archivated"
             )
-        current_question = self.question_repo.update_by_instance(current_question, {'is_active': False})
+        current_question = self._question_repo.update_by_instance(current_question, {'is_active': False})
 
         
         by_topic: Topic = current_question.by_topic  # pyright: ignore
-        by_topic = self.topic_repo.update_by_instance(by_topic, {'question_count': by_topic.question_count - 1})
+        by_topic = self._topic_repo.update_by_instance(by_topic, {'question_count': by_topic.question_count - 1})
 
         return JSONResponse(current_question.dump)
 
@@ -141,7 +141,7 @@ class QuestionService:
         Returns:
             JSONResponse: unarchived question instance
         """
-        current_question = self.question_repo.get_by_id(question_id, True)
+        current_question = self._question_repo.get_by_id(question_id, True)
 
         if current_question.by_topic.created_by.username != user.username:
             raise HTTPException(
@@ -155,11 +155,11 @@ class QuestionService:
                 "Already active"
             )
 
-        current_question = self.question_repo.update_by_instance(current_question, {'is_active': True})
+        current_question = self._question_repo.update_by_instance(current_question, {'is_active': True})
 
         
         by_topic: Topic = current_question.by_topic  # pyright: ignore
-        by_topic = self.topic_repo.update_by_instance(by_topic, {'question_count': by_topic.question_count + 1})
+        by_topic = self._topic_repo.update_by_instance(by_topic, {'question_count': by_topic.question_count + 1})
 
         return JSONResponse(current_question.dump)
 
@@ -175,16 +175,16 @@ class QuestionService:
         Returns:
             JSONResponse: list of questions with their answer options
         """
-        current_topic = self.topic_repo.get_or_none(True, 
+        current_topic = self._topic_repo.get_or_none(True, 
             id = topic_id, 
             created_by = user.username
         )
 
-        questions_by_topic = self.question_repo.select_where(by_topic = current_topic)
+        questions_by_topic = self._question_repo.select_where(by_topic = current_topic)
         
         to_return = []
         for question in questions_by_topic:
-            answers_by_question = self.answer_repo.select_where(by_question = question)
+            answers_by_question = self._answer_repo.select_where(by_question = question)
 
             to_return.append({**question.dump, "answer_options": [answer.dump for answer in answers_by_question]})
 
@@ -205,7 +205,7 @@ class QuestionService:
         Returns:
             JSONResponse: updated user topic progress information
         """
-        user_answer = self.user_text_answer_repo.get_or_none(True,
+        user_answer = self._user_text_answer_repo.get_or_none(True,
             id = user_answer_id,
             is_active = True
         )
@@ -216,17 +216,17 @@ class QuestionService:
                 "Question wasn`t created by you"
             )
 
-        user_answer = self.user_text_answer_repo.update_by_instance(user_answer, {
+        user_answer = self._user_text_answer_repo.update_by_instance(user_answer, {
             'is_correct': score != 0,
             'is_active': False
         })
 
         user_question: UserQuestion = user_answer.for_user_question  # pyright: ignore
-        user_question = self.user_question_repo.update_by_instance(user_question, {
+        user_question = self._user_question_repo.update_by_instance(user_question, {
             'question_score': score
         })
 
         user_topic: UserTopic = user_question.by_user_topic  # pyright: ignore
-        user_topic = self.progress_service.update_user_topic_progress(user_topic)
+        user_topic = self._progress_service.update_user_topic_progress(user_topic)
         
         return JSONResponse(user_topic.dump)

@@ -80,7 +80,7 @@ def get_progress_service(
 
 
 def get_adaptivity_service(
-    user_question_repo = Depends(get_question_repository),
+    user_question_repo = Depends(get_user_question_repository),
     adaptive_question_repo = Depends(get_adaptive_question_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     progress_service = Depends(get_progress_service),
@@ -148,22 +148,12 @@ def get_techer_topic_service(
     user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
-    user_question_repo = Depends(get_user_question_repository),
-    adaptive_question_repo = Depends(get_adaptive_question_repository),
-    user_text_answer_repo = Depends(get_user_text_answer_repository),
-    answer_repo = Depends(get_answer_repository),
-    question_repo = Depends(get_question_repository)
 ):
     return TTS(
         course_repo,
         user_course_repo,
         topic_repo,
         user_topic_repo,
-        user_question_repo,
-        adaptive_question_repo,
-        user_text_answer_repo,
-        answer_repo,
-        question_repo
     )
 
 
@@ -172,8 +162,6 @@ def get_techer_course_service(
     user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
-    user_question_repo = Depends(get_user_question_repository),
-    adaptive_question_repo = Depends(get_adaptive_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
 ):
     return TCS(
@@ -181,15 +169,12 @@ def get_techer_course_service(
         user_course_repo,
         topic_repo,
         user_topic_repo,
-        user_question_repo,
-        adaptive_question_repo,
         user_text_answer_repo,
     )
 
 
 def get_teacher_question_service(
     topic_repo = Depends(get_topic_repository),
-    user_topic_repo = Depends(get_user_topic_repository),
     user_question_repo = Depends(get_user_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     answer_repo = Depends(get_answer_repository),
@@ -197,8 +182,7 @@ def get_teacher_question_service(
     progress_service = Depends(get_progress_service)
 ):
     return TQS(
-        topic_repo,
-        user_topic_repo, 
+        topic_repo, 
         user_question_repo,
         user_text_answer_repo,
         answer_repo, 

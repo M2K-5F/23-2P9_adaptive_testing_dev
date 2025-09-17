@@ -149,22 +149,19 @@ if __name__ == "__main__":
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)
     teacher_role, _ = Role.get_or_create(status=Roles.TEACHER)
-    try:
-        base_teacher, _ = User.get_or_create(
-            username = 'teacher',
-            name = 'teacher',
-            defaults={
-                'telegram_link': 'https://t.me/teacher_tg.com',
-                'password_hash': get_password_hash('12345')
-            })
-        UserRole.get_or_create(
-            user = base_teacher,
-            role = teacher_role
-        )
+    base_teacher, _ = User.get_or_create(
+        username = 'teacher',
+        name = 'teacher',
+        defaults={
+            'telegram_link': 'https://t.me/teacher_tg',
+            'password_hash': get_password_hash('12345')
+        })
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = teacher_role
+    )
 
-        UserRole.get_or_create(
-            user = base_teacher,
-            role = student_role
-        )
-    except:
-        print('passed')
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = student_role
+    )

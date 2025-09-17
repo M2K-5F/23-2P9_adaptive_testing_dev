@@ -11,7 +11,7 @@ class UserService:
         self, 
         user_repo: UserRepository
     ):
-        self.user_repo = user_repo
+        self._user_repo = user_repo
 
 
     @database.atomic()
@@ -23,7 +23,7 @@ class UserService:
         password:str, 
         role: Literal['teacher', 'student']
     ) -> JSONResponse:
-        created_user = self.user_repo.create_user(
+        created_user = self._user_repo.create_user(
             username,
             name,
             telegram_link, 
@@ -36,9 +36,9 @@ class UserService:
 
     @database.atomic()
     def get_user_by_username(self, username: str):
-        return self.user_repo.get_user_by_username(username)
+        return self._user_repo.get_user_by_username(username)
 
 
     @database.atomic()
     def get_password_hash_by_username(self, username: str):
-        return self.user_repo.get_password_hash_by_username(username)
+        return self._user_repo.get_password_hash_by_username(username)

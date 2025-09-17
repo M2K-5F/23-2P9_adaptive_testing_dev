@@ -23,12 +23,12 @@ class CourseService:
         adaptive_question_repo: AdaptiveQuestionRepository,
         progress_service: ProgressService
     ):
-        self.course_repo = course_repo
-        self.topic_repo = topic_repository
-        self.user_course_repo = user_course_repo
-        self.user_topic_repo = user_topic_repository
-        self.adaptive_question_repo = adaptive_question_repo
-        self.progress_service = progress_service
+        self._course_repo = course_repo
+        self._topic_repo = topic_repository
+        self._user_course_repo = user_course_repo
+        self._user_topic_repo = user_topic_repository
+        self._adaptive_question_repo = adaptive_question_repo
+        self._progress_service = progress_service
     
     
     @database.atomic()
@@ -42,7 +42,7 @@ class CourseService:
             JSONResponse: List of active user courses with their details
         """
 
-        followed_courses = self.user_course_repo.get_active_user_courses_from_user(user)
+        followed_courses = self._user_course_repo.get_active_user_courses_from_user(user)
         return JSONResponse([uc.recdump for uc in followed_courses])
 
 
@@ -61,12 +61,12 @@ class CourseService:
             HTTPException(400): If course is not active or is already followed
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
     
         if not current_course.is_active:
-            raise self.course_repo._400_does_not_exist
+            raise self._course_repo._400_does_not_exist
         
-        user_course, is_created = self.user_course_repo.get_or_create(
+        user_course, is_created = self._user_course_repo.get_or_create(
             False, {},
             user=user.username,
             course=current_course
@@ -74,21 +74,21 @@ class CourseService:
     
         if not is_created:
             if user_course.is_active:
-                raise self.user_course_repo._400_does_not_exist
+                raise self._user_course_repo._400_does_not_exist
         
             else:
-                user_course = self.user_course_repo.activate_user_course(user_course)
+                user_course = self._user_course_repo.activate_user_course(user_course)
                 return JSONResponse(user_course.dump)
         
-        topics_by_course = self.topic_repo.get_active_topics_by_course(current_course)
+        topics_by_course = self._topic_repo.get_active_topics_by_course(current_course)
     
         for index, topic in enumerate(topics_by_course):
-            self.user_topic_repo.create_user_topic(
+            self._user_topic_repo.create_user_topic(
                 topic, user.username, user_course,
                 False if index != 0 else True
             )
     
-        current_course = self.course_repo.add_student(current_course)        
+        current_course = self._course_repo.add_student(current_course)        
     
         return JSONResponse(user_course.dump)
 
@@ -108,15 +108,15 @@ class CourseService:
             HTTPException(400): If user course not exists
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
     
         if not current_course.is_active:
-            raise self.course_repo._400_does_not_exist
+            raise self._course_repo._400_does_not_exist
         
-        user_course = self.progress_service.clear_user_course_progress(user, current_course.id, True)  #pyright: ignore
+        user_course = self._progress_service.clear_user_course_progress(user, current_course.id, True)  #pyright: ignore
         
         user_course.delete_instance()
-        current_course = self.course_repo.remove_student(current_course)
+        current_course = self._course_repo.remove_student(current_course)
     
         return JSONResponse(user_course.dump)
 
@@ -133,11 +133,11 @@ class CourseService:
             JSONResponse: Course instance with 'user_course' field
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
 
         try:
-            followed_course = self.user_course_repo.get_active_user_course_from_user(user, current_course)
-            self.adaptive_question_repo.delete_all(user = user.username)
+            followed_course = self._user_course_repo.get_active_user_course_from_user(user, current_course)
+            self._adaptive_question_repo.delete_all(user = user.username)
 
             return JSONResponse({**current_course.dump, 'user_course': {**followed_course.dump}})
 
@@ -157,7 +157,7 @@ class CourseService:
             JSONResponse: returns user course with nullish progress
         """
 
-        user_course = self.progress_service.clear_user_course_progress(user, user_course_id)
+        user_course = self._progress_service.clear_user_course_progress(user, user_course_id)
 
         return JSONResponse(user_course.dump)
 
@@ -174,6 +174,6 @@ class CourseService:
             JSONResponse: list of courses where title is search query 
         """
 
-        searched_courses = self.course_repo.search_courses_by_title(user, search_query)
+        searched_courses = self._course_repo.search_courses_by_title(user, search_query)
         
         return JSONResponse([course.dump for course in searched_courses])

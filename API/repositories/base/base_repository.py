@@ -21,7 +21,9 @@ class BaseRepository(Generic[T]):
             status.HTTP_404_NOT_FOUND,
             f'Object of type {self.model.__name__} not found'
         )
-        self._field_not_exist = lambda field: ValueError(f"Field {field} does not exist in {self.model.__name__}")
+        self._field_not_exist = lambda field: ValueError(
+            f"Field {field} does not exist in {self.model.__name__}"
+        )
 
 
     @overload
@@ -143,6 +145,7 @@ class BaseRepository(Generic[T]):
                 raise self._field_not_exist(field)
         return list(select)
 
+
     def exists(self, **kwargs) -> bool:
         select = self.model.select()
         for field, value in kwargs.items():
@@ -151,6 +154,7 @@ class BaseRepository(Generic[T]):
             else:
                 raise self._field_not_exist(field)
         return select.exists()
+
 
     def count(self, **kwargs) -> int:
         select = self.model.select()

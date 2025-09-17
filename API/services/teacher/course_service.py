@@ -22,11 +22,11 @@ class CourseService:
         user_topic_repository: UserTopicRepository,
         user_text_answer_repo: UserTextAnswerRepository
     ):
-        self.course_repo = course_repo
-        self.topic_repo = topic_repository
-        self.user_course_repo = user_course_repo
-        self.user_topic_repo = user_topic_repository
-        self.user_text_answer_repo = user_text_answer_repo
+        self._course_repo = course_repo
+        self._topic_repo = topic_repository
+        self._user_course_repo = user_course_repo
+        self._user_topic_repo = user_topic_repository
+        self._user_text_answer_repo = user_text_answer_repo
 
 
     @database.atomic()
@@ -42,7 +42,7 @@ class CourseService:
             JSONResponse: created course instance
         """
 
-        created_course = self.course_repo.get_or_create(
+        created_course = self._course_repo.get_or_create(
             True, {},
             title = course_title,
             created_by = user.username,
@@ -67,7 +67,7 @@ class CourseService:
             JSONResponse: archived course instance
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
         
         if not current_course.is_active:
             raise HTTPException(
@@ -81,12 +81,12 @@ class CourseService:
                 "Course wasn`t created by you"
             )
         
-        current_course = self.course_repo.update(
+        current_course = self._course_repo.update(
             current_course,
             is_active = False
         )
 
-        self.user_topic_repo.disable_activeness_by_course(current_course)
+        self._user_topic_repo.disable_activeness_by_course(current_course)
 
         return JSONResponse(current_course.dump)
 
@@ -106,7 +106,7 @@ class CourseService:
             JSONResponse: unarchived course instance
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
         
         if current_course.is_active:
             raise HTTPException(
@@ -120,11 +120,11 @@ class CourseService:
                 "Course wasn`t created by you"
             )
 
-        current_course = self.course_repo.update_by_instance(current_course, {
+        current_course = self._course_repo.update_by_instance(current_course, {
             'is_active': True
         })
 
-        self.user_topic_repo.enable_activeness_by_course(current_course)
+        self._user_topic_repo.enable_activeness_by_course(current_course)
 
         return JSONResponse(current_course.dump)
     
@@ -140,7 +140,7 @@ class CourseService:
             JSONResponse: list of courses
         """
 
-        courses = self.course_repo.select_where(created_by = user.username)
+        courses = self._course_repo.select_where(created_by = user.username)
 
         return JSONResponse([course.dump for course in courses])
 
@@ -158,14 +158,14 @@ class CourseService:
             _type_: response with statistics by course
         """
 
-        current_course = self.course_repo.get_by_id(course_id, True)
+        current_course = self._course_repo.get_by_id(course_id, True)
         if current_course.created_by.username != user.username:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 "Course wasn`t created by you"
             )
 
-        user_courses = self.user_course_repo.get_user_courses_by_course(current_course)
+        user_courses = self._user_course_repo.get_user_courses_by_course(current_course)
         
         statistics = []
         avg_course_progress = 0
@@ -173,7 +173,7 @@ class CourseService:
         for user_course in user_courses:
                 student = user_course.user
             
-                topics = self.topic_repo.select_where(by_course = current_course)
+                topics = self._topic_repo.select_where(by_course = current_course)
                 topics.sort(key=lambda t: t.number_in_course) # pyright: ignore
                 
                 avg_course_progress += round(user_course.course_progress, 2) # pyright: ignore
@@ -190,7 +190,7 @@ class CourseService:
                 }
                 
                 for topic in topics:
-                        user_topic = self.user_topic_repo.get_or_none(False,
+                        user_topic = self._user_topic_repo.get_or_none(False,
                             user = student.username,
                             topic = topic.id,
                             by_user_course = user_course.id
@@ -208,7 +208,7 @@ class CourseService:
                                 'unsubmited_answers': []
                             })
                         else:
-                            unsubmited_text_answers = self.user_text_answer_repo.get_unsubmited_answers_by_user_topic(user_topic)
+                            unsubmited_text_answers = self._user_text_answer_repo.get_unsubmited_answers_by_user_topic(user_topic)
                         
                             student_stats['topics_details'].append({
                                 'topic_id': topic.id,
