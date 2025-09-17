@@ -138,7 +138,7 @@ export const CreatedTopic = memo(({ topic, index }: {
                     onClick={handleExpand}
                     className="mt-4 flex items-center gap-2 w-full sm:w-auto"
                 >   
-                    <ChevronUp className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
+                    <ChevronDown className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
                     {isExpanded ? 'Свернуть тему' : 'Подробнее'
                     }
                 </Button>

@@ -87,7 +87,7 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
                 onClick={() => setExpanded(!expanded)}
                 className="flex items-center gap-1 text-xs text-muted-foreground p-0 h-6"
             >   
-                <ChevronUp className={clsx("h-3.5 w-3.5 transition-all", expanded && 'rotate-180')} />
+                <ChevronDown className={clsx("h-3.5 w-3.5 transition-all", expanded && 'rotate-180')} />
                 {expanded ? 'Скрыть ответы' : 'Показать ответы'}
             </Button>
 
