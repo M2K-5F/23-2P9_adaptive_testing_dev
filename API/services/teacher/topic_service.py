@@ -96,7 +96,7 @@ class TopicService:
 
         current_course = self._course_repo.update(
             current_course,
-            topics_count = current_course.topic_count + 1
+            topic_count = current_course.topic_count + 1
         )
 
         
