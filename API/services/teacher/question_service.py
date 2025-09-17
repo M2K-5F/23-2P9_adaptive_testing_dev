@@ -11,6 +11,7 @@ from repositories.answer.user_text_answer_repository import UserTextAnswerReposi
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
 from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
+from services.common.progress_service import ProgressService
 from shemas import QuestionBase, SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -20,25 +21,40 @@ SubmitQuestion = Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]
 
 
 class QuestionService:
+    """Service for processing actions with questions from teacher"""
+    
     def __init__(
         self,
         topic_repository: TopicRepository,
-        user_topic_repository: UserTopicRepository,
         user_question_repository: UserQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository,
         answer_repo: AnswerRepository,
-        question_repo: QuestionRepository
+        question_repo: QuestionRepository,
+        progress_service: ProgressService
     ):
         self.topic_repo = topic_repository
-        self.user_topic_repo = user_topic_repository
         self.user_question_repo = user_question_repository
         self.user_text_answer_repo = user_text_answer_repo
         self.answer_repo = answer_repo
         self.question_repo = question_repo
+        self.progress_service = progress_service
 
     
     @database.atomic()
     def create_question(self, user: UserOut, topic_id: int, question_to_create: QuestionBase):
+        """Create a new question in specified topic
+
+        Args:
+            user (UserOut): current user (teacher)
+            topic_id (int): ID of the topic where question will be created
+            question_to_create (QuestionBase): question data including text and answer options
+
+        Raises:
+            HTTPException(400): if no correct answer options provided for choice questions
+
+        Returns:
+            JSONResponse: created question instance with answers
+        """
         current_topic = self.topic_repo.get_by_id(topic_id, True)
 
         question_type = question_to_create.question_type
@@ -77,6 +93,18 @@ class QuestionService:
 
     @database.atomic()
     def arch_question(self, user: UserOut, question_id: int ):
+        """Archive a question and decrease topic question count
+
+        Args:
+            user (UserOut): current user (teacher)
+            question_id (int): ID of the question to archive
+
+        Raises:
+            HTTPException(400): if question wasn't created by user or already archived
+
+        Returns:
+            JSONResponse: archived question instance
+        """
         current_question = self.question_repo.get_by_id(question_id, True)
 
         if current_question.by_topic.created_by.username != user.username:
@@ -101,6 +129,18 @@ class QuestionService:
 
     @database.atomic()
     def unarch_question(self, user: UserOut, question_id: int):
+        """Unarchive a question and increase topic question count
+
+        Args:
+            user (UserOut): current user (teacher)
+            question_id (int): ID of the question to unarchive
+
+        Raises:
+            HTTPException(400): if question wasn't created by user or already active
+
+        Returns:
+            JSONResponse: unarchived question instance
+        """
         current_question = self.question_repo.get_by_id(question_id, True)
 
         if current_question.by_topic.created_by.username != user.username:
@@ -126,6 +166,15 @@ class QuestionService:
 
     @database.atomic()
     def get_question_list(self, user: UserOut, topic_id: int):
+        """Get list of all questions in a topic created by the user
+
+        Args:
+            user (UserOut): current user (teacher)
+            topic_id (int): ID of the topic to get questions from
+
+        Returns:
+            JSONResponse: list of questions with their answer options
+        """
         current_topic = self.topic_repo.get_or_none(True, 
             id = topic_id, 
             created_by = user.username
@@ -143,6 +192,19 @@ class QuestionService:
 
     
     def submit_question(self, user: UserOut, score: float, user_answer_id: int):
+        """Submit and evaluate a text question answer (teacher grading)
+
+        Args:
+            user (UserOut): current user (teacher)
+            score (float): score assigned to the answer (0-100)
+            user_answer_id (int): ID of the user's text answer to evaluate
+
+        Raises:
+            HTTPException(400): if question wasn't created by the user
+
+        Returns:
+            JSONResponse: updated user topic progress information
+        """
         user_answer = self.user_text_answer_repo.get_or_none(True,
             id = user_answer_id,
             is_active = True
@@ -165,48 +227,6 @@ class QuestionService:
         })
 
         user_topic: UserTopic = user_question.by_user_topic  # pyright: ignore
-        user_topic = self.update_user_topic_progress(user_topic)
+        user_topic = self.progress_service.update_user_topic_progress(user_topic)
         
         return JSONResponse(user_topic.dump)
-
-
-    def update_user_topic_progress(self, user_topic: UserTopic):
-        user_questions_by_topic = self.user_question_repo.get_by_user_topic(user_topic)
-        topic_score: float = 0 
-
-        for q in user_questions_by_topic:
-            topic_score += (
-                q.question_score /  # pyright: ignore
-                len(user_questions_by_topic)
-            )
-
-        topic_score = max(topic_score, user_topic.topic_progress) #pyright: ignore
-        
-        if topic_score >= 0.8:
-            user_topic = self.user_topic_repo.update_by_instance(user_topic, {
-                'is_completed': True
-            })
-            
-            next_ut = self.user_topic_repo.get_next_user_topic(user_topic)
-            if next_ut:
-                next_ut = self.user_topic_repo.update_by_instance(next_ut, {
-                    'ready_to_pass': True
-                })
-
-        user_topic = self.user_topic_repo.update_by_instance(user_topic, {
-            'topic_progress': topic_score
-        })
-
-        user_course: UserCourse = user_topic.by_user_course # pyright: ignore
-        user_topics_by_course  = self.user_topic_repo.get_user_topics_by_user_course(user_course)
-        course_progress = 0
-
-        for t in user_topics_by_course:
-            if t.topic_progress >= 0.8: # pyright: ignore
-                course_progress += 100 / len(user_topics_by_course)
-                user_course.completed_topic_number += 1
-
-        user_course.course_progress = course_progress
-        user_course.save()
-
-        return user_topic

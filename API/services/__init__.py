@@ -5,3 +5,4 @@ from .teacher.course_service import CourseService as TCS
 from .teacher.question_service import QuestionService as TQS
 from .teacher.topic_service import TopicService as TTS
 from .common.progress_service import ProgressService as PS
+from .common.adaptivity_service import AdaptivityServise as AS

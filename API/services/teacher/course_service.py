@@ -12,27 +12,36 @@ from fastapi.responses import JSONResponse
 
 
 class CourseService:
+    """Service for processing action with courses from teacher"""
+
     def __init__(
         self,
         course_repo: CourseRepository,
         user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
-        user_question_repository: UserQuestionRepository,
-        adaptive_question_repo: AdaptiveQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository
     ):
         self.course_repo = course_repo
         self.topic_repo = topic_repository
         self.user_course_repo = user_course_repo
         self.user_topic_repo = user_topic_repository
-        self.user_question_repo = user_question_repository
-        self.adaptive_question_repo = adaptive_question_repo
         self.user_text_answer_repo = user_text_answer_repo
 
 
     @database.atomic()
-    def create_course(self, course_title, course_description, user: UserOut):        
+    def create_course(self, course_title, course_description, user: UserOut):     
+        """Create course and return instance
+
+        Args:
+            course_title (str): title of new course
+            course_description (str): description of new course
+            user (UserOut): current user
+
+        Returns:
+            JSONResponse: created course instance
+        """
+
         created_course = self.course_repo.get_or_create(
             True, {},
             title = course_title,
@@ -45,6 +54,19 @@ class CourseService:
 
     @database.atomic()
     def arch_course(self, course_id: int, user: UserOut):
+        """Archivate course & deactivate all user_topics associated with that course
+
+        Args:
+            course_id (int): unique course id
+            user (UserOut): current user
+            
+        Raises:
+            HTTPException(400): if course already archived
+
+        Returns:
+            JSONResponse: archived course instance
+        """
+
         current_course = self.course_repo.get_by_id(course_id, True)
         
         if not current_course.is_active:
@@ -71,6 +93,19 @@ class CourseService:
     
     @database.atomic()
     def unarch_course(self, course_id: int, user: UserOut):
+        """Unarchivate course & activate all user_topics associated with that course
+
+        Args:
+            course_id (int): unique course id
+            user (UserOut): current user
+            
+        Raises:
+            HTTPException(400): if course already unarchived
+
+        Returns:
+            JSONResponse: unarchived course instance
+        """
+
         current_course = self.course_repo.get_by_id(course_id, True)
         
         if current_course.is_active:
@@ -96,13 +131,33 @@ class CourseService:
     
     @database.atomic()
     def get_created_by_teacher_courses(self, user: UserOut):
-            courses = self.course_repo.select_where(created_by = user.username)
+        """Returns courses which be created by user
 
-            return JSONResponse([course.dump for course in courses])
+        Args:
+            user (UserOut): current user
+
+        Returns:
+            JSONResponse: list of courses
+        """
+
+        courses = self.course_repo.select_where(created_by = user.username)
+
+        return JSONResponse([course.dump for course in courses])
 
 
     @database.atomic()
     def get_course_statistics(self, user: UserOut, course_id: int):
+        """Returns statistics by course
+
+        Args:
+            user (UserOut): current user
+            course_id (int): unique course id
+
+
+        Returns:
+            _type_: response with statistics by course
+        """
+
         current_course = self.course_repo.get_by_id(course_id, True)
         if current_course.created_by.username != user.username:
             raise HTTPException(

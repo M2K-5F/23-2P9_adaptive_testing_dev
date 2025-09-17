@@ -37,7 +37,7 @@ class UserRepository(BaseRepository[User]):
             )
 
         except IntegrityError:
-            raise self.integrity_exc
+            raise self._400_integrity
 
         return currect_user
 

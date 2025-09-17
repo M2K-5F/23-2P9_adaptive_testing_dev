@@ -5,10 +5,12 @@ from models import User, database
 from repositories.user_repository import UserRepository
 
 class UserService:
+    """Service management users"""
+
     def __init__(
         self, 
         user_repo: UserRepository
-    ) -> None:
+    ):
         self.user_repo = user_repo
 
 

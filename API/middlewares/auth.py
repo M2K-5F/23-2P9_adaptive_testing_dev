@@ -7,7 +7,16 @@ from utils.crypt_utils import decode_jwt
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
+    """Middleware which verify user from token"""
+
     async def dispatch(self, request: Request, call_next) -> Response:
+        """Method which get token from headers & decode it & write userdata to request
+
+        Exceptions:
+            HTTPException(403): raises when token are unvalid or broken
+            HTTPException(401): raises when request dispached without token
+        """
+
         public_paths = ["/auth/login", "/auth/register", '/auth/logout', "/docs", "/openapi.json"]
         if any(request.url.path.startswith(path) for path in public_paths):
             return await call_next(request)
@@ -19,20 +28,26 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
 
         credentials_exception = JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
-            content={'detail':"Could not validate credentials"}
+            content={
+                'detail':"Could not validate credentials"
+            }
         )
 
         if not cookie_token and not bearer_token:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={'detail': 'Not authentificated'}
+                content={
+                    'detail': 'Not authentificated'
+                }
             )
 
         token = str(cookie_token) or bearer_token
         if token is None:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={'detail': 'Not authentificated'}
+                content={
+                    'detail': 'Not authentificated'
+                }
             )
 
         try:

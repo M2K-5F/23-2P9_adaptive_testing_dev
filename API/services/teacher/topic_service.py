@@ -20,31 +20,43 @@ SubmitQuestion = Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]
 
 
 class TopicService:
+    """Service for processing actions with topics from teacher"""
+    
     def __init__(
         self,
         course_repo: CourseRepository,
         user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
-        user_topic_repository: UserTopicRepository,
-        user_question_repository: UserQuestionRepository,
-        adaptive_question_repo: AdaptiveQuestionRepository,
-        user_text_answer_repo: UserTextAnswerRepository,
-        answer_repo: AnswerRepository,
-        question_repo: QuestionRepository
+        user_topic_repository: UserTopicRepository
     ):
         self.course_repo = course_repo
         self.topic_repo = topic_repository
         self.user_course_repo = user_course_repo
         self.user_topic_repo = user_topic_repository
-        self.user_question_repo = user_question_repository
-        self.adaptive_question_repo = adaptive_question_repo
-        self.user_text_answer_repo = user_text_answer_repo
-        self.answer_repo = answer_repo
-        self.question_repo = question_repo
 
     
     @database.atomic()
-    def create_topic(self, user: UserOut, title: str, description: str, course_id: int):
+    def create_topic(
+        self, 
+        user: UserOut, 
+        title: str, 
+        description: str, 
+        course_id: int
+    ):
+        """Create a new topic in specified course and initialize user topics
+
+        Args:
+            user (UserOut): current user (teacher)
+            title (str): title of the new topic
+            description (str): description of the new topic
+            course_id (int): ID of the course where topic will be created
+
+        Raises:
+            HTTPException(400): if topic with same title and description already exists
+
+        Returns:
+            JSONResponse: created topic instance
+        """
         current_course = self.course_repo.get_by_id(course_id, True)
 
         topics_by_course = self.topic_repo.get_active_topics_by_course(current_course)
@@ -76,11 +88,16 @@ class TopicService:
                 is_ready = bool(prev.is_completed)
 
             self.user_topic_repo.create_user_topic(
-                created_topic, user.username, user_course, is_ready
+                created_topic, 
+                user.username, 
+                user_course, 
+                is_ready
             )
 
-        current_course.topic_count += 1
-        current_course.save()
+        current_course = self.course_repo.update(
+            current_course,
+            topics_count = current_course.topic_count + 1
+        )
 
         
         self.user_course_repo.update_user_courses_progress(current_course)
@@ -89,7 +106,19 @@ class TopicService:
 
 
     @database.atomic()
-    def arch_topic(self, user: UserOut, topic_id: str):   
+    def arch_topic(self, user: UserOut, topic_id: str):
+        """Archive a topic and disable associated user topics
+
+        Args:
+            user (UserOut): current user (teacher)
+            topic_id (str): ID of the topic to archive
+
+        Raises:
+            HTTPException(400): if topic is already archived
+
+        Returns:
+            JSONResponse: archived topic instance
+        """   
         current_topic = self.topic_repo.get_or_none(True,
             created_by = user.username,
             id = topic_id
@@ -100,8 +129,10 @@ class TopicService:
                 "Topic already archivated"
             )
         
-        current_topic.is_active = False
-        current_topic.save()
+        current_topic = self.topic_repo.update(
+            current_topic,
+            is_active = False
+        )
 
         self.user_topic_repo.disable_activeness_by_topic(current_topic)
 
@@ -109,7 +140,19 @@ class TopicService:
     
 
     @database.atomic()
-    def unarch_topic(self, user: UserOut, topic_id: str):   
+    def unarch_topic(self, user: UserOut, topic_id: str):
+        """Unarchive a topic and enable associated user topics
+
+        Args:
+            user (UserOut): current user (teacher)
+            topic_id (str): ID of the topic to unarchive
+
+        Raises:
+            HTTPException(400): if topic is already active
+
+        Returns:
+            JSONResponse: unarchived topic instance
+        """   
         current_topic = self.topic_repo.get_or_none(True,
             created_by = user.username,
             id = topic_id
@@ -120,8 +163,10 @@ class TopicService:
                 "Topic already active"
             )
         
-        current_topic.is_active = True
-        current_topic.save()
+        current_topic = self.topic_repo.update(
+            current_topic,
+            is_active = True
+        )
 
         self.user_topic_repo.enable_activeness_by_topic(current_topic)
 

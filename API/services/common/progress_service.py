@@ -16,7 +16,7 @@ from shemas import UserOut
 
 
 class ProgressService:
-    """Service for management acessibility & progresses of topic, courses and questions"""
+    """Service for managing accessibility and progress tracking of topics, courses and questions."""
     def __init__(
             self, 
             user_topic_repo: UserTopicRepository,
@@ -35,6 +35,16 @@ class ProgressService:
 
 
     def validate_topic_acess(self, user_topic: UserTopic):
+        """
+        Validates if a user topic is accessible for passing.
+        
+        Args:
+            user_topic (UserTopic): user topic 
+            
+        Raises:
+            HTTPException(400): if topic is inactive or not ready to pass
+        """
+
         if not user_topic.is_active:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, 
@@ -49,6 +59,17 @@ class ProgressService:
 
 
     def update_user_topic_score(self, user_topic: UserTopic, topic_score: float):
+        """
+        Updates user topic score and handles completion logic.
+        
+        Args:
+            user_topic (UserTopic): User topic to update
+            topic_score (float): New score value (0.0 to 1.0)
+            
+        Returns:
+            float: The updated topic score
+        """
+
         if user_topic.topic_progress < topic_score:  # pyright: ignore
             user_topic = self._user_topic_repo.update(
                 user_topic, 
@@ -81,6 +102,18 @@ class ProgressService:
     
 
     def clear_user_course_progress(self, user: UserOut, user_course_id: int, with_delete: bool = False) -> UserCourse:
+        """
+        Clears all progress for a user course and associated topics.
+        
+        Args:
+            user (UserOut): Current user
+            user_course_id (int): User course identifier to clear
+            with_delete (bool, optional): Whether to delete topic instances. Defaults to False.
+            
+        Returns:
+            UserCourse: The cleared user course instance
+        """
+
         user_course = self._user_course_repo.get_or_none(True, id = user_course_id, user = user.username)
 
         user_topics = self._user_topic_repo.get_user_topics_by_user_course(user_course)
@@ -100,3 +133,57 @@ class ProgressService:
         user_course = self._user_course_repo.clear_user_course_progress(user_course)
 
         return user_course
+    
+
+    def update_user_topic_progress(self, user_topic: UserTopic):
+        """
+        Recalculates and updates topic progress based on question scores.
+        
+        Args:
+            user_topic (UserTopic): User topic to update
+            
+        Returns:
+            UserTopic: Updated user topic instance
+        """
+
+        user_questions_by_topic = self._user_question_repo.get_by_user_topic(user_topic)
+        topic_score: float = 0 
+
+        for q in user_questions_by_topic:
+            topic_score += (
+                q.question_score /  # pyright: ignore
+                len(user_questions_by_topic)
+            )
+
+        topic_score = max(topic_score, user_topic.topic_progress) #pyright: ignore
+        
+        if topic_score >= 0.8:
+            user_topic = self._user_topic_repo.update_by_instance(user_topic, {
+                'is_completed': True
+            })
+            
+            next_ut = self._user_topic_repo.get_next_user_topic(user_topic)
+            if next_ut:
+                next_ut = self._user_topic_repo.update(
+                    next_ut,
+                    ready_to_pass = True
+                )
+
+        user_topic = self._user_topic_repo.update(
+            user_topic, 
+            topic_progress = topic_score
+        )
+
+        user_course: UserCourse = user_topic.by_user_course # pyright: ignore
+        user_topics_by_course  = self._user_topic_repo.get_user_topics_by_user_course(user_course)
+
+        completed_topic_number = len(list(filter(lambda t: t.topic_progress >= 0.8, user_topics_by_course)))
+        course_progress = 100 * completed_topic_number / len(user_topics_by_course)
+        
+        user_course = self._user_course_repo.update(
+            user_course,
+            course_progress = course_progress,
+            completed_topic_number = completed_topic_number
+        )
+
+        return user_topic

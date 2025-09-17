@@ -1,7 +1,7 @@
 from functools import lru_cache
 from fastapi import Depends
 from services import (
-    US, SCS, STS, TCS, TQS, TTS, PS
+    US, SCS, STS, TCS, TQS, TTS, PS, AS
 )
 from repositories import (
     UserRepository, CourseRepository, UserCourseRepository,
@@ -79,6 +79,20 @@ def get_progress_service(
     )
 
 
+def get_adaptivity_service(
+    user_question_repo = Depends(get_question_repository),
+    adaptive_question_repo = Depends(get_adaptive_question_repository),
+    user_topic_repo = Depends(get_user_topic_repository),
+    progress_service = Depends(get_progress_service),
+):
+    return AS(
+        user_question_repo,
+        adaptive_question_repo,
+        user_topic_repo,
+        progress_service
+    )
+
+
 def get_user_service(
     user_repo = Depends(get_user_repository)
 ) -> US:
@@ -113,7 +127,8 @@ def get_student_topic_service(
     adaptive_question_repo = Depends(get_adaptive_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     question_repo = Depends(get_question_repository),
-    progress_service = Depends(get_progress_service)
+    progress_service = Depends(get_progress_service),
+    adaptivity_service = Depends(get_adaptivity_service)
 ):
     return STS(
         course_repo,
@@ -121,10 +136,10 @@ def get_student_topic_service(
         topic_repo,
         user_topic_repo,
         user_question_repo,
-        adaptive_question_repo,
         user_text_answer_repo,
         question_repo,
-        progress_service
+        progress_service,
+        adaptivity_service
     )
 
 
@@ -178,7 +193,8 @@ def get_teacher_question_service(
     user_question_repo = Depends(get_user_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     answer_repo = Depends(get_answer_repository),
-    question_repo = Depends(get_question_repository)
+    question_repo = Depends(get_question_repository),
+    progress_service = Depends(get_progress_service)
 ):
     return TQS(
         topic_repo,
@@ -186,5 +202,6 @@ def get_teacher_question_service(
         user_question_repo,
         user_text_answer_repo,
         answer_repo, 
-        question_repo
+        question_repo,
+        progress_service
     )

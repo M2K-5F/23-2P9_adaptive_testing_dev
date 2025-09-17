@@ -1,5 +1,5 @@
 import random
-from typing import List, Union
+from typing import List
 from fastapi import HTTPException
 from repositories.course.course_repository import CourseRepository
 from repositories.course.user_course_repository import UserCourseRepository
@@ -8,19 +8,21 @@ from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
 from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
-from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
 from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
 from services.common.progress_service import ProgressService
-from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers, SubmitQuestion
+from services.common.adaptivity_service import AdaptivityServise
+from shemas import UserOut, TopicSubmitAnswers, SubmitQuestion
 from fastapi.responses import JSONResponse
 from fastapi import status
-from utils.score_utils import get_question_score, get_average_score
+from utils.score_utils import get_question_score
 
 
 
 
 class TopicService:
+    """Service for processing action with topics from student"""
+
     def __init__(
         self,
         course_repo: CourseRepository,
@@ -28,23 +30,36 @@ class TopicService:
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
         user_question_repository: UserQuestionRepository,
-        adaptive_question_repo: AdaptiveQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository,
         question_repo: QuestionRepository,
-        progress_service: ProgressService
+        progress_service: ProgressService,
+        adaptivity_service: AdaptivityServise
     ):
         self.course_repo = course_repo
         self.topic_repo = topic_repository
         self.user_course_repo = user_course_repo
         self.user_topic_repo = user_topic_repository
         self.user_question_repo = user_question_repository
-        self.adaptive_question_repo = adaptive_question_repo
         self.user_text_answer_repo = user_text_answer_repo
         self.question_repo = question_repo
         self.progress_service = progress_service
+        self._adaptivity_service = adaptivity_service
     
+
     @database.atomic()
-    def get_topics_by_course(self, course_id: int) -> JSONResponse:
+    def get_topics_by_course(
+        self, 
+        course_id: int
+    ) -> JSONResponse:
+        """Public method which retuns list of topic by course
+
+        Args:
+            course_id (int): unique id of course from which topics getted
+
+        Returns:
+            JSONResponse: response with list of topic 
+        """
+
         current_course = self.course_repo.get_by_id(course_id, True)
         topics = self.topic_repo.select_where(by_course = current_course)
 
@@ -52,43 +67,43 @@ class TopicService:
 
 
     @database.atomic()
-    def get_user_topics_by_followed_course(self, user: UserOut, user_course_id: int) -> JSONResponse:
+    def get_user_topics_by_followed_course(
+        self, 
+        user: UserOut, 
+        user_course_id: int
+    ) -> JSONResponse:
+        """Public method which returns list of user topic by user course
+
+        Args:
+            user (UserOut): current user
+            user_course_id (int): unique id of user course from which user topic getted
+
+        Returns:
+            JSONResponse: response with list of user topics in the specified user course
+        """
+
         user_course = self.user_course_repo.get_active_user_course_from_user_and_id(user, user_course_id)
         user_topics = self.user_topic_repo.get_user_topics_by_user_course(user_course)
         
         return JSONResponse([user_topic.dump for user_topic in user_topics])
-
-
-    @database.atomic()
-    def add_adaptive_questions_to_response(self, user: UserOut, user_topic: UserTopic, questions_list: List[dict]) -> JSONResponse:
-        user_questions = self.user_question_repo.get_user_questions_with_low_score(user_topic)
-        adaptive_questions: list[UserQuestion] = []
-
-        for _ in range(min(2, len(user_questions))):
-            question = random.choice(user_questions)
-            user_questions.remove(question)
-            adaptive_questions.append(question)
-        
-        for user_question in adaptive_questions:
-            self.adaptive_question_repo.create_adaptive_question(
-                user, user_topic, user_question
-            )
-            questions_list.insert(
-                random.randint(0, len(questions_list)-1),
-                {
-                    **user_question.question.dump,
-                    "answer_options": [{
-                            "id": answer.id,
-                            "text": "" if user_question.question.question_type == 'text' else answer.text
-                        } for answer in user_question.question.created_answers]
-                }
-            )
-        
-        return JSONResponse(questions_list)
     
     
     @database.atomic()
-    def start_topic_by_user_topic(self, user: UserOut, user_topic_id: int) -> JSONResponse:
+    def start_topic_by_user_topic(
+        self, 
+        user: UserOut, 
+        user_topic_id: int
+    ) -> JSONResponse:
+        """Public method which get list of questions by topic & add to adaptive questions to it & formatted and returns that list 
+
+        Args:
+            user (UserOut): current user
+            user_topic_id (int): unique identificator of user topic for which geting question list
+
+        Returns:
+            JSONResponse: response with list of formatted questions to pass
+        """
+
         user_topic = self.user_topic_repo.get_by_user_and_id(user, user_topic_id)
 
         self.progress_service.validate_topic_acess(user_topic)
@@ -111,32 +126,46 @@ class TopicService:
         if not current_topic.number_in_course:
             return JSONResponse(questions_with_answers)
         
-        return self.add_adaptive_questions_to_response(user, user_topic, questions_with_answers)
+        questions_with_answers = self._adaptivity_service.add_adaptive_questions_to_response(user, user_topic, questions_with_answers)
+
+        return JSONResponse(questions_with_answers)
 
     
     @database.atomic()
-    def sumbit_topic_answers(self, user: UserOut, topic_answers: TopicSubmitAnswers):
+    def sumbit_topic_answers(
+        self, 
+        user: UserOut, 
+        topic_answers: TopicSubmitAnswers
+    ) -> JSONResponse:
+        """Public method which verify topic data from client & get score & saving result 
+
+        Args:
+            user (UserOut): current user
+            topic_answers (TopicSubmitAnswers): data from client 
+
+        Raises:
+            HTTPException(400): raises when data from clien arent matches with data from database
+
+        Returns:
+            JSONResponce: response with topic score
+        """
+
         user_topic = self.user_topic_repo.get_by_user_and_id(user, topic_answers.user_topic_id)
         current_topic: Topic = user_topic.topic # pyright: ignore
+        topic_score = 0
 
         self.progress_service.validate_topic_acess(user_topic)
-        
-        
-        topic_score = 0
+
+
         submit_questions = topic_answers.questions
-        submit_adaptive_questions: List[SubmitQuestion] = list(
-            filter(lambda q: q.by_topic != user_topic.topic.id , submit_questions)
+        created_questions = self._adaptivity_service.add_adaptive_questions_to_list(
+            user_topic,
+            self.question_repo.get_active_questions_by_topic(current_topic)
         )
-
-        created_questions = self.question_repo.get_active_questions_by_topic(current_topic)
-
-        for q in submit_adaptive_questions:
-            adaptive_question = self.adaptive_question_repo.get_adaptive_question(q.id, user_topic)
-            current_question: Question = adaptive_question.question # pyright: ignore
-            created_questions.append(current_question)
         
         created_questions.sort(key=lambda q: getattr(q, "id"))
         submit_questions.sort(key=lambda q: q.id)
+
 
         if len(submit_questions) != len(created_questions):
             raise HTTPException(
@@ -169,7 +198,9 @@ class TopicService:
             user_topic, topic_score
         )
 
-        return JSONResponse({'score': topic_score})
+        return JSONResponse({
+            'score': topic_score
+        })
     
 
     def save_question_results(
@@ -180,6 +211,16 @@ class TopicService:
             submit_question: SubmitQuestion, 
             question_score: float
     ):
+        """Procedure which process saving question result based on score
+
+        Args:
+            user (UserOut): current user
+            user_topic (UserTopic): user topic for which question is saved
+            created_question (Question): question from database with unique id 
+            submit_question (SubmitQuestion): question data from client with topic id
+            question_score (float): score of question to save result
+        """
+
         user_question = self.user_question_repo.get_or_create_user_question(
             user.username, 
             submit_question.by_topic, 
@@ -196,7 +237,11 @@ class TopicService:
 
         if submit_question.type == 'text':
             user_answer = self.user_text_answer_repo.create_user_text_answer(
-                user, created_question, user_topic, user_question, submit_question.text
+                user, 
+                created_question, 
+                submit_question.by_topic, 
+                user_question, 
+                submit_question.text
             )
 
             self.user_text_answer_repo.update(
@@ -208,38 +253,8 @@ class TopicService:
             )
         
         if submit_question.by_topic != user_topic.topic.id:
-            self.save_adaptive_question_results(
-                user, user_topic, submit_question
+            self._adaptivity_service.save_adaptive_question_results(
+                user, 
+                user_topic, 
+                submit_question
             )
-
-
-    def save_adaptive_question_results(
-        self, user: UserOut, user_topic: UserTopic,
-        submit_question: SubmitQuestion
-    ):
-        user_topic_by_question = self.user_topic_repo.get_or_none(True,
-            user = user.username,
-            topic = submit_question.by_topic
-        )
-        
-        user_questions_by_user_topic = self.user_question_repo.get_by_user_topic(
-            user_topic_by_question
-        )
-        
-        user_topic_score = get_average_score(
-            user_questions_by_user_topic, 
-            lambda q: q.question_score
-        )
-
-        self.progress_service.update_user_topic_score(
-            user_topic_by_question,
-            max(
-                user_topic_score, 
-                user_topic_by_question.topic_progress # pyright: ignore
-            )
-        )
-
-        self.adaptive_question_repo.delete(True, 
-            question = submit_question.id, 
-            for_user_topic = user_topic
-        )    
