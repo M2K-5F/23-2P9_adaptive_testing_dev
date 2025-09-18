@@ -8,3 +8,9 @@ PUBLIC_PATHS: List[str] = [
     "/docs", 
     "/openapi.json"
 ]
+
+ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+    'http://localhost:8001', 
+    'http://localhost:80'
+]

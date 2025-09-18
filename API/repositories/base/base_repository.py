@@ -174,6 +174,7 @@ class BaseRepository(Generic[T]):
         if instance:
             instance.delete_instance()
     
+    
     def delete_all(self, **where) -> None:
         select = self.model.select()
         for field, value in where.items():
