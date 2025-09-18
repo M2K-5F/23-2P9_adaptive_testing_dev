@@ -124,7 +124,6 @@ def get_student_topic_service(
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     user_question_repo = Depends(get_user_question_repository),
-    adaptive_question_repo = Depends(get_adaptive_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     question_repo = Depends(get_question_repository),
     progress_service = Depends(get_progress_service),

@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from dependencies.dependencies import get_user_repository
 from config import oauth2_scheme
 from utils.crypt_utils import decode_jwt
+from config.path_config import PUBLIC_PATHS
 
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
@@ -17,8 +18,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
             HTTPException(401): raises when request dispached without token
         """
 
-        public_paths = ["/auth/login", "/auth/register", '/auth/logout', "/docs", "/openapi.json"]
-        if any(request.url.path.startswith(path) for path in public_paths):
+        if any(request.url.path.startswith(path) for path in PUBLIC_PATHS):
             return await call_next(request)
 
             
