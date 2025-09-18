@@ -1,4 +1,4 @@
-export const baseURL = `http://localhost` as const;
+export const baseURL = `http://localhost/api` as const;
 export const tURL = `${baseURL}/t` as const;
 export const sURL = `${baseURL}/s` as const;
 

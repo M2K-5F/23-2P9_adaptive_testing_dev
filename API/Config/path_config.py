@@ -1,12 +1,16 @@
 from typing import List
 
 
+API_PREFIX = '/api'
+
 PUBLIC_PATHS: List[str] = [
-    "/auth/login", 
-    "/auth/register", 
-    '/auth/logout', 
+    API_PREFIX + "/auth/login", 
+    API_PREFIX + "/auth/register", 
+    API_PREFIX + '/auth/logout', 
     "/docs", 
-    "/openapi.json"
+    "/openapi.json",
+    '/public',
+    '/assets'
 ]
 
 ALLOWED_ORIGINS = [

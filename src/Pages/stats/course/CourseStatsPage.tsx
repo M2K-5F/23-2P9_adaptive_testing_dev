@@ -139,8 +139,8 @@ export const CourseStatisticsPage: FC = () => {
                                                         variant="outline" 
                                                         className={clsx(
                                                             "text-primary-foreground bg-red-300",
-                                                            topic.average_score >= topic.score_for_pass*5/8 && 'bg-orange-300',
-                                                            topic.average_score >= topic.score_for_pass && 'bg-green-300'
+                                                            topic.topic_progress >= topic.score_for_pass*5/8 && 'bg-orange-300',
+                                                            topic.topic_progress >= topic.score_for_pass && 'bg-green-300'
                                                         )}>
                                                         {topic.average_score}%
                                                     </Badge>

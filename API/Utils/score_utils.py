@@ -49,8 +49,10 @@ def get_choice_question_score(
     if len(submit_answers) != len(created_answers):
         raise HTTPException(400, 'u didn`t answer all answers')
 
-    answer_count = len(submit_answers)
-    question_score: float = 0
+    correct_answer_count = sum(1 for a in created_answers if a.is_correct)
+    
+    correct_answered: int = 0
+    uncorrect_answered: int = 0
 
     for index, submit_answer in enumerate(submit_answers):
         created_answer: Answer = created_answers[index]
@@ -58,9 +60,13 @@ def get_choice_question_score(
             raise HTTPException(400, 'answer IDs is not matches')
 
         if created_answer.is_correct == submit_answer.is_correct:
-            question_score += 1 / answer_count
+            if created_answer.is_correct:
+                correct_answered += 1
+        else:
+            if not created_answer.is_correct:
+                return 0
     
-    return question_score
+    return correct_answered / correct_answer_count
 
 
 def get_text_question_score(

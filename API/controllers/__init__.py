@@ -20,10 +20,8 @@ student_router.include_router(s_course_router)
 student_router.include_router(s_topic_router)
 
 
-def add_routers_to_app(app: FastAPI):
-    app.include_router(auth_router)
-    app.include_router(search_router)
-    app.include_router(student_router)
-    app.include_router(teacher_router)
-
-    return app
+main_router = APIRouter(prefix='/api')
+main_router.include_router(auth_router)
+main_router.include_router(search_router)
+main_router.include_router(student_router)
+main_router.include_router(teacher_router)
