@@ -1,5 +1,8 @@
 from functools import lru_cache
-from fastapi import Depends
+from fastapi import Depends, dependencies
+from repositories.group.group import GroupRepository
+from repositories.group.user_group import UserGroupRepository
+from repositories.question.question_weigth import QuestionWeigthRepository
 from services import (
     US, SCS, STS, TCS, TQS, TTS, PS, AS
 )
@@ -9,6 +12,8 @@ from repositories import (
     AdaptiveQuestionRepository, UserTextAnswerRepository,
     AnswerRepository, QuestionRepository
 )
+from services.teacher.group import GroupService as TGS
+from services.student.group import GroupService as SGS
 
 
 @lru_cache(maxsize=None)
@@ -59,6 +64,21 @@ def get_user_text_answer_repository() -> UserTextAnswerRepository:
 @lru_cache(maxsize=None)
 def get_adaptive_question_repository() -> AdaptiveQuestionRepository:
     return AdaptiveQuestionRepository()
+
+
+@lru_cache(maxsize=None)
+def get_user_group_repository():
+    return UserGroupRepository()
+
+
+@lru_cache(maxsize=None)
+def get_question_weigth_repository():
+    return QuestionWeigthRepository()
+
+
+@lru_cache(maxsize=None)
+def get_group_repo():
+    return GroupRepository()
 
 
 def get_progress_service(
@@ -187,4 +207,30 @@ def get_teacher_question_service(
         answer_repo, 
         question_repo,
         progress_service
+    )
+
+
+def get_teacher_group_service(
+    group = Depends(get_group_repo),
+    course = Depends(get_course_repository),
+    question = Depends(get_question_repository),
+    question_weigth = Depends(get_question_weigth_repository)
+):
+    return TGS(
+        group,
+        course,
+        question,
+        question_weigth
+    )
+
+
+def get_student_group_service(
+    group = Depends(get_group_repo),
+    course = Depends(get_course_repository),
+    user_group = Depends(get_user_group_repository)
+):
+    return SGS(
+        group, 
+        course,
+        user_group
     )

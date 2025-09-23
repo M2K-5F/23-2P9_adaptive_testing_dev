@@ -36,7 +36,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         if not cookie_token and not bearer_token:
             return unauthorized_exception
 
-        token: str = str(cookie_token) if cookie_token else bearer_token
+        token: str = str(cookie_token) if cookie_token else bearer_token  #pyright: ignore
         
         try:
             payload = decode_jwt(token=token)

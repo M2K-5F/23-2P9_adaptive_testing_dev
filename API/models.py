@@ -3,6 +3,7 @@ from datetime import datetime
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
+from config import weigth_config
 from shemas import Roles, UserOut
 from utils import get_password_hash
 
@@ -25,6 +26,7 @@ def convert(obj):
 
 class Table(Model):
     id = AutoField()
+    created_at = DateTimeField(default=datetime.now)
     class Meta:
         database = database
 
@@ -69,9 +71,17 @@ class Course(Table):
     created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
     description = CharField(max_length=60)
-    created_at = DateTimeField(default=datetime.now)
     topic_count = IntegerField(default=0)
     student_count = IntegerField(default=0)
+
+
+class Group(Table):
+    by_course = ForeignKeyField(Course)
+    title = CharField(max_length=128)
+    max_student_count = IntegerField(default=30)
+    student_count = IntegerField(default=0)
+    created_by = ForeignKeyField(User, field=User.username)
+    is_active = BooleanField(default=True)
 
 
 class Topic(Table):
@@ -105,6 +115,22 @@ class UserCourse(Table):
     completed_topic_count = IntegerField(default=0)
     followed_at = DateTimeField(default=datetime.now)
     course_progress = FloatField(default=0)
+
+
+class UserGroup(Table):
+    user = ForeignKeyField(User, field=User.username, backref='user_groups')
+    group = ForeignKeyField(Group, backref='user_groups')
+    progress = FloatField(default=0)
+    completed_topic_count = IntegerField(default=0)
+
+
+class QuestionWeigth(Table):
+    group = ForeignKeyField(Group)
+    question = ForeignKeyField(Question)
+    weigth = FloatField(default=weigth_config.BASE_WEIGTH)
+    step = FloatField(default=weigth_config.STEP)
+    max_weigth = FloatField(default=weigth_config.MAX_WEIGTH)
+    min_weigth = FloatField(default=weigth_config.MIN_WEIGTH)
 
 
 class UserTopic(Table):
@@ -145,7 +171,13 @@ class UserTextAnswer(Table):
 if __name__ == "__main__":
     database.connect()
     database.register_function(lambda x: x.lower(), 'lower')
-    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion, UserTextAnswer])
+    database.create_tables([
+        User, Role, UserRole, 
+        Course, Topic, Question,
+        Answer, UserCourse, UserQuestion, 
+        UserTopic, AdaptiveQuestion, UserTextAnswer, 
+        Group, UserGroup, QuestionWeigth
+    ])
     database.close()
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)
