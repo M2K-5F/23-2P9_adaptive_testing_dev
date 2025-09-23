@@ -4,12 +4,10 @@ from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from models import UserQuestion
 from repositories import (
-    UserCourseRepository, 
     UserTopicRepository,
-    UserTopic, UserCourse,
+    UserTopic,
     UserQuestionRepository,
     TopicRepository,
-    AdaptiveQuestionRepository,
     UserTextAnswerRepository
 )
 from shemas import UserOut
@@ -20,17 +18,13 @@ class ProgressService:
     def __init__(
             self, 
             user_topic_repo: UserTopicRepository,
-            user_course_repo: UserCourseRepository,
             user_question_repo: UserQuestionRepository,
             topic_repo: TopicRepository,
-            adaptive_question_repo: AdaptiveQuestionRepository,
             text_answer_repo: UserTextAnswerRepository
     ):  
         self._user_topic_repo = user_topic_repo
-        self._user_course_repo = user_course_repo
         self._topic_repo = topic_repo
         self._user_question_repo = user_question_repo
-        self._adaptive_question_repo = adaptive_question_repo
         self._user_text_answer_repo = text_answer_repo
 
 
@@ -45,7 +39,7 @@ class ProgressService:
             HTTPException(400): if topic is inactive or not ready to pass
         """
 
-        if not user_topic.is_active:
+        if not user_topic.:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, 
                 "This user_topic are inactive"

@@ -9,8 +9,7 @@ from config.path_config import API_PREFIX, PUBLIC_PATHS
 
 class ServeMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
-        if not request.url.path.startswith((API_PREFIX, '/public', '/assets')):
-            print('client served')
+        if not request.url.path.startswith((API_PREFIX, '/public', '/assets', '/openapi.json', '/docs')):
             return FileResponse("../dist/index.html")
 
         return await call_next(request)
