@@ -107,19 +107,10 @@ class Answer(Table):
     is_correct = BooleanField()
     by_question = ForeignKeyField(Question, backref="created_answers")
 
-
-class UserCourse(Table):
-    user = ForeignKeyField(User, field=User.username, backref="user_courses")
-    course = ForeignKeyField(Course, backref="user_courses")
-    is_active = BooleanField(default=True)
-    completed_topic_count = IntegerField(default=0)
-    followed_at = DateTimeField(default=datetime.now)
-    course_progress = FloatField(default=0)
-
-
 class UserGroup(Table):
     user = ForeignKeyField(User, field=User.username, backref='user_groups')
     group = ForeignKeyField(Group, backref='user_groups')
+    course = ForeignKeyField(Course)
     progress = FloatField(default=0)
     completed_topic_count = IntegerField(default=0)
 
@@ -136,7 +127,7 @@ class QuestionWeigth(Table):
 class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_topics")
     topic = ForeignKeyField(Topic)
-    by_user_course = ForeignKeyField(UserCourse)
+    by_user_group = ForeignKeyField(UserGroup)
     ready_to_pass = BooleanField(default=False)
     is_completed = BooleanField(default=False)
     topic_progress = FloatField(default=0)
@@ -174,7 +165,7 @@ if __name__ == "__main__":
     database.create_tables([
         User, Role, UserRole, 
         Course, Topic, Question,
-        Answer, UserCourse, UserQuestion, 
+        Answer, UserQuestion, 
         UserTopic, AdaptiveQuestion, UserTextAnswer, 
         Group, UserGroup, QuestionWeigth
     ])

@@ -2,7 +2,6 @@ from .answer.answer_repository import *
 from .answer.user_text_answer_repository import *
 from .base.base_repository import *
 from .course.course_repository import *
-from .course.user_course_repository import *
 from .question.adaptive_question_repository import *
 from .question.question_repository import *
 from .question.user_question_repository import *

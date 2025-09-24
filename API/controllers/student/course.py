@@ -8,31 +8,6 @@ from shemas import UserOut
 
 course_router = APIRouter(prefix='/course', tags=["Student/Course"])
 
-@course_router.get('/get_followed', summary='Get user courses')
-async def get_followed_teacher_courses(
-    current_user = Depends(get_user_from_request),
-    course_service: CourseService = Depends(get_student_course_service)
-) -> JSONResponse:
-    return course_service.get_followed_courses(current_user)
-
-
-@course_router.post("/follow")
-def follow_teacher_course(
-    current_user: UserOut = Depends(get_user_from_request),
-    course_id = Query(),
-    course_service: CourseService = Depends(get_student_course_service)
-) -> JSONResponse:
-    return course_service.follow_course(current_user, course_id)
-
-
-@course_router.delete('/unfollow')
-def unfollow_teacher_course(
-    current_user: UserOut = Depends(get_user_from_request),
-    course_id = Query(),
-    course_service: CourseService = Depends(get_student_course_service)
-) -> JSONResponse:
-    return course_service.unfollow_course(current_user, course_id)
-
 
 @course_router.get('/get_by_id', summary="Get course, is_followed by course_id")
 async def get_course(
@@ -49,4 +24,4 @@ async def clear_progress(
     user_course_id = Query(),
     course_service: CourseService = Depends(get_student_course_service)
 ):
-    return course_service.clear_user_course_progress(current_user, user_course_id)
+    return course_service.clear_user_group_progress(current_user, user_course_id)

@@ -2,7 +2,7 @@ import random
 from typing import List, Union
 from fastapi import HTTPException
 from repositories.course.course_repository import CourseRepository
-from repositories.course.user_course_repository import UserCourseRepository
+from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
@@ -10,7 +10,7 @@ from repositories.question.adaptive_question_repository import AdaptiveQuestionR
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
-from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
+from models import Answer, Question, Topic, UserQuestion, database, UserTopic
 from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, TopicToCreate, UserOut, TopicSubmitAnswers
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -24,14 +24,14 @@ class TopicService:
     
     def __init__(
         self,
+        user_group: UserGroupRepository,
         course_repo: CourseRepository,
-        user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository
     ):
         self._course_repo = course_repo
+        self._user_group = user_group
         self._topic_repo = topic_repository
-        self._user_course_repo = user_course_repo
         self._user_topic_repo = user_topic_repository
 
     
@@ -73,12 +73,14 @@ class TopicService:
                 "Topic with this title and description already created"
             )
 
-        user_courses = self._user_course_repo.get_user_courses_by_course(current_course)
+        # user_courses = self._user_course_repo.get_user_courses_by_course(current_course)
+
+        user_groups = self._user_group.select_where(course = current_course)
 
         
-        for user_course in user_courses:
+        for user_group in user_groups:
             is_ready = False
-            prev = self._user_topic_repo.get_prev_user_topic(user_course, created_topic)
+            prev = self._user_topic_repo.get_prev_user_topic(user_group, created_topic)
             if not prev:
                 is_ready = True
             else:
@@ -86,8 +88,8 @@ class TopicService:
 
             self._user_topic_repo.create_user_topic(
                 created_topic, 
-                user.username, 
-                user_course, 
+                user, 
+                user_group, 
                 is_ready
             )
 
@@ -97,7 +99,7 @@ class TopicService:
         )
 
         
-        self._user_course_repo.update_user_courses_progress(current_course)
+        self._user_group.update_user_groups_progress(current_course)
 
         return JSONResponse(created_topic.dump)
 

@@ -1,8 +1,11 @@
 from fastapi.responses import JSONResponse
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
-from models import database
+from models import Course, database
 from repositories.group.user_group import UserGroupRepository
+from repositories.topic.topic_repository import TopicRepository
+from repositories.topic.user_topic_repository import UserTopicRepository
+from services.common.progress_service import ProgressService
 from shemas import UserOut
 
 
@@ -11,9 +14,15 @@ class GroupService:
         self,
         group: GroupRepository,
         course: CourseRepository,
-        user_group: UserGroupRepository
+        user_group: UserGroupRepository,
+        topic: TopicRepository,
+        user_topic: UserTopicRepository,
+        progress_service: ProgressService
     ):
         self._group = group
+        self._progress_service = progress_service
+        self._user_topic = user_topic
+        self._topic = topic
         self._user_group = user_group
         self._course = course
 
@@ -48,8 +57,11 @@ class GroupService:
         group_id: int,
     ):
         current_group = self._group.get_by_id(group_id, True)
+        current_course: Course = current_group.by_course  #pyright: ignore[reportAssignmentType]
+
         user_group = self._user_group.get_or_create(
             True,
+            course = current_group.by_course,
             user = user.username,
             group = current_group,
         )
@@ -57,8 +69,25 @@ class GroupService:
             current_group,
             student_count = current_group.student_count + 1
         )
-        return JSONResponse(user_group.dump)
+
+        
+        self._course.update(
+            current_course,
+            student_count = current_course.student_count + 1
+        )
+
+        topics_by_course = self._topic.get_active_topics_by_course(current_course)
     
+        for index, topic in enumerate(topics_by_course):
+            self._user_topic.create_user_topic(
+                topic, 
+                user, 
+                user_group,
+                False if index != 0 else True
+            )
+        
+        return JSONResponse(user_group.dump)
+
 
     @database.atomic()
     def unfollow_group(
@@ -67,6 +96,7 @@ class GroupService:
         group_id: int
     ):
         current_group = self._group.get_by_id(group_id, True)
+        current_course: Course = current_group.by_course  # pyright: ignore[reportAssignmentType]
 
         user_group = self._user_group.get_or_none(
             True,
@@ -78,5 +108,18 @@ class GroupService:
             student_count = current_group.student_count - 1
         )
 
+
+        user_group = self._progress_service.clear_user_course_progress(user, user_group.id, True)  # pyright: ignore[reportAssignmentType, reportArgumentType]
         user_group.delete_instance()
+        self._course.update(
+            current_course,
+            student_count = current_course.student_count - 1
+        )
         return JSONResponse(user_group.dump)
+    
+    
+
+    @database.atomic()
+    def get_user_groups_by_user(self, user: UserOut):
+        user_groups = self._user_group.select_where(user = user.username)
+        return JSONResponse([ug.dump for ug in user_groups])

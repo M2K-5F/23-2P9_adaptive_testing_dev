@@ -7,7 +7,7 @@ from services import (
     US, SCS, STS, TCS, TQS, TTS, PS, AS
 )
 from repositories import (
-    UserRepository, CourseRepository, UserCourseRepository,
+    UserRepository, CourseRepository,
     TopicRepository, UserTopicRepository, UserQuestionRepository,
     AdaptiveQuestionRepository, UserTextAnswerRepository,
     AnswerRepository, QuestionRepository
@@ -39,12 +39,6 @@ def get_question_repository() -> QuestionRepository:
 @lru_cache(maxsize=None)
 def get_answer_repository() -> AnswerRepository:
     return AnswerRepository()
-
-
-@lru_cache(maxsize=None)
-def get_user_course_repository() -> UserCourseRepository:
-    return UserCourseRepository()
-
 
 @lru_cache(maxsize=None)
 def get_user_topic_repository() -> UserTopicRepository:
@@ -84,14 +78,14 @@ def get_group_repo():
 def get_progress_service(
     user_topic_repo = Depends(get_user_topic_repository),
     user_question_repo = Depends(get_user_question_repository),
-    user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     adaptive_question_repo = Depends(get_adaptive_question_repository),
-    text_answer_repo = Depends(get_user_text_answer_repository)
+    text_answer_repo = Depends(get_user_text_answer_repository),
+    user_group = Depends(get_user_group_repository)
 ):
     return PS(
+        user_group,
         user_topic_repo,
-        user_course_repo,
         user_question_repo,
         topic_repo,
         adaptive_question_repo,
@@ -122,15 +116,15 @@ def get_user_service(
 
 def get_student_course_service(
     course_repo = Depends(get_course_repository),
-    user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     adaptive_question_repo = Depends(get_adaptive_question_repository),
-    progress_service = Depends(get_progress_service)
+    progress_service = Depends(get_progress_service),
+    user_group = Depends(get_user_group_repository)
 ) -> SCS:
     return SCS(
+        user_group,
         course_repo,
-        user_course_repo,
         topic_repo,
         user_topic_repo,
         adaptive_question_repo,
@@ -140,37 +134,37 @@ def get_student_course_service(
 
 def get_student_topic_service(
     course_repo = Depends(get_course_repository),
-    user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     user_question_repo = Depends(get_user_question_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     question_repo = Depends(get_question_repository),
     progress_service = Depends(get_progress_service),
-    adaptivity_service = Depends(get_adaptivity_service)
+    adaptivity_service = Depends(get_adaptivity_service),
+    user_group = Depends(get_user_group_repository)
 ):
     return STS(
         course_repo,
-        user_course_repo,
         topic_repo,
         user_topic_repo,
         user_question_repo,
         user_text_answer_repo,
         question_repo,
         progress_service,
-        adaptivity_service
+        adaptivity_service,
+        user_group
     )
 
 
 def get_techer_topic_service(
     course_repo = Depends(get_course_repository),
-    user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
+    user_group = Depends(get_user_group_repository)
 ):
     return TTS(
+        user_group,
         course_repo,
-        user_course_repo,
         topic_repo,
         user_topic_repo,
     )
@@ -178,14 +172,12 @@ def get_techer_topic_service(
 
 def get_techer_course_service(
     course_repo = Depends(get_course_repository),
-    user_course_repo = Depends(get_user_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
 ):
     return TCS(
         course_repo,
-        user_course_repo,
         topic_repo,
         user_topic_repo,
         user_text_answer_repo,
@@ -198,15 +190,19 @@ def get_teacher_question_service(
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     answer_repo = Depends(get_answer_repository),
     question_repo = Depends(get_question_repository),
-    progress_service = Depends(get_progress_service)
+    progress_service = Depends(get_progress_service),
+    question_weigth = Depends(get_question_weigth_repository),
+    group = Depends(get_group_repo)
 ):
     return TQS(
         topic_repo, 
+        question_weigth,
         user_question_repo,
         user_text_answer_repo,
         answer_repo, 
         question_repo,
-        progress_service
+        progress_service,
+        group
     )
 
 
@@ -227,10 +223,16 @@ def get_teacher_group_service(
 def get_student_group_service(
     group = Depends(get_group_repo),
     course = Depends(get_course_repository),
-    user_group = Depends(get_user_group_repository)
+    user_group = Depends(get_user_group_repository),
+    topic = Depends(get_topic_repository),
+    user_topic = Depends(get_user_topic_repository),
+    progress_service = Depends(get_progress_service),
 ):
     return SGS(
         group, 
         course,
-        user_group
+        user_group,
+        topic,
+        user_topic,
+        progress_service
     )

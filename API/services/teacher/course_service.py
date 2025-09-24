@@ -1,5 +1,4 @@
 from repositories.course.course_repository import CourseRepository
-from repositories.course.user_course_repository import UserCourseRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
@@ -17,14 +16,12 @@ class CourseService:
     def __init__(
         self,
         course_repo: CourseRepository,
-        user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
         user_text_answer_repo: UserTextAnswerRepository
     ):
         self._course_repo = course_repo
         self._topic_repo = topic_repository
-        self._user_course_repo = user_course_repo
         self._user_topic_repo = user_topic_repository
         self._user_text_answer_repo = user_text_answer_repo
 
@@ -159,77 +156,77 @@ class CourseService:
         """
 
         current_course = self._course_repo.get_by_id(course_id, True)
-        if current_course.created_by.username != user.username:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "Course wasn`t created by you"
-            )
+    #     if current_course.created_by.username != user.username:
+    #         raise HTTPException(
+    #             status.HTTP_400_BAD_REQUEST,
+    #             "Course wasn`t created by you"
+    #         )
 
-        user_courses = self._user_course_repo.get_user_courses_by_course(current_course)
+    #     user_courses = self._user_course_repo.get_user_courses_by_course(current_course)
         
-        statistics = []
-        avg_course_progress = 0
+    #     statistics = []
+    #     avg_course_progress = 0
         
-        for user_course in user_courses:
-                student = user_course.user
+    #     for user_course in user_courses:
+    #             student = user_course.user
             
-                topics = self._topic_repo.select_where(by_course = current_course)
-                topics.sort(key=lambda t: t.number_in_course) # pyright: ignore
+    #             topics = self._topic_repo.select_where(by_course = current_course)
+    #             topics.sort(key=lambda t: t.number_in_course) # pyright: ignore
                 
-                avg_course_progress += round(user_course.course_progress, 2) # pyright: ignore
+    #             avg_course_progress += round(user_course.course_progress, 2) # pyright: ignore
                 
-                student_stats = {
-                    'user_id': student.id,
-                    'username': student.username,
-                    "telegram_link": student.telegram_link,
-                    'name': student.name,
-                    'course_progress': round(user_course.course_progress, 2), # pyright: ignore
-                    'completed_topics': user_course.completed_topic_count,
-                    'total_topics': len(topics),
-                    'topics_details': []
-                }
+    #             student_stats = {
+    #                 'user_id': student.id,
+    #                 'username': student.username,
+    #                 "telegram_link": student.telegram_link,
+    #                 'name': student.name,
+    #                 'course_progress': round(user_course.course_progress, 2), # pyright: ignore
+    #                 'completed_topics': user_course.completed_topic_count,
+    #                 'total_topics': len(topics),
+    #                 'topics_details': []
+    #             }
                 
-                for topic in topics:
-                        user_topic = self._user_topic_repo.get_or_none(False,
-                            user = student.username,
-                            topic = topic.id,
-                            by_user_course = user_course.id
-                        )
+    #             for topic in topics:
+    #                     user_topic = self._user_topic_repo.get_or_none(False,
+    #                         user = student.username,
+    #                         topic = topic.id,
+    #                         by_user_course = user_course.id
+    #                     )
                         
-                        if not user_topic:
-                            student_stats['topics_details'].append({
-                                'topic_id': topic.id,
-                                'topic_title': topic.title,
-                                'is_completed': False,
-                                'topic_progress': 0,
-                                'question_count': topic.question_count,
-                                'average_score': 0,
-                                'ready_to_pass': False,
-                                'unsubmited_answers': []
-                            })
-                        else:
-                            unsubmited_text_answers = self._user_text_answer_repo.get_unsubmited_answers_by_user_topic(user_topic)
+    #                     if not user_topic:
+    #                         student_stats['topics_details'].append({
+    #                             'topic_id': topic.id,
+    #                             'topic_title': topic.title,
+    #                             'is_completed': False,
+    #                             'topic_progress': 0,
+    #                             'question_count': topic.question_count,
+    #                             'average_score': 0,
+    #                             'ready_to_pass': False,
+    #                             'unsubmited_answers': []
+    #                         })
+    #                     else:
+    #                         unsubmited_text_answers = self._user_text_answer_repo.get_unsubmited_answers_by_user_topic(user_topic)
                         
-                            student_stats['topics_details'].append({
-                                'topic_id': topic.id,
-                                'topic_title': topic.title,
-                                'is_completed': user_topic.is_completed,
-                                'score_for_pass': topic.score_for_pass,
-                                'topic_progress': round(user_topic.topic_progress, 3), # pyright: ignore
-                                'question_count': topic.question_count,
-                                'average_score': round(user_topic.topic_progress * 100, 2), # pyright: ignore
-                                'ready_to_pass': user_topic.ready_to_pass,
-                                'unsubmited_answers': [a.dump for a in unsubmited_text_answers]
-                            })
+    #                         student_stats['topics_details'].append({
+    #                             'topic_id': topic.id,
+    #                             'topic_title': topic.title,
+    #                             'is_completed': user_topic.is_completed,
+    #                             'score_for_pass': topic.score_for_pass,
+    #                             'topic_progress': round(user_topic.topic_progress, 3), # pyright: ignore
+    #                             'question_count': topic.question_count,
+    #                             'average_score': round(user_topic.topic_progress * 100, 2), # pyright: ignore
+    #                             'ready_to_pass': user_topic.ready_to_pass,
+    #                             'unsubmited_answers': [a.dump for a in unsubmited_text_answers]
+    #                         })
                 
-                statistics.append(student_stats)
+    #             statistics.append(student_stats)
 
-        to_return = {
-            "course_id": course_id,
-            "course_title": current_course.title,
-            "average_progress": round(avg_course_progress / len(statistics), 2) if len(statistics) else 0,
-            "total_students": len(statistics),
-            "students": statistics
-        }
+    #     to_return = {
+    #         "course_id": course_id,
+    #         "course_title": current_course.title,
+    #         "average_progress": round(avg_course_progress / len(statistics), 2) if len(statistics) else 0,
+    #         "total_students": len(statistics),
+    #         "students": statistics
+    #     }
         
-        return JSONResponse(to_return)
+    #     return JSONResponse(to_return)

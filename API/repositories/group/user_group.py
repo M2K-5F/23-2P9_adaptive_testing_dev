@@ -15,3 +15,27 @@ class UserGroupRepository(BaseRepository[UserGroup]):
         )
 
         return user_group
+
+
+    def update_user_groups_progress(self, course: Course) -> int:
+        user_groups = self.select_where(course = course)
+        counter = 0
+        for user_group in user_groups:
+            self.update_by_instance(
+                user_group, 
+                {
+                    'course_progress': user_group.completed_topic_count / UserGroup.course.topic_count * 100
+                }
+            )
+            counter += 1
+
+        return counter
+    
+
+    def clear_user_group_progress(self, user_group: UserGroup) -> UserGroup:
+        user_group = self.update(
+            user_group,
+            progress = 0,
+            completed_topic_count = 0
+        )
+        return user_group

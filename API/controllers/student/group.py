@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Request
 from fastapi.responses import JSONResponse
+from pydantic import Json
 from services.student.group import GroupService
 from dependencies.dependencies import get_student_group_service
 
@@ -14,8 +15,16 @@ def get_group_list(
     current_user: UserOut = Depends(get_user_from_request),
     course_id: int = Query(),
     service: GroupService = Depends(get_student_group_service)
-):
+) -> JSONResponse:
     return service.get_group_list_by_course(current_user, course_id)
+
+
+@group_router.get('/get_user_groups')
+async def get_user_groups(
+    current_user: UserOut = Depends(get_user_from_request),
+    service: GroupService = Depends(get_student_group_service)
+) -> JSONResponse:
+    return service.get_user_groups_by_user(current_user)
 
 
 @group_router.put('/follow')

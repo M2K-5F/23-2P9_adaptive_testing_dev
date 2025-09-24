@@ -2,14 +2,14 @@ import random
 from typing import List
 from fastapi import HTTPException
 from repositories.course.course_repository import CourseRepository
-from repositories.course.user_course_repository import UserCourseRepository
+from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
 from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.question.question_repository import QuestionRepository
-from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
+from models import Answer, Question, Topic, UserQuestion, database, UserTopic
 from services.common.progress_service import ProgressService
 from services.common.adaptivity_service import AdaptivityServise
 from shemas import UserOut, TopicSubmitAnswers, SubmitQuestion
@@ -26,18 +26,18 @@ class TopicService:
     def __init__(
         self,
         course_repo: CourseRepository,
-        user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
         user_question_repository: UserQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository,
         question_repo: QuestionRepository,
         progress_service: ProgressService,
-        adaptivity_service: AdaptivityServise
+        adaptivity_service: AdaptivityServise,
+        user_group: UserGroupRepository
     ):
         self._course_repo = course_repo
+        self._user_group = user_group
         self._topic_repo = topic_repository
-        self._user_course_repo = user_course_repo
         self._user_topic_repo = user_topic_repository
         self._user_question_repo = user_question_repository
         self._user_text_answer_repo = user_text_answer_repo
@@ -67,10 +67,10 @@ class TopicService:
 
 
     @database.atomic()
-    def get_user_topics_by_followed_course(
+    def get_user_topics_by_user_group(
         self, 
         user: UserOut, 
-        user_course_id: int
+        user_group_id: int
     ) -> JSONResponse:
         """Public method which returns list of user topic by user course
 
@@ -82,8 +82,12 @@ class TopicService:
             JSONResponse: response with list of user topics in the specified user course
         """
 
-        user_course = self._user_course_repo.get_active_user_course_from_user_and_id(user, user_course_id)
-        user_topics = self._user_topic_repo.get_user_topics_by_user_course(user_course)
+        user_group = self._user_group.get_or_none(
+            True,
+            id = user_group_id, 
+            user = user.username
+        )
+        user_topics = self._user_topic_repo.get_user_topics_by_user_group(user_group)
         
         return JSONResponse([user_topic.dump for user_topic in user_topics])
     
@@ -123,8 +127,8 @@ class TopicService:
                 } for answer in answers]
             })
         
-        if not current_topic.number_in_course:
-            return JSONResponse(questions_with_answers)
+        # if not current_topic.number_in_course:
+        return JSONResponse(questions_with_answers)
         
         questions_with_answers = self._adaptivity_service.add_adaptive_questions_to_response(user, user_topic, questions_with_answers)
 
@@ -160,12 +164,12 @@ class TopicService:
         submit_questions = topic_answers.questions
 
         created_questions = self._question_repo.get_active_questions_by_topic(current_topic)
-        created_questions.extend(
-            self._adaptivity_service.get_adaptive_questions_to_list(
-                user_topic,
-                submit_questions
-            )
-        )
+        # created_questions.extend(
+        #     self._adaptivity_service.get_adaptive_questions_to_list(
+        #         user_topic,
+        #         submit_questions
+        #     )
+        # )
         
         created_questions.sort(key=lambda q: getattr(q, "id"))
         submit_questions.sort(key=lambda q: q.id)
@@ -255,9 +259,9 @@ class TopicService:
                     bool(question_score)
                 )
             )
-        if submit_question.by_topic != user_topic.topic.id:
-            self._adaptivity_service.save_adaptive_question_results(
-                user, 
-                user_topic, 
-                submit_question
-            )
+        # if submit_question.by_topic != user_topic.topic.id:
+        #     self._adaptivity_service.save_adaptive_question_results(
+        #         user, 
+        #         user_topic, 
+        #         submit_question
+        #     )
