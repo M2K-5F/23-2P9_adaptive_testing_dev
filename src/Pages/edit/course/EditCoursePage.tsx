@@ -3,8 +3,9 @@ import { Fragment, useEffect, useLayoutEffect, useState } from "react";
 import { useTopicStore } from "@/stores/useTopicStore";
 import { useCourseStore } from "@/stores/useCourseStore";
 import clsx from "clsx";
-import { Button, CreatedTopic, CreateTopicDialog, Loader } from "@/Components";
-import { BarChart2, BarChart3 } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, CreatedTopic, CreateTopicDialog, Loader } from "@/Components";
+import { BarChart2, BarChart3, UserRoundPlus, UsersRound } from "lucide-react";
+import { ViewGroupDialog } from "@/Components/dialogs/view-course-groups-dialog";
 
 export function TopicsPortal() {
     const navigate = useNavigate()
@@ -42,16 +43,27 @@ export function TopicsPortal() {
                     )}
                 >{createdCourses.find(c => c.id === courseId)?.title}
                 </div>
-                <Button 
-                    onClick={() => {
-                        navigate('/stats/course?stats_course_id=' + createdCourses.find(c => c.id === courseId)?.id)
-                    }}
-                    variant={'secondary'} 
-                    className="p-0.5 my-auto row-start-2 col-start-2 mx-auto mt-3 w-fit h-fit mr-auto" >
-                    <BarChart3></BarChart3>
-                    Статистика
-                </Button>
             </header>
+
+            <Accordion className="border-b border-t mb-4" type='multiple' defaultValue={['actions']}>
+                <AccordionItem value="actions">
+                    <AccordionTrigger>
+                        <h2>Действия с курсом:</h2>
+                    </AccordionTrigger>
+                    <AccordionContent className="flex gap-2">
+                        <ViewGroupDialog courseId={courseId} />
+                        <Button 
+                            onClick={() => {
+                                navigate('/stats/course?stats_course_id=' + createdCourses.find(c => c.id === courseId)?.id)
+                            }}
+                            className="" 
+                        >
+                            <BarChart3></BarChart3>
+                            Статистика
+                        </Button>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
 
             {createdTopics[courseId] 
                 ?   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">

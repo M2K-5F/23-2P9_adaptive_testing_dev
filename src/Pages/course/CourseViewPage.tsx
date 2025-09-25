@@ -2,7 +2,7 @@ import { Fragment, use, useEffect, useLayoutEffect, useState } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
 import { useCourseStore } from "@/stores/useCourseStore"
-import { followCourse, getCourse, unfollowCourse } from "@/services/api.service"
+import { getCourseById } from "@/services/course"
 import { 
     Card,CardHeader,
     CardTitle, CardContent,
@@ -11,7 +11,7 @@ import {
     AccordionItem, AccordionTrigger,
     Loader, FollowedTopic, Progress
 } from "@/Components"
-import { FetchedCourse } from "@/types/interfaces"
+import { FetchedCourse, FetchedGroup } from "@/types/interfaces"
 import { 
     BarChart2, BookOpen, Check, 
     GitCommitVerticalIcon, List, 
@@ -22,6 +22,8 @@ import clsx from "clsx"
 import { toast } from "sonner"
 import { useClipboard } from "@/hooks/useClipboard"
 import { ClearUCProgressDialog } from "@/Components/dialogs/clear_uc_progress_dialog"
+import { FollowGroupDialog } from "@/Components/dialogs/follow-group-dialog"
+import { unfollowGroup } from "@/services/group"
 
 
 
@@ -34,17 +36,12 @@ export function FollowedCoursePage() {
     const {fetchCreatedTopics, fetchFollowedTopics} = useTopicStore()
     const fetchCourses = useCourseStore(s => s.fetchFollowedCourses)
     const allFollowedTopics = useTopicStore(s => s.followedTopics)
-    const followedTopics = course?.user_course ? allFollowedTopics[course.user_course.id] : []
+    const followedTopics = course?.user_group ? allFollowedTopics[course.user_group.id] : []
     const copyToCB = useClipboard()
 
-    const handleFollowToggle = async () => {
+    const followHandler = async () => {
         setIsLoading(true)
-        if (course && course.user_course) {
-            await unfollowCourse(courseId)
-        } else {
-            await followCourse(courseId)
-        }
-        setCourse(await getCourse(courseId))
+        setCourse(await getCourseById(courseId))
         setIsLoading(false)
         await fetchCourses()
     }
@@ -53,7 +50,7 @@ export function FollowedCoursePage() {
     useLayoutEffect(() => {
         (async () => {
             setIsLoading(true)
-            setCourse(await getCourse(courseId))
+            setCourse(await getCourseById(courseId))
             const _ = await fetchCreatedTopics(courseId)
             setIsLoading(false)
         })()
@@ -61,9 +58,9 @@ export function FollowedCoursePage() {
     }, [courseId])
 
     useLayoutEffect(() => {
-        if (course && course.user_course){
+        if (course && course.user_group){
             setIsLoading(true)
-            fetchFollowedTopics(course.user_course.id)
+            fetchFollowedTopics(course.user_group.id)
                 .then(() => setIsLoading(false))
         } 
     }, [course])
@@ -97,9 +94,9 @@ export function FollowedCoursePage() {
                                                 Автор: {course.created_by.username}
                                             </Badge>
                                             <Badge
-                                                className={clsx(course.user_course ? 'bg-green-400' : 'border-red-500')} 
-                                                variant={course.user_course ? "default" : "outline"}
-                                            >{course.user_course
+                                                className={clsx(course.user_group ? 'bg-green-400' : 'border-red-500')} 
+                                                variant={course.user_group ? "default" : "outline"}
+                                            >{course.user_group
                                                     ?   <>
                                                             <Check className="h-3 w-3 mr-1" />
                                                             Подписан
@@ -126,12 +123,12 @@ export function FollowedCoursePage() {
                                                 <span className="max-md:hidden">Поделиться курсом</span>
                                             </Button>
 
-                                            {course.user_course && 
+                                            {course.user_group && 
                                                 <ClearUCProgressDialog 
-                                                    userCourseId={course.user_course.id} 
+                                                    userCourseId={course.user_group.id} 
                                                     callback={async (id) => {
                                                         await fetchFollowedTopics(id)
-                                                        setCourse(await getCourse(courseId))
+                                                        setCourse(await getCourseById(courseId))
                                                     }}
                                                 /> 
                                             }
@@ -156,47 +153,42 @@ export function FollowedCoursePage() {
                                             <Share2 className="h-4 w-4" />
                                             <span className="min-md:hidden">Поделиться курсом</span>
                                         </Badge>
-                                        {course.user_course && 
+                                        {course.user_group && 
                                             <ClearUCProgressDialog 
                                                 isBadge 
-                                                userCourseId={course.user_course.id}
+                                                userCourseId={course.user_group.id}
                                                 callback={async (id) => {
                                                     await fetchFollowedTopics(id)
-                                                    setCourse(await getCourse(courseId))
+                                                    setCourse(await getCourseById(courseId))
                                                 }}
                                             />
                                         }
                                     </div>
                             </div>
-                            
-                            <Button
-                                variant={course.user_course ? "destructive" : "default"}
-                                size="sm"
-                                onClick={handleFollowToggle}
-                                className="flex items-center gap-1 max-w-80 w-full"
-                            >{course.user_course
-                                ?   <>
+                            {course.user_group
+                                ?   <Button
+                                        variant={course.user_group ? "destructive" : "default"}
+                                        size="sm"
+                                        onClick={() => {unfollowGroup(course.user_group.group.id).then(() => {followHandler()})}}
+                                        className="flex items-center gap-1 max-w-80 w-full"
+                                    >
                                         <LogOut className="h-4 w-4" />
                                         Отписаться
-                                    </>
-                                :   <>
-                                        <Plus className="h-4 w-4" />
-                                        Подписаться
-                                    </>
+                                    </Button>
+                                :   <FollowGroupDialog courseId={courseId} user_group={course.user_group}  followCallback={followHandler}/> 
                             }
-                            </Button>
                         </section>
                     </CardHeader>
 
-                    {course.user_course && 
+                    {course.user_group && 
                         <CardContent>
                             <div className="flex items-center gap-4">
                                 <Progress offsetValue={2}
-                                    value={course.user_course.course_progress}
+                                    value={course.user_group.progress}
                                 />
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <BarChart2 className="h-4 w-4" />
-                                    {Math.round(course.user_course.course_progress || 0)}% завершено
+                                    {Math.round(course.user_group.progress || 0)}% завершено
                                 </div>
                             </div>
                         </CardContent>
@@ -226,7 +218,7 @@ export function FollowedCoursePage() {
                                                     <GitCommitVerticalIcon size={40} className="" />
                                                 </div>
                                             }
-                                            <FollowedTopic topic={topic} index={index} userTopic={userTopic} isCourseFollowed={Boolean(course.user_course)} /> 
+                                            <FollowedTopic topic={topic} index={index} userTopic={userTopic} isCourseFollowed={Boolean(course.user_group)} /> 
                                         </Fragment>
                                     )
                                 })}

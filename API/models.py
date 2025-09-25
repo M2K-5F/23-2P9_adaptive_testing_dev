@@ -73,6 +73,7 @@ class Course(Table):
     is_active = BooleanField(default=True)
     description = CharField(max_length=60)
     topic_count = IntegerField(default=0)
+    group_count = IntegerField(default=0)
     student_count = IntegerField(default=0)
 
 

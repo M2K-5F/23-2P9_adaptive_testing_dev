@@ -4,7 +4,8 @@ import { useTopicStore } from "@/stores/useTopicStore"
 import { Button, Badge } from "@/Components"
 import { CreatedQuestion, QuestionConstructor } from "@/Components"
 import { CreatedTopic as CT } from "@/types/interfaces"
-import { getQuestions, archTopic, unarchTopic } from "@/services/api.service"
+import { archTopic, unarchTopic } from "@/services/topic"
+import { getQuestions } from "@/services/question"
 import clsx from "clsx"
 import { 
   Archive, 

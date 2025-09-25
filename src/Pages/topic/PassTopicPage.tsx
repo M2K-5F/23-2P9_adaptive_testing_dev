@@ -5,7 +5,7 @@ import { Button, Card, Progress, Badge, Separator, CardHeader, CardContent, Card
 import { toast } from 'sonner'
 import { CompletedTopic, QuestionToPass } from '@/types/interfaces'
 import { useImmer } from 'use-immer'
-import { startPassingTopic, submitTopic } from '@/services/api.service'
+import { startPassingTopic, submitTopic } from '@/services/topic'
 import { useTopicStore } from '@/stores/useTopicStore'
 
 

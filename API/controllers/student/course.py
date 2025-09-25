@@ -17,12 +17,3 @@ async def get_course(
     course_service: CourseService = Depends(get_student_course_service)
 ) -> JSONResponse:
     return course_service.get_course_by_id(user=current_user, course_id=course_id)
-
-
-@course_router.delete('/clear')
-async def clear_progress(
-    current_user = Depends(get_user_from_request),
-    user_group_id = Query(),
-    progress_service: ProgressService = Depends(get_progress_service)
-):
-    return progress_service.clear_user_group_progress(current_user, user_group_id)

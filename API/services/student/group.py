@@ -34,7 +34,10 @@ class GroupService:
         course_id: int
     ):
         current_course = self._course.get_by_id(course_id, True)
-        groups = self._group.select_where(by_course = current_course)
+        groups = self._group.select_where(
+            by_course = current_course,
+            is_active = True
+        )
         user_group = self._user_group.get_user_group_by_user(
             user, current_course
         )

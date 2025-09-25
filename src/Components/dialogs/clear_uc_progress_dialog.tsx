@@ -11,7 +11,7 @@ import { FC, memo, useEffect, useId, useState } from "react"
 import { PropsVariant } from "@/types/types"
 import { set } from "react-hook-form"
 import { RotateCcw } from "lucide-react"
-import { clearUCProgress } from "@/services/api.service"
+import { clearGroupProgress } from "@/services/group"
 import { toast } from "sonner"
 import { useTopicStore } from "@/stores/useTopicStore"
 
@@ -23,7 +23,7 @@ export const ClearUCProgressDialog: FC<{className?: string, variant?: PropsVaria
 
     const handleClear = async () => {
         try {
-            await clearUCProgress(userCourseId)
+            await clearGroupProgress(userCourseId)
             toast.success('Прогресс успешно сброшен!')
             await fetchFollowedCourses()
             callback(userCourseId)

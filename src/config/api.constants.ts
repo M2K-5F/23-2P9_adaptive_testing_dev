@@ -10,28 +10,28 @@ export const APIUrls = {
     logOutURL: `${baseURL}/auth/logout`,
     registerURL: `${baseURL}/auth/register`,
 
+    // Teacher/Course
     createCourseURL: `${tURL}/course/create`,
-    getCoursesURL: `${tURL}/course/get`,
-    getFollowedCoursesURL: `${sURL}/course/get_followed`,
+    getCreatedCoursesURL: `${tURL}/course/get`,
     archCourseURL: `${tURL}/course/arch`,
     unarchCourseURL: `${tURL}/course/unarch`,
-    followCourseURL: `${sURL}/course/follow`,
-    unfollowCourseURL: `${sURL}/course/unfollow`,
-    getCourseURL: `${sURL}/course/get_by_id`,
-    clearUCUrl: `${sURL}/course/clear`,
     getCourseStatsURL: `${tURL}/course/stats`,
 
+    // Student/Course
+    getCourseURL: `${sURL}/course/get_by_id`,
+
+    // Teacher/Topic
     createTopicURL: `${tURL}/topic/create`,
-    addTopicToUCURL: `${sURL}/topic/add_topic_to_user_course`,
-    getTopicsURL: `${sURL}/topic/get`,
-    getFollowedTopicsURL: `${sURL}/topic/get_followed`,
     archTopicURL: `${tURL}/topic/arch`,
     unarchTopicURL: `${tURL}/topic/unarch`,
-    followTopicURL: `${sURL}/topic/follow`,
-    unfollowTopicURL: `${sURL}/topic/unfollow`,
+
+    //Student/Topic
+    getTopicsURL: `${sURL}/topic/get`,
+    getFollowedTopicsURL: `${sURL}/topic/get_followed`,
     startPassingTopicURL: `${sURL}/topic/start`,
     submitTopicURL: `${sURL}/topic/submit_topic`,
 
+    //Teacher/Questions
     createQuestionURL: `${tURL}/question/create`,
     getQuestionsURL: `${tURL}/question/get`,
     archQuestionURL: `${tURL}/question/arch`,
@@ -39,6 +39,19 @@ export const APIUrls = {
     submitQuestionURL: `${tURL}/question/submit`,
 
     searchCourseURL: `${searchUrl}/course`,
+
+    //Teacher/Group
+    createGroupURL: `${tURL}/group/create`,
+    getTeacherGroupsURL: `${tURL}/group/get`,
+    archGroupURL: `${tURL}/group/arch`,
+    unarchGroupURL: `${tURL}/group/unarch`,
+
+    //Student/Group
+    getCourseGroupsURL: `${sURL}/group/get`,
+    getFollowedGroupsURL: `${sURL}/group/get_followed`,
+    followGroupURL: `${sURL}/group/follow`,
+    unfollowGroupURL: `${sURL}/group/unfollow`,
+    clearGroupPregressURL: `${sURL}/group/clear`
 } as const
 
 export type apiUrl = {

@@ -47,7 +47,10 @@ class GroupService:
                 group = group,
                 question = question
             )
-
+        self._course.update(
+            current_course,
+            group_count = current_course.group_count + 1
+        )
         return JSONResponse(group.dump)
 
 

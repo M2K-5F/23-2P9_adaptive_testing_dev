@@ -54,9 +54,9 @@ class CourseService:
         self._adaptive_question_repo.delete_all(user = user.username)
 
         if user_group:
-            return JSONResponse({**current_course.dump, 'user_course': {**user_group.dump}})
+            return JSONResponse({**current_course.dump, 'user_group': {**user_group.dump}})
 
-        return JSONResponse({**current_course.dump, 'user_course': False})
+        return JSONResponse({**current_course.dump, 'user_group': False})
 
 
     @database.atomic()

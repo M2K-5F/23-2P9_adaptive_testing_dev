@@ -35,7 +35,7 @@ def get_groups(
     return service.get_teacher_groups(current_user, course_id)
 
 
-@group_router.get('/arch')
+@group_router.put('/arch')
 def arch_group(
     current_user = Depends(get_user_from_request),
     group_id: int = Query(),
@@ -44,7 +44,7 @@ def arch_group(
     return service.arch_group(current_user, group_id)
 
 
-@group_router.get('/unarch')
+@group_router.put('/unarch')
 def unarch_group(
     current_user = Depends(get_user_from_request),
     group_id: int = Query(),
