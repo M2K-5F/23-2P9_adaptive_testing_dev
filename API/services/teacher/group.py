@@ -84,3 +84,15 @@ class GroupService:
             is_active = True
         )
         return JSONResponse(current_group.dump)
+    
+
+    @database.atomic()
+    def get_question_weigths_by_group(self, group_id: int, user: UserOut):
+        current_group = self._group.get_or_none(
+            True,
+            id = group_id,
+            created_by = user.username
+        )
+
+        weigths = self._question_weigth.select_where(group = current_group)
+        return JSONResponse([w.dump for w in weigths])

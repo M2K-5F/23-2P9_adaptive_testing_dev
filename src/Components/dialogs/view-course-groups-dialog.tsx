@@ -19,6 +19,7 @@ import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar } from
 import { CreatedGroup } from "@/types/interfaces"
 import clsx from "clsx"
 import { CreateGroupDialog } from "./create-group-dialog"
+import { QuestionWeightsDialog } from "./question-weigth-dialog"
 
 interface ViewGroupDialogProps {
 }
@@ -196,6 +197,7 @@ const GroupCard: FC<GroupCardProps> = ({onArchive, onUnarchive, group}) => {
                         </Badge>
                     </CardTitle>
                     <div className="flex gap-2">
+                        <QuestionWeightsDialog groupId={group.id} />
                         {group.is_active 
                             ?   <Button 
                                     variant="outline" 

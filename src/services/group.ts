@@ -58,6 +58,19 @@ export const unarchGroup = (group_id: number) => {
 }
 
 
+export const getGroupWeigths = (group_id: number) => {
+    return ApiService.requestToServer(
+        APIUrls.getGroupWeigthsURL,
+        {
+            credentials: 'include',
+        },
+        {
+            group_id: group_id
+        }
+    )
+}
+
+
 export const getGroupsByCourse = (course_id: number) => {
     return ApiService.requestToServer(
         APIUrls.getCourseGroupsURL,

@@ -141,9 +141,11 @@ def get_student_topic_service(
     question_repo = Depends(get_question_repository),
     progress_service = Depends(get_progress_service),
     adaptivity_service = Depends(get_adaptivity_service),
-    user_group = Depends(get_user_group_repository)
+    user_group = Depends(get_user_group_repository),
+    question_weigth = Depends(get_question_weigth_repository)
 ):
     return STS(
+        question_weigth,
         course_repo,
         topic_repo,
         user_topic_repo,
@@ -175,8 +177,12 @@ def get_techer_course_service(
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
+    user_group = Depends(get_user_group_repository),
+    group = Depends(get_group_repo)
 ):
     return TCS(
+        group,
+        user_group,
         course_repo,
         topic_repo,
         user_topic_repo,

@@ -1,8 +1,11 @@
 import random
-from typing import List
+from typing import List, Tuple
 from fastapi import HTTPException
+from config import weigth_config
 from repositories.course.course_repository import CourseRepository
 from repositories.group.user_group import UserGroupRepository
+from repositories.question import question_weigth
+from repositories.question.question_weigth import QuestionWeigthRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
@@ -25,6 +28,7 @@ class TopicService:
 
     def __init__(
         self,
+        question_weigth: QuestionWeigthRepository,
         course_repo: CourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
@@ -35,6 +39,7 @@ class TopicService:
         adaptivity_service: AdaptivityServise,
         user_group: UserGroupRepository
     ):
+        self._question_weigth = question_weigth
         self._course_repo = course_repo
         self._user_group = user_group
         self._topic_repo = topic_repository
@@ -164,13 +169,6 @@ class TopicService:
         submit_questions = topic_answers.questions
 
         created_questions = self._question_repo.get_active_questions_by_topic(current_topic)
-        # created_questions.extend(
-        #     self._adaptivity_service.get_adaptive_questions_to_list(
-        #         user_topic,
-        #         submit_questions
-        #     )
-        # )
-        
         created_questions.sort(key=lambda q: getattr(q, "id"))
         submit_questions.sort(key=lambda q: q.id)
 
@@ -195,13 +193,17 @@ class TopicService:
             question_score = get_question_score(
                 submit_question, created_question
             )
-            topic_score += question_score / question_count
 
-            self.save_question_results(
-                user, user_topic, created_question, 
+            factor = self.save_question_results(
+                user_topic, user, created_question, 
                 submit_question, question_score
             )
             
+            topic_score += question_score * factor / question_count
+            
+        if topic_score > 1:
+            topic_score = 1
+
         self._progress_service.update_user_topic_score(
             user_topic, topic_score
         )
@@ -213,18 +215,18 @@ class TopicService:
 
     def save_question_results(
             self, 
+            user_topic: UserTopic,
             user: UserOut, 
-            user_topic: UserTopic, 
             created_question: Question, 
             submit_question: SubmitQuestion, 
             question_score: float
-    ):
+    ) -> float:
         """Procedure which process saving question result based on score
 
         Args:
             user (UserOut): current user
             user_topic (UserTopic): user topic for which question is saved
-            created_question (Question): question from database with unique id 
+            created_question (Question): question from database with unique id
             submit_question (SubmitQuestion): question data from client with topic id
             question_score (float): score of question to save result
         """
@@ -243,6 +245,24 @@ class TopicService:
             )
         )
 
+        question_weigth = self._question_weigth.get_or_none(
+            True,
+            question = created_question,
+            group = user_topic.by_user_group.group
+        )
+
+        weigth: float = question_weigth.weigth  # pyright: ignore[reportAssignmentType]
+        step: float = question_weigth.step  # pyright: ignore[reportAssignmentType]
+        max_w: float = question_weigth.max_weigth  # pyright: ignore[reportAssignmentType]
+        min_w: float = question_weigth.min_weigth  # pyright: ignore[reportAssignmentType]
+        score_step = (((question_score - 0.5) * 2 ) * step)
+        updated_weigth = weigth - float(round(score_step, 4))
+
+        self._question_weigth.update(
+            question_weigth, 
+            weigth = min(max(min_w, updated_weigth), max_w)
+        )
+
         if submit_question.type == 'text':
             user_answer = self._user_text_answer_repo.create_user_text_answer(
                 user, 
@@ -259,9 +279,5 @@ class TopicService:
                     bool(question_score)
                 )
             )
-        # if submit_question.by_topic != user_topic.topic.id:
-        #     self._adaptivity_service.save_adaptive_question_results(
-        #         user, 
-        #         user_topic, 
-        #         submit_question
-        #     )
+
+        return max(weigth / weigth_config.BASE_WEIGTH, user_topic.topic.score_for_pass)

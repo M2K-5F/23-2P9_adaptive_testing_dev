@@ -11,12 +11,12 @@ import {
     AccordionItem, AccordionTrigger,
     Loader, FollowedTopic, Progress
 } from "@/Components"
-import { FetchedCourse, FetchedGroup } from "@/types/interfaces"
+import { FetchedCourse, FetchedGroup, UserGroup } from "@/types/interfaces"
 import { 
     BarChart2, BookOpen, Check, 
     GitCommitVerticalIcon, List, 
     LogOut, Plus, RotateCcw, 
-    Share2, User, X 
+    Share2, User, UserRound, X 
 } from "lucide-react"
 import clsx from "clsx"
 import { toast } from "sonner"
@@ -105,8 +105,14 @@ export function FollowedCoursePage() {
                                                             <X className="h-3 text-red-400 w-3 mr-1" />
                                                             Не подписан
                                                         </>
-                                                }
+                                            }
                                             </Badge>
+                                            {course.user_group &&
+                                                <Badge>
+                                                    <UserRound />
+                                                    Группа: {course.user_group.group.title}
+                                                </Badge>
+                                            }
                                         </div>
 
                                         <div className={clsx('w-fit flex flex-col max-md:hidden gap-2')}>
@@ -169,7 +175,7 @@ export function FollowedCoursePage() {
                                 ?   <Button
                                         variant={course.user_group ? "destructive" : "default"}
                                         size="sm"
-                                        onClick={() => {unfollowGroup(course.user_group.group.id).then(() => {followHandler()})}}
+                                        onClick={() => {unfollowGroup((course.user_group as UserGroup).group.id).then(() => {followHandler()})}}
                                         className="flex items-center gap-1 max-w-80 w-full"
                                     >
                                         <LogOut className="h-4 w-4" />
@@ -184,11 +190,11 @@ export function FollowedCoursePage() {
                         <CardContent>
                             <div className="flex items-center gap-4">
                                 <Progress offsetValue={2}
-                                    value={course.user_group.progress}
+                                    value={course.user_group.progress * 100}
                                 />
                                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                     <BarChart2 className="h-4 w-4" />
-                                    {Math.round(course.user_group.progress || 0)}% завершено
+                                    {Math.round(course.user_group.progress * 100 || 0)}% завершено
                                 </div>
                             </div>
                         </CardContent>

@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
@@ -60,6 +61,11 @@ class GroupService:
         group_id: int,
     ):
         current_group = self._group.get_by_id(group_id, True)
+        if current_group.student_count >= current_group.max_student_count:
+            raise HTTPException(
+                400,
+                'maximum students in group'
+            )
         current_course: Course = current_group.by_course  #pyright: ignore[reportAssignmentType]
 
         user_group = self._user_group.get_or_create(

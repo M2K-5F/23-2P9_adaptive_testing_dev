@@ -135,7 +135,7 @@ class ProgressService:
                 progress = (
                     (user_group.completed_topic_count + 1) / 
                     len(self._topic_repo.get_active_topics_by_course(user_group.course))  # pyright: ignore
-                ) * 100
+                )
             )
 
             next_user_topic = self._user_topic_repo.get_next_user_topic(user_topic)
@@ -208,7 +208,7 @@ class ProgressService:
         user_topics_by_group  = self._user_topic_repo.get_user_topics_by_user_group(user_group)
 
         completed_topic_count = len(list(filter(lambda t: t.is_completed, user_topics_by_group)))
-        group_progress = 100 * completed_topic_count / len(user_topics_by_group)
+        group_progress = completed_topic_count / len(user_topics_by_group)
         
         user_group = self._user_group.update(
             user_group,

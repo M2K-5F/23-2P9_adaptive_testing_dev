@@ -45,10 +45,10 @@ async def unarch_course(
 
 
 
-# @course_router.get('/stats')
-# async def get_statistics(
-#     current_user: UserOut = Depends(get_user_from_request),
-#     course_id = Query(),
-#     service: TCS = Depends(get_techer_course_service)
-# ) -> JSONResponse:
-#     return service.get_course_statistics(current_user, course_id)
+@course_router.get('/stats')
+async def get_statistics(
+    current_user: UserOut = Depends(get_user_from_request),
+    course_id = Query(),
+    service: TCS = Depends(get_techer_course_service)
+) -> JSONResponse:
+    return service.get_course_statistics(current_user, course_id)

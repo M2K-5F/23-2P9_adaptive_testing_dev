@@ -90,7 +90,7 @@ class QuestionService:
 
         for answer_option in question_to_create.answer_options:
 
-            self._answer_repo.get_or_create(True, {},
+            self._answer_repo.model.create(
                 text = answer_option.text,
                 is_correct = True if question_to_create.question_type == "text" else answer_option.is_correct,
                 by_question = created_question
