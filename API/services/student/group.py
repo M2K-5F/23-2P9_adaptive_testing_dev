@@ -48,7 +48,7 @@ class GroupService:
             }
             for group in groups
         ])
-    
+
 
     @database.atomic()
     def follow_group(
@@ -103,18 +103,21 @@ class GroupService:
             user = user.username,
             group = current_group
         )
+
         self._group.update(
             current_group,
             student_count = current_group.student_count - 1
         )
 
-
-        user_group = self._progress_service.clear_user_course_progress(user, user_group.id, True)  # pyright: ignore[reportAssignmentType, reportArgumentType]
-        user_group.delete_instance()
         self._course.update(
             current_course,
             student_count = current_course.student_count - 1
         )
+
+
+        user_group = self._progress_service.delete_user_group_associations(user_group)
+        user_group.delete_instance()
+        
         return JSONResponse(user_group.dump)
     
     

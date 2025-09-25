@@ -57,23 +57,6 @@ class CourseService:
             return JSONResponse({**current_course.dump, 'user_course': {**user_group.dump}})
 
         return JSONResponse({**current_course.dump, 'user_course': False})
-    
-
-    @database.atomic()
-    def clear_user_group_progress(self, user: UserOut, user_course_id: int) -> JSONResponse:
-        """Delete all entries associated with user course
-
-        Args:
-            user (UserOut): current_user
-            user_course_id (int): unique user_course id
-
-        Returns:
-            JSONResponse: returns user course with nullish progress
-        """
-
-        user_group = self._progress_service.clear_user_course_progress(user, user_course_id)
-
-        return JSONResponse(user_group.dump)
 
 
     @database.atomic()

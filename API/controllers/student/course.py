@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Request
 from fastapi.responses import JSONResponse
+from services.common.progress_service import ProgressService
 from services.student.course_service import CourseService
-from dependencies.dependencies import get_student_course_service
+from dependencies.dependencies import get_progress_service, get_student_course_service
 
 from dependencies.user import get_user_from_request
 from shemas import UserOut
@@ -21,7 +22,7 @@ async def get_course(
 @course_router.delete('/clear')
 async def clear_progress(
     current_user = Depends(get_user_from_request),
-    user_course_id = Query(),
-    course_service: CourseService = Depends(get_student_course_service)
+    user_group_id = Query(),
+    progress_service: ProgressService = Depends(get_progress_service)
 ):
-    return course_service.clear_user_group_progress(current_user, user_course_id)
+    return progress_service.clear_user_group_progress(current_user, user_group_id)

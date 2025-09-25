@@ -52,7 +52,7 @@ class GroupService:
 
 
     @database.atomic()
-    def get_created_groups_by_course(self, user: UserOut, course_id: int):
+    def get_teacher_groups(self, user: UserOut, course_id: int):
         current_course = self._course.get_by_id(course_id, True)
 
         groups = self._group.select_where(

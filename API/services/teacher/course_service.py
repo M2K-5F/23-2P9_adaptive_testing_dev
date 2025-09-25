@@ -127,7 +127,7 @@ class CourseService:
     
     
     @database.atomic()
-    def get_created_by_teacher_courses(self, user: UserOut):
+    def get_teacher_courses(self, user: UserOut):
         """Returns courses which be created by user
 
         Args:
@@ -198,7 +198,7 @@ class CourseService:
     #                             'topic_id': topic.id,
     #                             'topic_title': topic.title,
     #                             'is_completed': False,
-    #                             'topic_progress': 0,
+    #                             'progress': 0,
     #                             'question_count': topic.question_count,
     #                             'average_score': 0,
     #                             'ready_to_pass': False,
@@ -212,9 +212,9 @@ class CourseService:
     #                             'topic_title': topic.title,
     #                             'is_completed': user_topic.is_completed,
     #                             'score_for_pass': topic.score_for_pass,
-    #                             'topic_progress': round(user_topic.topic_progress, 3), # pyright: ignore
+    #                             'progress': round(user_topic.progress, 3), # pyright: ignore
     #                             'question_count': topic.question_count,
-    #                             'average_score': round(user_topic.topic_progress * 100, 2), # pyright: ignore
+    #                             'average_score': round(user_topic.progress * 100, 2), # pyright: ignore
     #                             'ready_to_pass': user_topic.ready_to_pass,
     #                             'unsubmited_answers': [a.dump for a in unsubmited_text_answers]
     #                         })

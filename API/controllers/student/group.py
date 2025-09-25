@@ -19,7 +19,7 @@ def get_group_list(
     return service.get_group_list_by_course(current_user, course_id)
 
 
-@group_router.get('/get_user_groups')
+@group_router.get('/get_followed')
 async def get_user_groups(
     current_user: UserOut = Depends(get_user_from_request),
     service: GroupService = Depends(get_student_group_service)

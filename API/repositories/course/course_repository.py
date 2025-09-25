@@ -22,7 +22,7 @@ class CourseRepository(BaseRepository[Course]):
     def search_courses_by_title(self, user: UserOut, title: str) -> List[Course]:
         searched_courses = Course.select().where(
             fn.lower(Course.title).contains(title.lower()),
-            Course.created_by != user.username
+            # Course.created_by != user.username
         )
 
         return searched_courses

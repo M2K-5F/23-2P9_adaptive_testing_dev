@@ -1,4 +1,5 @@
 """database discription"""
+from ast import boolop
 from datetime import datetime
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
@@ -128,10 +129,12 @@ class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_topics")
     topic = ForeignKeyField(Topic)
     by_user_group = ForeignKeyField(UserGroup)
-    ready_to_pass = BooleanField(default=False)
     is_completed = BooleanField(default=False)
-    topic_progress = FloatField(default=0)
+    is_attempted = BooleanField(default=False)
+    is_available = BooleanField(default=False)
     is_active = BooleanField(default=True)
+    progress = FloatField(default=0)
+    attempt_count = IntegerField(default=0)
 
 
 class AdaptiveQuestion(Table):
@@ -146,7 +149,7 @@ class UserQuestion(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_questions")
     by_user_topic = ForeignKeyField(UserTopic, backref='user_questions')
     question = ForeignKeyField(Question)
-    question_score = FloatField(default=0)
+    progress = FloatField(default=0)
 
 
 class UserTextAnswer(Table):

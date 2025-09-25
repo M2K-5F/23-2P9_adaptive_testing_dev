@@ -21,7 +21,7 @@ class UserTopicRepository(BaseRepository[UserTopic]):
             topic=topic,
             user=user.username,
             by_user_group = user_group,
-            ready_to_pass=ready_to_pass
+            is_available=ready_to_pass
         )
         return user_topic
 
@@ -31,10 +31,11 @@ class UserTopicRepository(BaseRepository[UserTopic]):
         return user_topics
     
     def clear_user_topic_progress(self, user_topic: UserTopic) -> UserTopic: 
-        user_topic = self.update(user_topic,
-            topic_progress = 0,
+        user_topic = self.update(
+            user_topic,
+            progress = 0,
             is_completed = 0,
-            ready_to_pass = False if user_topic.topic.number_in_course else True
+            is_available = False if user_topic.topic.number_in_course else True
         )
 
         return user_topic

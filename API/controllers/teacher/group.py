@@ -32,7 +32,7 @@ def get_groups(
     service: GroupService = Depends(get_teacher_group_service),
     course_id: int = Query()
 ) -> JSONResponse:
-    return service.get_created_groups_by_course(current_user, course_id)
+    return service.get_teacher_groups(current_user, course_id)
 
 
 @group_router.get('/arch')

@@ -184,7 +184,7 @@ class QuestionService:
 
 
     @database.atomic()
-    def get_question_list(self, user: UserOut, topic_id: int):
+    def get_teacher_questions(self, user: UserOut, topic_id: int):
         """Get list of all questions in a topic created by the user
 
         Args:
@@ -210,7 +210,7 @@ class QuestionService:
         return JSONResponse(to_return)
 
     
-    def submit_question(self, user: UserOut, score: float, user_answer_id: int):
+    def submit_text_question(self, user: UserOut, score: float, user_answer_id: int):
         """Submit and evaluate a text question answer (teacher grading)
 
         Args:
@@ -241,11 +241,12 @@ class QuestionService:
         )
 
         user_question: UserQuestion = user_answer.for_user_question  # pyright: ignore
-        user_question = self._user_question_repo.update(user_question, 
-            question_score = score
+        user_question = self._user_question_repo.update(
+            user_question, 
+            progress = score
         )
 
         user_topic: UserTopic = user_question.by_user_topic  # pyright: ignore
-        user_topic = self._progress_service.update_user_topic_progress(user_topic)
+        user_topic = self._progress_service.update_user_progress(user_topic)
         
         return JSONResponse(user_topic.dump)

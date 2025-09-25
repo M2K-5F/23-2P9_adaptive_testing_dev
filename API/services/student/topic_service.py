@@ -110,7 +110,7 @@ class TopicService:
 
         user_topic = self._user_topic_repo.get_by_user_and_id(user, user_topic_id)
 
-        self._progress_service.validate_topic_acess(user_topic)
+        self._progress_service.validate_topic_access(user_topic)
         
         current_topic: Topic = user_topic.topic # pyright: ignore
 
@@ -158,7 +158,7 @@ class TopicService:
         current_topic: Topic = user_topic.topic # pyright: ignore
         topic_score = 0
 
-        self._progress_service.validate_topic_acess(user_topic)
+        self._progress_service.validate_topic_access(user_topic)
 
 
         submit_questions = topic_answers.questions
@@ -237,9 +237,9 @@ class TopicService:
 
         user_question = self._user_question_repo.update(
             user_question,
-            question_score = max(
+            progress = max(
                 question_score, 
-                user_question.question_score # pyright: ignore
+                user_question.progress # pyright: ignore
             )
         )
 
