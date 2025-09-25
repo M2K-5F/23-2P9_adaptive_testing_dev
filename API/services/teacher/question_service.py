@@ -2,7 +2,8 @@ import random
 from typing import List, Union
 from fastapi import HTTPException
 from repositories.course.course_repository import CourseRepository
-from repositories.course.user_course_repository import UserCourseRepository
+from repositories.group.group import GroupRepository
+from repositories.question.question_weigth import QuestionWeigthRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
@@ -10,7 +11,7 @@ from repositories.question.adaptive_question_repository import AdaptiveQuestionR
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
-from models import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
+from models import Answer, Question, Topic, UserQuestion, database, UserTopic
 from services.common.progress_service import ProgressService
 from shemas import QuestionBase, SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers
 from fastapi.responses import JSONResponse
@@ -26,13 +27,17 @@ class QuestionService:
     def __init__(
         self,
         topic_repository: TopicRepository,
+        question_weigth: QuestionWeigthRepository,
         user_question_repository: UserQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository,
         answer_repo: AnswerRepository,
         question_repo: QuestionRepository,
-        progress_service: ProgressService
+        progress_service: ProgressService,
+        group: GroupRepository
     ):
         self._topic_repo = topic_repository
+        self._group = group
+        self._question_weigth = question_weigth
         self._user_question_repo = user_question_repository
         self._user_text_answer_repo = user_text_answer_repo
         self._answer_repo = answer_repo
@@ -75,7 +80,10 @@ class QuestionService:
 
 
         created_question = self._question_repo.get_or_create(
-            True, {"question_type": question_type},
+            True, 
+            {
+                "question_type": question_type
+            },
             text = question_to_create.text,
             by_topic = current_topic
         )
@@ -87,7 +95,18 @@ class QuestionService:
                 is_correct = True if question_to_create.question_type == "text" else answer_option.is_correct,
                 by_question = created_question
             )
-        current_topic = self._topic_repo.update_by_instance(current_topic, {'question_count': current_topic.question_count + 1})
+        current_topic = self._topic_repo.update(
+            current_topic, 
+            question_count = current_topic.question_count + 1
+        )
+        groups_by_course = self._group.select_where(by_course = current_topic.by_course)
+        for group in groups_by_course:
+            self._question_weigth.get_or_create(
+                True,
+                {},
+                group = group,
+                question = created_question
+            )
         return JSONResponse(created_question.dump)
 
 
@@ -165,7 +184,7 @@ class QuestionService:
 
 
     @database.atomic()
-    def get_question_list(self, user: UserOut, topic_id: int):
+    def get_teacher_questions(self, user: UserOut, topic_id: int):
         """Get list of all questions in a topic created by the user
 
         Args:
@@ -191,7 +210,7 @@ class QuestionService:
         return JSONResponse(to_return)
 
     
-    def submit_question(self, user: UserOut, score: float, user_answer_id: int):
+    def submit_text_question(self, user: UserOut, score: float, user_answer_id: int):
         """Submit and evaluate a text question answer (teacher grading)
 
         Args:
@@ -216,17 +235,18 @@ class QuestionService:
                 "Question wasn`t created by you"
             )
 
-        user_answer = self._user_text_answer_repo.update_by_instance(user_answer, {
-            'is_correct': score != 0,
-            'is_active': False
-        })
+        user_answer = self._user_text_answer_repo.update(user_answer, 
+            is_correct = (score != 0),
+            is_active = False
+        )
 
         user_question: UserQuestion = user_answer.for_user_question  # pyright: ignore
-        user_question = self._user_question_repo.update_by_instance(user_question, {
-            'question_score': score
-        })
+        user_question = self._user_question_repo.update(
+            user_question, 
+            progress = score
+        )
 
         user_topic: UserTopic = user_question.by_user_topic  # pyright: ignore
-        user_topic = self._progress_service.update_user_topic_progress(user_topic)
+        user_topic = self._progress_service.update_user_progress(user_topic)
         
         return JSONResponse(user_topic.dump)

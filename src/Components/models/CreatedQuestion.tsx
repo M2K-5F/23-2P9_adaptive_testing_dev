@@ -1,6 +1,6 @@
 import { CreatedQuestion as CQ } from "@/types/interfaces"
 import { Dispatch, FC, SetStateAction, useState } from "react"
-import { archQuestion, unarchQuestion } from "@/services/api.service"
+import { archQuestion, unarchQuestion } from "@/services/question"
 import { Button } from "@/Components/ui/button"
 import { Badge } from "@/Components/ui/badge"
 import { Archive, ArchiveRestore, ChevronDown, ChevronUp, CheckCircle2, XCircle } from "lucide-react"

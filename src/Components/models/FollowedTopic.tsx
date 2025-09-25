@@ -4,12 +4,10 @@ import { FC, use } from "react";
 import { Card, CardTitle, Badge, Button } from "@/Components";
 import clsx from "clsx";
 import { p } from "node_modules/shadcn/dist/index-8c784f6a";
-import { useAddTopicToUC } from "@/hooks/useAddTopic";
 import { useNavigate } from "react-router-dom";
 
 
 export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: UserTopic | undefined, isCourseFollowed: boolean}> = ({topic, index, isCourseFollowed, userTopic}) => {
-    const handler = useAddTopicToUC()
     const navigate = useNavigate()
 
 
@@ -21,7 +19,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                 <div className="flex items-center justify-between">
                     {isCourseFollowed
                         ?   userTopic
-                            ?   userTopic.ready_to_pass
+                            ?   userTopic.is_available
                                 ?   userTopic.is_completed
                                     ?   <Check className=" shrink-0 m-2" />
                                     :   <CirclePlay className=" shrink-0 m-2 " />
@@ -62,14 +60,14 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                         <div className="flex flex-col justify-center gap-1">
                             {userTopic 
                                 ?   <>
-                                        {userTopic.topic_progress
+                                        {userTopic.progress
                                             ? userTopic.is_completed
                                                 ?   <Badge variant='default' className= "border-green-500 border p-0 pr-2">
                                                         <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-green-500 mr-1">
                                                             <Check className="h-3 w-3" />
                                                             Пройдено
                                                         </Badge>
-                                                        Баллы: {userTopic.topic_progress.toFixed(1)}/1
+                                                        Баллы: {userTopic.progress.toFixed(1)}/1
                                                     </Badge>
                                                 :   <div className="space-y-1">
                                                         <Badge variant='default' className= "border-red-500 border p-0 pr-2">
@@ -77,7 +75,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                                                                 <X className="h-3 w-3" />
                                                                 Не пройдено
                                                             </Badge>
-                                                            Баллы: {userTopic.topic_progress.toFixed(1)}/1
+                                                            Баллы: {userTopic.progress.toFixed(1)}/1
                                                         </Badge>
                                                         <div className="text-xs text-red-600">
                                                             Минимум: {topic.score_for_pass} для зачета
@@ -85,7 +83,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                                                     </div>
                                             : <></>
                                         }
-                                        {(userTopic.ready_to_pass && userTopic.is_active)
+                                        {(userTopic.is_available && userTopic.is_active)
                                             ? topic.question_count
                                                 ?   <span className="text-green-500">Доступно для прохождения</span>
                                                 :   <span className="text-red-500">В данной теме нет вопросов<br />Заблокировано для прохождения</span>
@@ -103,18 +101,6 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                                                 <div className="text-xs text-center text-orange-400 mb-1">
                                                     Эта тема еще не добавлена в ваш курс
                                                 </div>
-                                                
-                                                <Button 
-                                                    onClick={() => {
-                                                        handler(topic)
-                                                    }}
-                                                    size="sm" 
-                                                    variant="outline"
-                                                    className="border-orange-100 text-orange-500 hover:bg-orange-300 hover:text-white transition-colors"
-                                                >
-                                                    <Plus className="h-4 w-4 mr-1" />
-                                                    Добавить в курс
-                                                </Button>
                                             </div>
                                         :   <span className="text-blue-400">Предпросмотр</span>
                             }
@@ -123,11 +109,11 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                         {userTopic
                             ?   <>
                                     <div className="shrink grow"></div>
-                                    {userTopic.ready_to_pass && topic.question_count > 0 && userTopic.is_active && (
+                                    {userTopic.is_available && topic.question_count > 0 && userTopic.is_active && (
                                         <Button size="sm" variant='default'
                                             onClick={() => navigate(`/topic?utopic_id=${userTopic.id}&title=${topic.title}`, {state: {from: `${userTopic.id}`}})}
                                         >
-                                            {userTopic.topic_progress
+                                            {userTopic.progress
                                                 ? userTopic.is_completed
                                                     ? 'Перепройти'
                                                     : 'Повторить'

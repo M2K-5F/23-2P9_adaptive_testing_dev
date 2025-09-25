@@ -25,7 +25,7 @@ def get_questions(
     topic_id = Query(),
     service: TQS = Depends(get_teacher_question_service)
 ) -> JSONResponse:
-    return service.get_question_list(current_user, topic_id)
+    return service.get_teacher_questions(current_user, topic_id)
 
 
 @question_router.put('/arch')
@@ -53,4 +53,4 @@ async def submit_text_questions(
     score: float = Query(),
     service: TQS = Depends(get_teacher_question_service)
 ) -> JSONResponse:
-    return service.submit_question(curent_user, score, user_answer_id)
+    return service.submit_text_question(curent_user, score, user_answer_id)

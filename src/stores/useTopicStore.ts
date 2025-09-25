@@ -1,4 +1,4 @@
-import { getFollowedTopics, getTopics } from "@/services/api.service";
+import { getFollowedTopics, getTopics } from "@/services/topic";
 import { CreatedTopic, UserTopic } from "@/types/interfaces";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";

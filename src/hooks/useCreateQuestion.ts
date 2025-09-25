@@ -1,4 +1,4 @@
-import { createQuestion } from "@/services/api.service"
+import { createQuestion } from "@/services/question"
 import { CreatedQuestion, QuestionCreate } from "@/types/interfaces"
 import { toast } from "sonner"
 

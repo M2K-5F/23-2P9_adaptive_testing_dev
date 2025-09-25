@@ -1,6 +1,6 @@
 import { Dispatch, FC, SetStateAction } from "react"
 import { CreatedCourse as CC } from "../../types/interfaces"
-import { archCourse, unarchCourse } from "../../services/api.service"
+import { archCourse, unarchCourse } from "../../services/course"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/Components/ui/button"
 import { useCourseStore } from "@/stores/useCourseStore"

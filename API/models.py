@@ -1,8 +1,10 @@
 """database discription"""
+from ast import boolop
 from datetime import datetime
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
+from config import weigth_config
 from shemas import Roles, UserOut
 from utils import get_password_hash
 
@@ -25,8 +27,8 @@ def serialize(obj):
 
 class Table(Model):
     id = AutoField()
-    created_at = DateTimeField(default = datetime.now)
-
+    created_at = DateTimeField(default=datetime.now)
+    
     class Meta:
         database = database
 
@@ -69,7 +71,17 @@ class Course(Table):
     is_active = BooleanField(default=True)
     description = CharField(max_length=128)
     topic_count = IntegerField(default=0)
+    group_count = IntegerField(default=0)
     student_count = IntegerField(default=0)
+
+
+class Group(Table):
+    by_course = ForeignKeyField(Course)
+    title = CharField(max_length=128)
+    max_student_count = IntegerField(default=30)
+    student_count = IntegerField(default=0)
+    created_by = ForeignKeyField(User, field=User.username)
+    is_active = BooleanField(default=True)
 
 
 class Topic(Table):
@@ -100,35 +112,42 @@ class Answer(Table):
     by_question = ForeignKeyField(Question, backref="answers")
 
 
-class Group(Table):
-    by_course = ForeignKeyField(Course, backref='groups')
-    title = CharField(max_length=128)
-    students_count = IntegerField(default=0)
-    is_active = BooleanField(default=True)
-
-
-class GroupWeigth(Table):
-    question = ForeignKeyField(Question)
-    group = ForeignKeyField(Group)
-
-
 class UserGroup(Table):
-    user = ForeignKeyField(User, backref='user_groups', field=User.username)
+    user = ForeignKeyField(User, field=User.username, backref='user_groups')
     group = ForeignKeyField(Group, backref='user_groups')
+    course = ForeignKeyField(Course)
     progress = FloatField(default=0)
     completed_topic_count = IntegerField(default=0)
+
+
+class QuestionWeigth(Table):
+    group = ForeignKeyField(Group)
+    question = ForeignKeyField(Question)
+    weigth = FloatField(default=weigth_config.BASE_WEIGTH)
+    step = FloatField(default=weigth_config.STEP)
+    max_weigth = FloatField(default=weigth_config.MAX_WEIGTH)
+    min_weigth = FloatField(default=weigth_config.MIN_WEIGTH)
 
 
 class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username)
     topic = ForeignKeyField(Topic)
     by_user_group = ForeignKeyField(UserGroup)
-    progress = FloatField(default=0)
-    is_available = BooleanField(default=False)
+
     is_completed = BooleanField(default=False)
     is_attempted = BooleanField(default=False)
-    completed_at = DateTimeField(null=True)
+    is_available = BooleanField(default=False)
+    is_active = BooleanField(default=True)
+    progress = FloatField(default=0)
     attempt_count = IntegerField(default=0)
+
+
+class AdaptiveQuestion(Table):
+    user = ForeignKeyField(User, field=User.username, backref='adaptive_questions')
+    for_user_topic = ForeignKeyField(UserTopic, backref='adaptive_questions')
+    by_user_topic = ForeignKeyField(UserTopic)
+    question = ForeignKeyField(Question)
+    question_score = FloatField(default=0)
 
 
 class UserQuestion(Table):
@@ -136,7 +155,7 @@ class UserQuestion(Table):
     question = ForeignKeyField(Question)
     by_user_topic = ForeignKeyField(UserTopic)
     progress = FloatField(default=0)
-
+    
 
 class UserChoiceAnswer(Table):
     user = ForeignKeyField(User, field=User.username)
@@ -157,7 +176,14 @@ class UserTextAnswer(Table):
 if __name__ == "__main__":
     database.connect()
     database.register_function(lambda x: x.lower(), 'lower')
-    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserQuestion, UserTopic, UserTextAnswer, UserChoiceAnswer, UserGroup, Group, GroupWeigth])
+
+    database.create_tables([
+        User, Role, UserRole, 
+        Course, Topic, Question,
+        Answer, UserQuestion, 
+        UserTopic, AdaptiveQuestion, UserTextAnswer, 
+        Group, UserGroup, QuestionWeigth
+    ])
     database.close()
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)

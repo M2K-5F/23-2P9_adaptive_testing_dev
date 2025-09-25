@@ -2,39 +2,78 @@ from typing import Dict
 
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
-from models import UserQuestion
+from dependencies import user
+from models import UserGroup, UserQuestion
+import models
 from repositories import (
-    UserCourseRepository, 
     UserTopicRepository,
-    UserTopic, UserCourse,
+    UserTopic, 
     UserQuestionRepository,
     TopicRepository,
     AdaptiveQuestionRepository,
     UserTextAnswerRepository
 )
+from repositories.group import user_group
+from repositories.group.user_group import UserGroupRepository
 from shemas import UserOut
 
 
 class ProgressService:
     """Service for managing accessibility and progress tracking of topics, courses and questions."""
     def __init__(
-            self, 
-            user_topic_repo: UserTopicRepository,
-            user_course_repo: UserCourseRepository,
-            user_question_repo: UserQuestionRepository,
-            topic_repo: TopicRepository,
-            adaptive_question_repo: AdaptiveQuestionRepository,
-            text_answer_repo: UserTextAnswerRepository
+        self, 
+        user_group: UserGroupRepository,
+        user_topic_repo: UserTopicRepository,
+        user_question_repo: UserQuestionRepository,
+        topic_repo: TopicRepository,
+        adaptive_question_repo: AdaptiveQuestionRepository,
+        text_answer_repo: UserTextAnswerRepository
     ):  
         self._user_topic_repo = user_topic_repo
-        self._user_course_repo = user_course_repo
+        self._user_group = user_group
         self._topic_repo = topic_repo
         self._user_question_repo = user_question_repo
         self._adaptive_question_repo = adaptive_question_repo
         self._user_text_answer_repo = text_answer_repo
 
 
-    def validate_topic_acess(self, user_topic: UserTopic):
+    @models.database.atomic()
+    def clear_user_group_progress(self, user: UserOut, user_group_id: int) -> JSONResponse:
+        """
+        Clears all progress for a user course and associated topics.
+        
+        Args:
+            user (UserOut): Current user
+            user_course_id (int): User course identifier to clear
+            with_delete (bool, optional): Whether to delete topic instances. Defaults to False.
+            
+        Returns:
+            UserCourse: The cleared user course instance
+        """
+
+        user_group = self._user_group.get_or_none(
+            True,
+            user = user.username,
+            id = user_group_id
+        )
+
+        user_topics = self._user_topic_repo.get_user_topics_by_user_group(user_group)
+
+        for user_topic in user_topics:
+            self._user_question_repo.delete_all(by_user_topic=user_topic)
+        
+            self._adaptive_question_repo.delete_all(by_user_topic = user_topic)
+
+            self._user_text_answer_repo.delete_all(by_user_topic = user_topic)
+
+            self._user_topic_repo.clear_user_topic_progress(user_topic)
+        
+        user_group = self._user_group.clear_user_group_progress(user_group)
+        
+        return JSONResponse(user_group.dump)
+
+
+    def validate_topic_access(self, user_topic: UserTopic):
         """
         Validates if a user topic is accessible for passing.
         
@@ -51,7 +90,7 @@ class ProgressService:
                 "This user_topic are inactive"
             )
 
-        if not user_topic.ready_to_pass:
+        if not user_topic.is_available:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, 
                 "u cannot pass this topic"
@@ -70,23 +109,32 @@ class ProgressService:
             float: The updated topic score
         """
 
-        if user_topic.topic_progress < topic_score:  # pyright: ignore
+        self._user_topic_repo.update(
+            user_topic,
+            is_attempted = True,
+            attempt_count = user_topic.attempt_count + 1
+        )
+
+        if user_topic.progress < topic_score:  # pyright: ignore
             user_topic = self._user_topic_repo.update(
                 user_topic, 
-                topic_progress = round(topic_score, 3)
+                progress = round(topic_score, 3)
             )
             
 
-        if user_topic.topic_progress >= user_topic.topic.score_for_pass and not user_topic.is_completed:  # pyright: ignore
-            user_topic = self._user_topic_repo.update(user_topic, is_completed = True)
+        if user_topic.progress >= user_topic.topic.score_for_pass and not user_topic.is_completed:  # pyright: ignore
+            user_topic = self._user_topic_repo.update(
+                user_topic, 
+                is_completed = True
+            )
 
-            user_course: UserCourse = user_topic.by_user_course  # pyright: ignore
-            user_course = self._user_course_repo.update(
-                user_course,
-                completed_topic_count = user_course.completed_topic_count + 1,
-                course_progress = (
-                    (user_course.completed_topic_count + 1) / 
-                    len(self._topic_repo.get_active_topics_by_course(user_course.course))  # pyright: ignore
+            user_group: UserGroup = user_topic.by_user_group  # pyright: ignore
+            user_group = self._user_group.update(
+                user_group,
+                completed_topic_count = user_group.completed_topic_count + 1,
+                progress = (
+                    (user_group.completed_topic_count + 1) / 
+                    len(self._topic_repo.get_active_topics_by_course(user_group.course))  # pyright: ignore
                 ) * 100
             )
 
@@ -95,28 +143,14 @@ class ProgressService:
             if next_user_topic:
                 next_user_topic = self._user_topic_repo.update(
                     next_user_topic, 
-                    ready_to_pass = True
+                    is_available = True
                 )
 
         return topic_score
-    
 
-    def clear_user_course_progress(self, user: UserOut, user_course_id: int, with_delete: bool = False) -> UserCourse:
-        """
-        Clears all progress for a user course and associated topics.
-        
-        Args:
-            user (UserOut): Current user
-            user_course_id (int): User course identifier to clear
-            with_delete (bool, optional): Whether to delete topic instances. Defaults to False.
-            
-        Returns:
-            UserCourse: The cleared user course instance
-        """
 
-        user_course = self._user_course_repo.get_or_none(True, id = user_course_id, user = user.username)
-
-        user_topics = self._user_topic_repo.get_user_topics_by_user_course(user_course)
+    def delete_user_group_associations(self, user_group: UserGroup):
+        user_topics = self._user_topic_repo.get_user_topics_by_user_group(user_group)
 
         for user_topic in user_topics:
             self._user_question_repo.delete_all(by_user_topic=user_topic)
@@ -124,18 +158,14 @@ class ProgressService:
             self._adaptive_question_repo.delete_all(by_user_topic = user_topic)
 
             self._user_text_answer_repo.delete_all(by_user_topic = user_topic)
-
-            self._user_topic_repo.clear_user_topic_progress(user_topic)
-
-            if with_delete:
-                user_topic.delete_instance()
+            user_topic.delete_instance()
         
-        user_course = self._user_course_repo.clear_user_course_progress(user_course)
+        user_group.delete_instance()
 
-        return user_course
+        return user_group
     
 
-    def update_user_topic_progress(self, user_topic: UserTopic):
+    def update_user_progress(self, user_topic: UserTopic):
         """
         Recalculates and updates topic progress based on question scores.
         
@@ -151,13 +181,13 @@ class ProgressService:
 
         for q in user_questions_by_topic:
             topic_score += (
-                q.question_score /  # pyright: ignore
+                q.progress /  # pyright: ignore
                 len(user_questions_by_topic)
             )
 
-        topic_score = max(topic_score, user_topic.topic_progress) #pyright: ignore
+        topic_score = max(topic_score, user_topic.progress) #pyright: ignore
         
-        if topic_score >= user_topic.topic.score_for_pass:
+        if topic_score >= user_topic.topic.score_for_pass and not user_topic.is_completed:
             user_topic = self._user_topic_repo.update_by_instance(user_topic, {
                 'is_completed': True
             })
@@ -166,23 +196,23 @@ class ProgressService:
             if next_ut:
                 next_ut = self._user_topic_repo.update(
                     next_ut,
-                    ready_to_pass = True
+                    is_available = True
                 )
 
         user_topic = self._user_topic_repo.update(
             user_topic, 
-            topic_progress = topic_score
+            progress = topic_score
         )
 
-        user_course: UserCourse = user_topic.by_user_course # pyright: ignore
-        user_topics_by_course  = self._user_topic_repo.get_user_topics_by_user_course(user_course)
+        user_group: UserGroup = user_topic.by_user_group # pyright: ignore
+        user_topics_by_group  = self._user_topic_repo.get_user_topics_by_user_group(user_group)
 
-        completed_topic_count = len(list(filter(lambda t: t.topic_progress >= user_topic.topic.score_for_pass, user_topics_by_course)))
-        course_progress = 100 * completed_topic_count / len(user_topics_by_course)
+        completed_topic_count = len(list(filter(lambda t: t.is_completed, user_topics_by_group)))
+        group_progress = 100 * completed_topic_count / len(user_topics_by_group)
         
-        user_course = self._user_course_repo.update(
-            user_course,
-            course_progress = course_progress,
+        user_group = self._user_group.update(
+            user_group,
+            progress = group_progress,
             completed_topic_count = completed_topic_count
         )
 
