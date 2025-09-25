@@ -10,17 +10,17 @@ from utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
 
-def convert(obj):
+def serialize(obj):
     if isinstance(obj, dict):
         to_return = {}
         for key, value in obj.items():
             if key != 'password_hash':
-                to_return = {**to_return, key: convert(value)}
+                to_return = {**to_return, key: serialize(value)}
         return to_return
     elif isinstance(obj, datetime):
         return obj.isoformat()
     elif hasattr(obj, '__dict__'):
-        return convert(obj.__dict__)
+        return serialize(obj.__dict__)
     else:
         return obj
 
@@ -28,6 +28,7 @@ def convert(obj):
 class Table(Model):
     id = AutoField()
     created_at = DateTimeField(default=datetime.now)
+    
     class Meta:
         database = database
 
@@ -35,14 +36,12 @@ class Table(Model):
     def dump(self):
         data = model_to_dict(self, recurse=True, max_depth=1)
         
-        return dict(convert(data))
-    
+        return dict(serialize(data))
+
     @property
     def recdump(self):
         data = model_to_dict(self, recurse=True, max_depth=2)
-        return dict(convert(data))
-
-
+        return dict(serialize(data))
 
 
 class User(Table):
@@ -50,7 +49,6 @@ class User(Table):
     name = CharField(unique=True)
     telegram_link = CharField()
     password_hash = CharField()
-    created_at = DateTimeField(default=datetime.now)
     is_active = BooleanField(default=True)
 
 
@@ -68,10 +66,10 @@ class UserRole(Table):
 
 
 class Course(Table):
-    title = CharField(max_length=30)
+    title = CharField(max_length=64)
     created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
-    description = CharField(max_length=60)
+    description = CharField(max_length=128)
     topic_count = IntegerField(default=0)
     group_count = IntegerField(default=0)
     student_count = IntegerField(default=0)
@@ -87,10 +85,10 @@ class Group(Table):
 
 
 class Topic(Table):
-    by_course = ForeignKeyField(Course)
+    by_course = ForeignKeyField(Course, backref='topics')
     created_by = ForeignKeyField(User, field=User.username, backref="created_topics")
-    title = CharField(max_length=60)
-    description = CharField(max_length=120)
+    title = CharField(max_length=64)
+    description = CharField(max_length=128)
     is_active = BooleanField(default=True)
     number_in_course = IntegerField()
     question_count = IntegerField(default=0)
@@ -98,16 +96,21 @@ class Topic(Table):
 
 
 class Question(Table):
-    text = CharField(max_length=30)
-    by_topic = ForeignKeyField(Topic, backref='created_questions')
-    question_type = CharField(default='single')
+    text = CharField(max_length=128)
+    by_topic = ForeignKeyField(Topic, backref='questions')
+    question_type = CharField()
     is_active = BooleanField(default=True)
+    weigth = FloatField()
+    weigth_step = FloatField()
+    max_weigth = FloatField()
+    min_weigth = FloatField()
 
 
 class Answer(Table):
-    text = CharField(max_length=30)
+    text = CharField(max_length=64)
     is_correct = BooleanField()
-    by_question = ForeignKeyField(Question, backref="created_answers")
+    by_question = ForeignKeyField(Question, backref="answers")
+
 
 class UserGroup(Table):
     user = ForeignKeyField(User, field=User.username, backref='user_groups')
@@ -127,9 +130,10 @@ class QuestionWeigth(Table):
 
 
 class UserTopic(Table):
-    user = ForeignKeyField(User, field=User.username, backref="user_topics")
+    user = ForeignKeyField(User, field=User.username)
     topic = ForeignKeyField(Topic)
     by_user_group = ForeignKeyField(UserGroup)
+
     is_completed = BooleanField(default=False)
     is_attempted = BooleanField(default=False)
     is_available = BooleanField(default=False)
@@ -147,25 +151,32 @@ class AdaptiveQuestion(Table):
 
 
 class UserQuestion(Table):
-    user = ForeignKeyField(User, field=User.username, backref="user_questions")
-    by_user_topic = ForeignKeyField(UserTopic, backref='user_questions')
-    question = ForeignKeyField(Question)
-    progress = FloatField(default=0)
-
-
-class UserTextAnswer(Table):
     user = ForeignKeyField(User, field=User.username)
     question = ForeignKeyField(Question)
     by_user_topic = ForeignKeyField(UserTopic)
-    for_user_question = ForeignKeyField(UserQuestion, backref='user_text_answers')
+    progress = FloatField(default=0)
+    
+
+class UserChoiceAnswer(Table):
+    user = ForeignKeyField(User, field=User.username)
+    answer = ForeignKeyField(Answer)
+    by_user_question = ForeignKeyField(UserQuestion)
+    is_choised = BooleanField(default=0)
+
+    
+class UserTextAnswer(Table):
+    user = ForeignKeyField(User, field=User.username)
+    question = ForeignKeyField(Question)
+    by_user_question = ForeignKeyField(UserQuestion, backref='user_text_answers')
     text = CharField(max_length=60)
-    is_correct = BooleanField(default=False)
+    progress = FloatField(default=0)
     is_active = BooleanField(default=True)
 
 
 if __name__ == "__main__":
     database.connect()
     database.register_function(lambda x: x.lower(), 'lower')
+
     database.create_tables([
         User, Role, UserRole, 
         Course, Topic, Question,

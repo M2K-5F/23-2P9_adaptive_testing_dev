@@ -17,7 +17,7 @@ export default function Regisration () {
 
 
     return(
-        <Card className="w-full ">
+        <Card className="w-full">
             <CardHeader className="text-center">
                 <CardTitle>Регистрация</CardTitle>
                 <CardDescription>

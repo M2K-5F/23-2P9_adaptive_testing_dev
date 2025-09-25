@@ -41,14 +41,17 @@ class BaseRepository(Generic[T]):
             else:
                 raise self._400_does_not_exist
 
-                
+
     @overload
     def get_or_create(self, auto_error: Literal[True], defaults: Optional[Dict[str, Any]] = None, **kwargs) -> T: ...
 
     @overload
     def get_or_create(self, auto_error: Literal[False], defaults: Optional[Dict[str, Any]] = None, **kwargs) -> Tuple[T, bool]: ...
 
-    def get_or_create(self, auto_error: bool = False, defaults: Optional[Dict[str, Any]] = None, **kwargs) -> Any:
+    @overload
+    def get_or_create(self, auto_error: None = None, defaults: Optional[Dict[str, Any]] = None, **kwargs) -> Tuple[T, bool]: ...
+
+    def get_or_create(self, auto_error: Optional[bool] = False, defaults: Optional[Dict[str, Any]] = None, **kwargs) -> Any:
         instance, is_created = self.model.get_or_create(defaults=defaults, **kwargs)
         if auto_error and not is_created:
             raise HTTPException(
