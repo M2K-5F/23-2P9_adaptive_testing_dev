@@ -11,7 +11,7 @@ export default function HomePage() {
 
 
     return (
-        <div className="p-4 h-full">
+        <div className="p-8 h-full">
             <Accordion defaultValue={['followed', 'created']} type='multiple' >
                 {roles.includes('teacher') && <CreatedCoursesSection />}
                 {roles.includes('student') && <FollowedCourseSection />}

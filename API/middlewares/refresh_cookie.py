@@ -1,6 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from fastapi import FastAPI, Request, Response
 from datetime import datetime, timedelta, timezone
+from config.jwt_config import AuthJWT
 from utils import encode_jwt
 
 
@@ -15,12 +16,12 @@ class CookieRefreshMiddleware(BaseHTTPMiddleware):
         payload = request.state.payload
         exp = datetime.fromtimestamp(payload.get('exp'), tz=timezone.utc)
         iat = datetime.fromtimestamp(payload.get('iat'), tz=timezone.utc)
-        is_remember = True if exp - iat == timedelta(days=30) else False
+        is_remember = True if exp - iat == AuthJWT.remembered_token_exire else False
 
         response = await call_next(request)
 
-        if now + timedelta(minutes=3) > exp:
-            exp = now + (timedelta(days=30) if is_remember else timedelta(minutes=15))
+        if now + AuthJWT.token_refresh_delta > exp:
+            exp = now + (AuthJWT.remembered_token_exire if is_remember else AuthJWT.not_remembered_token_expire)
             jwt_payload = {
                 "sub": payload.get('sub'),
                 'exp': exp,
