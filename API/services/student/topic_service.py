@@ -1,12 +1,13 @@
 import random
-from typing import List
+from typing import List, Tuple
 from fastapi import HTTPException
+from config import weight_config
 from repositories.course.course_repository import CourseRepository
 from repositories.group.user_group import UserGroupRepository
+from repositories.question.question_weight import QuestionWeightRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
-from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.question.question_repository import QuestionRepository
 from models import Answer, Question, Topic, UserQuestion, database, UserTopic
@@ -25,6 +26,7 @@ class TopicService:
 
     def __init__(
         self,
+        question_weight: QuestionWeightRepository,
         course_repo: CourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
@@ -35,6 +37,7 @@ class TopicService:
         adaptivity_service: AdaptivityServise,
         user_group: UserGroupRepository
     ):
+        self._question_weight = question_weight
         self._course_repo = course_repo
         self._user_group = user_group
         self._topic_repo = topic_repository
@@ -118,7 +121,7 @@ class TopicService:
 
         questions_with_answers = []
         for question in questions:
-            answers: List[Answer] = list(question.created_answers)  #pyright: ignore
+            answers: List[Answer] = list(question.answers)  #pyright: ignore
             questions_with_answers.append({
                 **question.dump,
                 "answer_options": [{
@@ -164,13 +167,6 @@ class TopicService:
         submit_questions = topic_answers.questions
 
         created_questions = self._question_repo.get_active_questions_by_topic(current_topic)
-        # created_questions.extend(
-        #     self._adaptivity_service.get_adaptive_questions_to_list(
-        #         user_topic,
-        #         submit_questions
-        #     )
-        # )
-        
         created_questions.sort(key=lambda q: getattr(q, "id"))
         submit_questions.sort(key=lambda q: q.id)
 
@@ -195,13 +191,17 @@ class TopicService:
             question_score = get_question_score(
                 submit_question, created_question
             )
-            topic_score += question_score / question_count
 
-            self.save_question_results(
-                user, user_topic, created_question, 
+            factor = self.save_question_results(
+                user_topic, user, created_question, 
                 submit_question, question_score
             )
             
+            topic_score += question_score * factor / question_count
+            
+        if topic_score > 1:
+            topic_score = 1
+
         self._progress_service.update_user_topic_score(
             user_topic, topic_score
         )
@@ -213,18 +213,18 @@ class TopicService:
 
     def save_question_results(
             self, 
+            user_topic: UserTopic,
             user: UserOut, 
-            user_topic: UserTopic, 
             created_question: Question, 
             submit_question: SubmitQuestion, 
             question_score: float
-    ):
+    ) -> float:
         """Procedure which process saving question result based on score
 
         Args:
             user (UserOut): current user
             user_topic (UserTopic): user topic for which question is saved
-            created_question (Question): question from database with unique id 
+            created_question (Question): question from database with unique id
             submit_question (SubmitQuestion): question data from client with topic id
             question_score (float): score of question to save result
         """
@@ -243,6 +243,24 @@ class TopicService:
             )
         )
 
+        question_weight = self._question_weight.get_or_none(
+            True,
+            question = created_question,
+            group = user_topic.by_user_group.group
+        )
+
+        weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
+        step: float = question_weight.step  # pyright: ignore[reportAssignmentType]
+        max_w: float = question_weight.max_weight  # pyright: ignore[reportAssignmentType]
+        min_w: float = question_weight.min_weight  # pyright: ignore[reportAssignmentType]
+        score_step = (((question_score - 0.5) * 2 ) * step)
+        updated_weight = weight - float(round(score_step, 4))
+
+        self._question_weight.update(
+            question_weight, 
+            weight = min(max(min_w, updated_weight), max_w)
+        )
+
         if submit_question.type == 'text':
             user_answer = self._user_text_answer_repo.create_user_text_answer(
                 user, 
@@ -254,14 +272,10 @@ class TopicService:
 
             self._user_text_answer_repo.update(
                 user_answer,
-                is_correct = max(
-                    user_answer.is_correct, # pyright: ignore
+                progress = max(
+                    user_answer.progress,  # pyright: ignore
                     bool(question_score)
                 )
             )
-        # if submit_question.by_topic != user_topic.topic.id:
-        #     self._adaptivity_service.save_adaptive_question_results(
-        #         user, 
-        #         user_topic, 
-        #         submit_question
-        #     )
+
+        return max(weight / weight_config.BASE_WEIGHT, user_topic.topic.score_for_pass)

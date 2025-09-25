@@ -23,6 +23,7 @@ export interface RegistrationForm {
 
 
 export interface UserShema {
+    id: number
     username: string,
     name: string    
     telegram_link: string
@@ -42,6 +43,7 @@ export interface CreatedCourseBase {
 export interface CreatedCourse extends CreatedCourseBase {
     student_count: number
     topic_count: number
+    group_count: number
     created_at: string
 }
 
@@ -168,18 +170,6 @@ export interface OptionToPass {
     text: string
 }
 
-export interface TopicDetail {
-    topic_id: number
-    topic_title: string
-    score_for_pass: number
-    is_completed: boolean
-    topic_progress: number
-    question_count: number
-    average_score: number
-    ready_to_pass: boolean
-    unsubmited_answers: UnsubmitedAnswer[]
-}
-
 export interface UnsubmitedAnswer {
     id: number
     user: UserShema
@@ -203,22 +193,56 @@ export interface UnsubmitedAnswer {
     is_active: true
 }
 
-export interface StudentStats {
-    user_id: number
-    username: string
-    name: string
-    telegram_link: string
-    course_progress: number
+
+export interface CourseStatistics {
+    course_id: string
+    course_title: string
+    meta: {
+        avg_progress: number
+        total_students: number
+        completed_user_groups: number
+    }
+    group_details: GroupDetail[]
+}
+
+export interface GroupDetail {
+    id: number
+    avg_progress: number
+    title: string
+    max_student_count: number
+    student_count: number
+    user_group_details: UserGroupDetail[]
+}
+
+export interface UserGroupDetail {
+    user: UserShema
+    progress: number
     completed_topics: number
     total_topics: number
-    topics_details: TopicDetail[]
+    user_topic_details: UserTopicDetail[]
 }
 
-export interface CourseStats {
-    course_id: number
-    course_title: string
-    total_students: number
-    average_progress: number
-    students: StudentStats[]
+export interface UserTopicDetail {
+    topic_title: string
+    is_completed: boolean
+    score_for_pass: number
+    progress: number
+    attempt_count: number
+    question_count: number
+    ready_to_pass: boolean
+    unsubmited_answers: UnsubmitedAnswer[]
 }
 
+
+export interface QuestionWeight {
+    id: number;
+    created_at: string;
+    group: CreatedGroup
+    question: CreatedQuestion
+    weight: number;
+    step: number;
+    max_weight: number;
+    min_weight: number;
+}
+
+export interface CourseStats extends CourseStatistics {}

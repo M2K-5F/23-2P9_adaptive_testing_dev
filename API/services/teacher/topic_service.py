@@ -5,13 +5,8 @@ from repositories.course.course_repository import CourseRepository
 from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
-from repositories.question.user_question_repository import UserQuestionRepository
-from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
-from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
-from repositories.answer.answer_repository import AnswerRepository
-from repositories.question.question_repository import QuestionRepository
 from models import Answer, Question, Topic, UserQuestion, database, UserTopic
-from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, TopicToCreate, UserOut, TopicSubmitAnswers
+from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, TopicToCreate, UserOut
 from fastapi.responses import JSONResponse
 from fastapi import status
 

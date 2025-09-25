@@ -92,19 +92,19 @@ export const FollowedCourse: FC<{userGroup: UserGroup}> = memo(({userGroup}) => 
                 <div className="flex flex-wrap items-center gap-3 mt-3">
                     <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
                         <BarChart3 className="h-3.5 w-3.5" />
-                        <span>Прогресс: {Math.round(userGroup.progress)}%</span>
+                        <span>Прогресс: {Math.round(userGroup.progress * 100)}%</span>
                     </div>
                     
-                    {userGroup.progress > 0 && (
+                    {userGroup.progress > 0 && 
                         <div className="flex items-center gap-1 text-sm bg-green-500/20 px-2 py-1 rounded-full text-green-700">
                             <Award className="h-3.5 w-3.5" />
-                            <span>{userGroup.progress === 100 ? 'Завершен' : 'Начат'}</span>
+                            <span>{userGroup.progress === 1 ? 'Завершен' : 'Начат'}</span>
                         </div>
-                    )}
+                    }
                 </div>
                 <Progress offsetValue={2}
                     className="mt-3"
-                    value={userGroup.progress}
+                    value={userGroup.progress * 100}
                 />
 
                 <Button
@@ -119,7 +119,7 @@ export const FollowedCourse: FC<{userGroup: UserGroup}> = memo(({userGroup}) => 
                     id="expandCourseBtn"
                     className="mt-4 flex items-center gap-2 w-full sm:w-auto"
                 >   
-                    <ChevronUp className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
+                    <ChevronDown className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
                     {isExpanded ? 'Свернуть курс' : 'Подробнее'}
                 </Button>
             </section>

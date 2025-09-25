@@ -34,7 +34,7 @@ class UserTextAnswerRepository(BaseRepository[UserTextAnswer]):
                 .select()
                 .where(
                     UserTextAnswer.by_user_topic == user_topic,
-                    UserTextAnswer.is_correct == False,
+                    UserTextAnswer.progress == 0,
                     UserTextAnswer.is_active
                 )
         )

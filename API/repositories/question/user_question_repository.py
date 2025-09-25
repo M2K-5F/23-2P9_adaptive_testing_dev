@@ -8,19 +8,6 @@ class UserQuestionRepository(BaseRepository[UserQuestion]):
         super().__init__(UserQuestion)
 
     
-    def get_user_questions_with_low_score(self, user_topic: UserTopic) -> List[UserQuestion]:
-        user_questions = list(UserQuestion
-                            .select()
-                            .join(UserTopic, on=(UserQuestion.by_user_topic == UserTopic.id))
-                            .join(Topic, on=(UserTopic.topic == Topic.id))
-                            .where(
-                                Topic.by_course == user_topic.by_user_course.course,
-                                Topic.number_in_course < user_topic.topic.number_in_course,
-                                UserQuestion.question_score.between(0, 0.5)
-                            )
-        )
-        return user_questions
-    
     def get_or_create_user_question(self, username: str, by_user_topic: Union[UserTopic, int], question: Question):
         user_question, is_created = self.get_or_create(
             False, {},

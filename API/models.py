@@ -4,7 +4,7 @@ from datetime import datetime
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
-from config import weigth_config
+from config import weight_config
 from shemas import Roles, UserOut
 from utils import get_password_hash
 
@@ -100,10 +100,6 @@ class Question(Table):
     by_topic = ForeignKeyField(Topic, backref='questions')
     question_type = CharField()
     is_active = BooleanField(default=True)
-    weigth = FloatField()
-    weigth_step = FloatField()
-    max_weigth = FloatField()
-    min_weigth = FloatField()
 
 
 class Answer(Table):
@@ -120,13 +116,13 @@ class UserGroup(Table):
     completed_topic_count = IntegerField(default=0)
 
 
-class QuestionWeigth(Table):
+class QuestionWeight(Table):
     group = ForeignKeyField(Group)
     question = ForeignKeyField(Question)
-    weigth = FloatField(default=weigth_config.BASE_WEIGTH)
-    step = FloatField(default=weigth_config.STEP)
-    max_weigth = FloatField(default=weigth_config.MAX_WEIGTH)
-    min_weigth = FloatField(default=weigth_config.MIN_WEIGTH)
+    weight = FloatField(default=weight_config.BASE_WEIGHT)
+    step = FloatField(default=weight_config.STEP)
+    max_weight = FloatField(default=weight_config.MAX_WEIGHT)
+    min_weight = FloatField(default=weight_config.MIN_WEIGHT)
 
 
 class UserTopic(Table):
@@ -140,14 +136,6 @@ class UserTopic(Table):
     is_active = BooleanField(default=True)
     progress = FloatField(default=0)
     attempt_count = IntegerField(default=0)
-
-
-class AdaptiveQuestion(Table):
-    user = ForeignKeyField(User, field=User.username, backref='adaptive_questions')
-    for_user_topic = ForeignKeyField(UserTopic, backref='adaptive_questions')
-    by_user_topic = ForeignKeyField(UserTopic)
-    question = ForeignKeyField(Question)
-    question_score = FloatField(default=0)
 
 
 class UserQuestion(Table):
@@ -167,7 +155,8 @@ class UserChoiceAnswer(Table):
 class UserTextAnswer(Table):
     user = ForeignKeyField(User, field=User.username)
     question = ForeignKeyField(Question)
-    by_user_question = ForeignKeyField(UserQuestion, backref='user_text_answers')
+    by_user_topic = ForeignKeyField(UserTopic)
+    for_user_question = ForeignKeyField(UserQuestion, backref='user_text_answers')
     text = CharField(max_length=60)
     progress = FloatField(default=0)
     is_active = BooleanField(default=True)
@@ -181,8 +170,8 @@ if __name__ == "__main__":
         User, Role, UserRole, 
         Course, Topic, Question,
         Answer, UserQuestion, 
-        UserTopic, AdaptiveQuestion, UserTextAnswer, 
-        Group, UserGroup, QuestionWeigth
+        UserTopic, UserTextAnswer, 
+        Group, UserGroup, QuestionWeight
     ])
     database.close()
 

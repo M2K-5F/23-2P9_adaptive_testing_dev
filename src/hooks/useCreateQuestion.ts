@@ -43,6 +43,7 @@ export const useCreateQuestion = () => (question: QuestionCreate & {question_typ
                     toast('Вопрос с таким текстом уже создан в этой теме!')
                     break
             }
+            onReject()
         })
         
     }

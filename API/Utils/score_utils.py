@@ -73,7 +73,7 @@ def get_text_question_score(
     submit_question: SubmitTextQuestionUnit,
     created_question: Question
 ):
-    created_answers = getattr(created_question, 'created_answers')
+    created_answers = getattr(created_question, 'answers')
     question_score: float = 0
 
     for created_answer in created_answers:
