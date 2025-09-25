@@ -23,7 +23,7 @@ async def get_teacher_courses(
     current_user = Depends(get_user_from_request),
     service: TCS = Depends(get_techer_course_service)
 ) -> JSONResponse:
-    return service.get_created_by_teacher_courses(current_user)
+    return service.get_teacher_courses(current_user)
 
 
 @course_router.put('/arch', summary='Arch | unarch created by teacher course')
@@ -45,10 +45,10 @@ async def unarch_course(
 
 
 
-@course_router.get('/stats')
-async def get_statistics(
-    current_user: UserOut = Depends(get_user_from_request),
-    course_id = Query(),
-    service: TCS = Depends(get_techer_course_service)
-) -> JSONResponse:
-    return service.get_course_statistics(current_user, course_id)
+# @course_router.get('/stats')
+# async def get_statistics(
+#     current_user: UserOut = Depends(get_user_from_request),
+#     course_id = Query(),
+#     service: TCS = Depends(get_techer_course_service)
+# ) -> JSONResponse:
+#     return service.get_course_statistics(current_user, course_id)

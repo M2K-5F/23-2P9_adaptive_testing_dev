@@ -4,7 +4,8 @@ import { useTopicStore } from "@/stores/useTopicStore"
 import { Button, Badge } from "@/Components"
 import { CreatedQuestion, QuestionConstructor } from "@/Components"
 import { CreatedTopic as CT } from "@/types/interfaces"
-import { getQuestions, archTopic, unarchTopic } from "@/services/api.service"
+import { archTopic, unarchTopic } from "@/services/topic"
+import { getQuestions } from "@/services/question"
 import clsx from "clsx"
 import { 
   Archive, 
@@ -17,7 +18,8 @@ import {
   FileText,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  KeyRound
 } from "lucide-react"
 
 export const CreatedTopic = memo(({ topic, index }: {
@@ -72,7 +74,7 @@ export const CreatedTopic = memo(({ topic, index }: {
             isExpanded && 'sm:col-span-2',
             !topic.is_active &&  'opacity-70'
         )}>
-            <section className="p-5 bg-muted">
+            <section className="p-5 bg-card">
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 bg-primary/10 rounded-lg mt-1">
@@ -113,6 +115,11 @@ export const CreatedTopic = memo(({ topic, index }: {
                             <span className="text-green-600">({activeQuestionsCount} актив.)</span>
                         )}
                     </div>
+
+                    <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
+                        <KeyRound className="h-3.5 w-3.5" />
+                        Мин. {topic.score_for_pass} баллов
+                    </div>
                     
                     <Badge 
                         className="cursor-pointer flex items-center gap-1" 
@@ -121,11 +128,11 @@ export const CreatedTopic = memo(({ topic, index }: {
                     >
                         {topic.is_active 
                             ?   <>
-                                    <CheckCircle className="h-3.5 w-3.5" />
+                                    <div className="h-2 w-2 rounded-full bg-background animate-pulse"></div>
                                     Активный
                                 </>
                             :   <>
-                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    <Archive className="h-3 w-3" />
                                     В архиве
                                 </>
                         }
@@ -138,7 +145,7 @@ export const CreatedTopic = memo(({ topic, index }: {
                     onClick={handleExpand}
                     className="mt-4 flex items-center gap-2 w-full sm:w-auto"
                 >   
-                    <ChevronUp className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
+                    <ChevronDown className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
                     {isExpanded ? 'Свернуть тему' : 'Подробнее'
                     }
                 </Button>

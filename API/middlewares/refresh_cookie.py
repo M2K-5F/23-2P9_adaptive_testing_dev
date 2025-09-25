@@ -5,6 +5,7 @@ from utils import encode_jwt
 
 
 class CookieRefreshMiddleware(BaseHTTPMiddleware):
+    """Middelawe which verify token payload & returns new token with refresed expires time"""
     async def dispatch(self, request: Request, call_next) -> Response:
         if not hasattr(request.state, 'payload'):
             return await call_next(request)

@@ -1,127 +1,124 @@
 import random
-from typing import List, Union
+from typing import List
 from fastapi import HTTPException
 from repositories.course.course_repository import CourseRepository
-from repositories.course.user_course_repository import UserCourseRepository
+from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
 from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
-from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
-from db import Answer, Question, Topic, UserCourse, UserQuestion, database, UserTopic
-from shemas import SubmitChoiceQuestionUnit, SubmitTextQuestionUnit, UserOut, TopicSubmitAnswers
+from models import Answer, Question, Topic, UserQuestion, database, UserTopic
+from services.common.progress_service import ProgressService
+from services.common.adaptivity_service import AdaptivityServise
+from shemas import UserOut, TopicSubmitAnswers, SubmitQuestion
 from fastapi.responses import JSONResponse
 from fastapi import status
+from utils.score_utils import get_question_score
 
 
-SubmitQuestion = Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]
 
 
 class TopicService:
+    """Service for processing action with topics from student"""
+
     def __init__(
         self,
         course_repo: CourseRepository,
-        user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
         user_question_repository: UserQuestionRepository,
-        adaptive_question_repo: AdaptiveQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository,
-        answer_repo: AnswerRepository,
-        question_repo: QuestionRepository
+        question_repo: QuestionRepository,
+        progress_service: ProgressService,
+        adaptivity_service: AdaptivityServise,
+        user_group: UserGroupRepository
     ):
-        self.course_repo = course_repo
-        self.topic_repo = topic_repository
-        self.user_course_repo = user_course_repo
-        self.user_topic_repo = user_topic_repository
-        self.user_question_repo = user_question_repository
-        self.adaptive_question_repo = adaptive_question_repo
-        self.user_text_answer_repo = user_text_answer_repo
-        self.answer_repo = answer_repo
-        self.question_repo = question_repo
-
+        self._course_repo = course_repo
+        self._user_group = user_group
+        self._topic_repo = topic_repository
+        self._user_topic_repo = user_topic_repository
+        self._user_question_repo = user_question_repository
+        self._user_text_answer_repo = user_text_answer_repo
+        self._question_repo = question_repo
+        self._progress_service = progress_service
+        self._adaptivity_service = adaptivity_service
     
+
     @database.atomic()
-    def get_topics_by_course(self, course_id: int) -> JSONResponse:
-        current_course = self.course_repo.get_by_id(course_id, True)
-        topics = self.topic_repo.select_where(by_course = current_course)
+    def get_topics_by_course(
+        self, 
+        course_id: int
+    ) -> JSONResponse:
+        """Public method which retuns list of topic by course
+
+        Args:
+            course_id (int): unique id of course from which topics getted
+
+        Returns:
+            JSONResponse: response with list of topic 
+        """
+
+        current_course = self._course_repo.get_by_id(course_id, True)
+        topics = self._topic_repo.select_where(by_course = current_course)
 
         return JSONResponse([topic.dump for topic in topics])
 
 
     @database.atomic()
-    def get_user_topics_by_followed_course(self, user: UserOut, user_course_id: int) -> JSONResponse:
-        user_course = self.user_course_repo.get_active_user_course_from_user_and_id(user, user_course_id)
-        user_topics = self.user_topic_repo.get_user_topics_by_user_course(user_course)
+    def get_user_topics_by_user_group(
+        self, 
+        user: UserOut, 
+        user_group_id: int
+    ) -> JSONResponse:
+        """Public method which returns list of user topic by user course
 
-        is_user_course_active = user_course.course.is_active
-        for user_topic in user_topics:
-            if not user_topic.topic.is_active or not is_user_course_active:
-                user_topic.ready_to_pass = False
-                user_topic.save()
+        Args:
+            user (UserOut): current user
+            user_course_id (int): unique id of user course from which user topic getted
+
+        Returns:
+            JSONResponse: response with list of user topics in the specified user course
+        """
+
+        user_group = self._user_group.get_or_none(
+            True,
+            id = user_group_id, 
+            user = user.username
+        )
+        user_topics = self._user_topic_repo.get_user_topics_by_user_group(user_group)
         
         return JSONResponse([user_topic.dump for user_topic in user_topics])
-
-
-    @database.atomic()
-    def add_adaptive_questions_to_response(self, user: UserOut, user_topic: UserTopic, questions_list: List[dict]) -> JSONResponse:
-        user_questions = self.user_question_repo.get_user_questions_with_low_score(user_topic)
-        adaptive_questions: list[UserQuestion] = []
-
-        for _ in range(min(2, len(user_questions))):
-            question = random.choice(user_questions)
-            user_questions.remove(question)
-            adaptive_questions.append(question)
-        
-        for user_question in adaptive_questions:
-            self.adaptive_question_repo.create_adaptive_question(
-                user, user_topic, user_question
-            )
-            answers = list(user_question.question.created_answers)
-            questions_list.insert(
-                random.randint(0, len(questions_list)-1),
-                {
-                    **user_question.question.dump,
-                    "answer_options": [{
-                            "id": answer.id,
-                            "text": "" if user_question.question.question_type == 'text' else answer.text
-                        } for answer in user_question.question.created_answers]
-                }
-            )
-        
-        return JSONResponse(questions_list)
     
     
     @database.atomic()
-    def start_topic_by_user_topic(self, user: UserOut, user_topic_id: int) -> JSONResponse:
-        user_topic = self.user_topic_repo.get_by_user_and_id(user, user_topic_id)
-        if not user_topic.topic.is_active:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, 
-                'This topic are inactive'
-            )
+    def start_topic_by_user_topic(
+        self, 
+        user: UserOut, 
+        user_topic_id: int
+    ) -> JSONResponse:
+        """Public method which get list of questions by topic & add to adaptive questions to it & formatted and returns that list 
 
-        if not user_topic.by_user_course.is_active:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, 
-                'This course are inactive'
-            )
+        Args:
+            user (UserOut): current user
+            user_topic_id (int): unique identificator of user topic for which geting question list
 
-        if not user_topic.ready_to_pass:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, 
-                'u cannot pass this topic, please pass previous'
-            )
+        Returns:
+            JSONResponse: response with list of formatted questions to pass
+        """
+
+        user_topic = self._user_topic_repo.get_by_user_and_id(user, user_topic_id)
+
+        self._progress_service.validate_topic_access(user_topic)
         
         current_topic: Topic = user_topic.topic # pyright: ignore
 
-        questions = self.question_repo.get_active_questions_by_topic(current_topic)
+        questions = self._question_repo.get_active_questions_by_topic(current_topic)
 
         questions_with_answers = []
         for question in questions:
-            answers: List[Answer] = list(question.created_answers)
+            answers: List[Answer] = list(question.created_answers)  #pyright: ignore
             questions_with_answers.append({
                 **question.dump,
                 "answer_options": [{
@@ -130,53 +127,61 @@ class TopicService:
                 } for answer in answers]
             })
         
-        if not current_topic.number_in_course:
-            return JSONResponse(questions_with_answers)
+        # if not current_topic.number_in_course:
+        return JSONResponse(questions_with_answers)
         
-        return self.add_adaptive_questions_to_response(user, user_topic, questions_with_answers)
+        questions_with_answers = self._adaptivity_service.add_adaptive_questions_to_response(user, user_topic, questions_with_answers)
+
+        return JSONResponse(questions_with_answers)
 
     
     @database.atomic()
-    def sumbit_topic_answers(self, user: UserOut, topic_answers: TopicSubmitAnswers):
-        user_topic = self.user_topic_repo.get_by_user_and_id(user, topic_answers.user_topic_id)
+    def sumbit_topic_answers(
+        self, 
+        user: UserOut, 
+        topic_answers: TopicSubmitAnswers
+    ) -> JSONResponse:
+        """Public method which verify topic data from client & get score & saving result 
+
+        Args:
+            user (UserOut): current user
+            topic_answers (TopicSubmitAnswers): data from client 
+
+        Raises:
+            HTTPException(400): raises when data from clien arent matches with data from database
+
+        Returns:
+            JSONResponce: response with topic score
+        """
+
+        user_topic = self._user_topic_repo.get_by_user_and_id(user, topic_answers.user_topic_id)
         current_topic: Topic = user_topic.topic # pyright: ignore
-
-        if not user_topic.topic.is_active:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, 
-                "This topic are inactive"
-            )
-
-        if not user_topic.ready_to_pass:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, 
-                "u cannot pass this topic"
-            )
-        
         topic_score = 0
+
+        self._progress_service.validate_topic_access(user_topic)
+
+
         submit_questions = topic_answers.questions
-        submit_adaptive_questions: List[SubmitQuestion] = list(
-            filter(lambda q: q.by_topic != user_topic.topic.id , submit_questions)
-        )
 
-        created_questions = self.question_repo.get_active_questions_by_topic(current_topic)
-
-        for q in submit_adaptive_questions:
-            adaptive_question = self.adaptive_question_repo.get_adaptive_question(q.id, user_topic)
-            current_question: Question = adaptive_question.question # pyright: ignore
-            created_questions.append(current_question)
+        created_questions = self._question_repo.get_active_questions_by_topic(current_topic)
+        # created_questions.extend(
+        #     self._adaptivity_service.get_adaptive_questions_to_list(
+        #         user_topic,
+        #         submit_questions
+        #     )
+        # )
         
         created_questions.sort(key=lambda q: getattr(q, "id"))
         submit_questions.sort(key=lambda q: q.id)
+
 
         if len(submit_questions) != len(created_questions):
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST, 
                 "u didn`t answer all questions"
             )
-
+            
         question_count = len(submit_questions)
-
         
         for index, submit_question in enumerate(submit_questions):
             created_question = created_questions[index]
@@ -187,201 +192,76 @@ class TopicService:
                     "question IDs is not matches"
                 )
 
-            topic_score, question_score = self.get_question_score(
-                topic_score, submit_question, 
-                created_question, question_count
+            question_score = get_question_score(
+                submit_question, created_question
             )
+            topic_score += question_score / question_count
 
             self.save_question_results(
                 user, user_topic, created_question, 
                 submit_question, question_score
             )
-        
-        response = self.save_user_topic_result(user_topic, topic_score)
-
-        return response
-
-
-    
-    def get_question_score(
-        self, topic_score: float, submit_question: SubmitQuestion, 
-        created_question: Question, questions_count: int
-    ):
-        if submit_question.type == 'choice':
-            if created_question.question_type == 'text':
-                raise HTTPException(
-                    status.HTTP_400_BAD_REQUEST, 
-                    "question types not matches"
-                )
-
-            topic_score, question_score = self.get_choice_question_score(
-                submit_question, questions_count,
-                topic_score
-            )
             
-        else:
-            if created_question.question_type != 'text':
-                raise HTTPException(
-                    status.HTTP_400_BAD_REQUEST, 
-                    "question types not matches"
-                )
-            
-            topic_score, question_score = self.get_text_question_score(
-                submit_question, 
-                questions_count, topic_score
-            )
-        
-        return (topic_score, question_score)
-
-
-    def get_choice_question_score(
-        self, submit_question: SubmitChoiceQuestionUnit, 
-        questions_count: int, topic_score: float
-    ):
-        submit_answers = submit_question.answer_options
-        created_answers = self.answer_repo.select_where(by_question = submit_question.id)
-
-        submit_answers.sort(key=lambda ans: ans.id)
-        created_answers.sort(key=lambda a: getattr(a, "id"))
-
-        if len(submit_answers) != len(created_answers):
-            raise HTTPException(400, 'u didn`t answer all answers')
-
-        answer_count = len(submit_answers)
-        question_score = 0
-
-        for index, submit_answer in enumerate(submit_answers):
-            created_answer: Answer = created_answers[index]
-            if created_answer.id != submit_answer.id:
-                raise HTTPException(400, 'answer IDs is not matches')
-
-            if created_answer.is_correct == submit_answer.is_correct:
-                topic_score += 1 / (answer_count * questions_count)
-                question_score += 1 / answer_count
-        
-        return (topic_score, question_score)
-
-    
-    def get_text_question_score(
-        self, submit_question: SubmitTextQuestionUnit, 
-        questions_count: int, topic_score: float
-    ):
-        created_answers = self.answer_repo.select_where(by_question = submit_question.id)
-        question_score = 0
-
-        for created_answer in created_answers:
-            if created_answer.text == submit_question.text:
-                question_score = 1
-                topic_score += ( 1 / questions_count )
-                break
-        return (topic_score, question_score)
-
-
-    def save_question_results(self, user: UserOut, user_topic: UserTopic, created_question: Question, submit_question: SubmitQuestion, question_score: float):
-        if submit_question.by_topic == user_topic.topic.id:
-            self.save_static_question_results(
-                user, user_topic, created_question, 
-                submit_question, question_score
-            )
-        
-        else:
-            self.save_adaptive_question_results(
-                user, user_topic, created_question, 
-                submit_question, question_score
-            )
-
-    def save_static_question_results( 
-        self, user: UserOut, user_topic: UserTopic, created_question: Question, 
-        submit_question: SubmitQuestion, question_score: float
-    ):
-        user_question = self.user_question_repo.create_user_question(
-            user, user_topic, created_question
+        self._progress_service.update_user_topic_score(
+            user_topic, topic_score
         )
-        user_question.question_score = max(
-            question_score, 
-            user_question.question_score # pyright: ignore
-        )  
-        user_question.save()
+
+        return JSONResponse({
+            'score': topic_score
+        })
+    
+
+    def save_question_results(
+            self, 
+            user: UserOut, 
+            user_topic: UserTopic, 
+            created_question: Question, 
+            submit_question: SubmitQuestion, 
+            question_score: float
+    ):
+        """Procedure which process saving question result based on score
+
+        Args:
+            user (UserOut): current user
+            user_topic (UserTopic): user topic for which question is saved
+            created_question (Question): question from database with unique id 
+            submit_question (SubmitQuestion): question data from client with topic id
+            question_score (float): score of question to save result
+        """
+
+        user_question = self._user_question_repo.get_or_create_user_question(
+            user.username, 
+            submit_question.by_topic, 
+            created_question
+        )
+
+        user_question = self._user_question_repo.update(
+            user_question,
+            progress = max(
+                question_score, 
+                user_question.progress # pyright: ignore
+            )
+        )
 
         if submit_question.type == 'text':
-            user_answer = self.user_text_answer_repo.create_user_text_answer(
-                user, created_question, user_topic, user_question, submit_question.text
+            user_answer = self._user_text_answer_repo.create_user_text_answer(
+                user, 
+                created_question, 
+                submit_question.by_topic, 
+                user_question, 
+                submit_question.text
             )
-            user_answer.is_correct = max(
-                user_answer.is_correct, # pyright: ignore
-                bool(question_score)
+
+            self._user_text_answer_repo.update(
+                user_answer,
+                is_correct = max(
+                    user_answer.is_correct, # pyright: ignore
+                    bool(question_score)
+                )
             )
-            user_answer.save()
-
-    
-    def save_adaptive_question_results(
-        self, user: UserOut, user_topic: UserTopic, created_question: Question, 
-        submit_question: SubmitQuestion, question_score: float
-    ):
-        user_question = self.user_question_repo.get_or_none(True,
-            question = submit_question.id,
-            usr = user.username
-        )
-
-        user_question.question_score = max(
-            question_score, 
-            user_question.question_score # pyright: ignore
-        )
-        user_question.save()
-
-        if submit_question.type == 'text':
-            user_answer = self.user_text_answer_repo.get_or_none(True,
-                by_user_topic = user_question.by_user_topic,
-                for_user_question = user_question
-            )
-            user_answer.is_correct = bool(question_score)
-            user_answer.save()
-
-        question_user_topic = self.user_topic_repo.get_or_none(True,
-            user = user.username,
-            topic = submit_question.by_topic
-        )
-        
-        user_questions_by_user_topic = self.user_question_repo.get_by_user_topic(question_user_topic)
-        
-        user_topic_score = 0
-
-        for question in user_questions_by_user_topic:
-            user_topic_score += question.question_score / len(user_questions_by_user_topic)  # pyright: ignore
-
-        question_user_topic.topic_progress = max(
-            user_topic_score, 
-            question_user_topic.topic_progress
-        )
-        question_user_topic.save()
-
-        self.adaptive_question_repo.delete(True, 
-            question = submit_question.id, 
-            for_user_topic = user_topic
-        )
-
-
-    def save_user_topic_result(self, user_topic: UserTopic, topic_score: float):
-        if user_topic.topic_progress < topic_score:  # pyright: ignore
-            user_topic.topic_progress = round(topic_score, 3)
-
-        user_course: UserCourse = user_topic.by_user_course  # pyright: ignore
-
-        if user_topic.topic_progress >= 0.8 and not user_topic.is_completed:  # pyright: ignore
-            user_course.completed_topic_number += 1
-            user_topic.is_completed = True
-            user_course.course_progress = (
-                user_course.completed_topic_number / 
-                len(self.topic_repo.get_active_topics_by_course(user_course.course))  # pyright: ignore
-            ) * 100
-
-            next_user_topic = self.user_topic_repo.get_next_user_topic(user_topic)
-
-            if next_user_topic:
-                next_user_topic.ready_to_pass = True
-                next_user_topic.save()
-
-        user_course.save()
-        user_topic.save()
-
-        return JSONResponse({'score': round(topic_score, 3)})
+        # if submit_question.by_topic != user_topic.topic.id:
+        #     self._adaptivity_service.save_adaptive_question_results(
+        #         user, 
+        #         user_topic, 
+        #         submit_question
+        #     )

@@ -1,6 +1,6 @@
 from typing import List, Type
 from shemas import UserOut
-from db import Course
+from models import Course
 from peewee import fn
 from ..base.base_repository import BaseRepository
 
@@ -22,7 +22,7 @@ class CourseRepository(BaseRepository[Course]):
     def search_courses_by_title(self, user: UserOut, title: str) -> List[Course]:
         searched_courses = Course.select().where(
             fn.lower(Course.title).contains(title.lower()),
-            Course.created_by != user.username
+            # Course.created_by != user.username
         )
 
         return searched_courses

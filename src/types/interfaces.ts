@@ -45,18 +45,35 @@ export interface CreatedCourse extends CreatedCourseBase {
     created_at: string
 }
 
-export interface UserCourse {
-    id: number,
-    user: UserShema,
-    course: CreatedCourse,
-    course_progress: number
+
+export interface CreatedGroup {
+    id: number
+    by_course: CreatedCourse
+    created_by: UserShema
+    title: string
+    student_count: number
+    max_student_count: number
     is_active: boolean
-    completed_topic_number: number
+}
+
+
+export interface UserGroup {
+    id: number
+    user: UserShema
+    group: CreatedGroup
+    course: CreatedCourse
+    progress: number
+    completed_topic_count: number
 }
 
 
 export interface FetchedCourse extends CreatedCourseBase {
-    user_course: UserCourse | false
+    user_group: UserGroup | false
+}
+
+
+export interface FetchedGroup extends CreatedGroup {
+    user_group: UserGroup | false
 }
 
 
@@ -64,16 +81,20 @@ export interface CreatedTopic extends CreatedCourseBase {
     number_in_course: number
     question_count: number
     by_course: CreatedCourse
+    score_for_pass: number
 }
 
 export interface UserTopic {
     id: number
     user: string
     topic: CreatedTopic
-    by_user_course: UserCourse
-    ready_to_pass: boolean
+    by_user_group: UserGroup
+    is_available: boolean
+    is_attempted: boolean
+    attempt_count: boolean
     is_completed: boolean
-    topic_progress: number
+    progress: number
+    is_active: boolean
 }
 
 export interface AnswerOption {
@@ -150,6 +171,7 @@ export interface OptionToPass {
 export interface TopicDetail {
     topic_id: number
     topic_title: string
+    score_for_pass: number
     is_completed: boolean
     topic_progress: number
     question_count: number

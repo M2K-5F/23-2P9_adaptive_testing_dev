@@ -77,62 +77,57 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
                 </SelectContent>
             </Select>
 
-            {questionType === 'choice' &&
-                <>
-                    <div className="flex items-center gap-3 mb-4 p-3 bg-secondary/20 rounded-lg">
-                        <Badge variant='default'>
-                            Выбор из вариантов
-                        </Badge>
-                    </div>
+            <div className="flex items-center gap-3 mb-4 p-3 bg-secondary/20 rounded-lg">
+                <Badge variant='default'>
+                    {questionType === 'choice'
+                        ?   "Выбор из вариантов"
+                        :   "Ручной ввод ответа"
+                    }
+                </Badge>
+            </div>
 
-                    <fieldset className="mb-4">
-                        <legend className="text-md font-medium mb-3 flex items-center gap-2">
-                            Варианты ответов
-                            <Badge variant="outline">
-                                {createdQuestion.answer_options.length}
-                            </Badge>
-                        </legend>
-                        
-                        <div className="space-y-3">
-                            {createdQuestion.answer_options.map((answer, index) => (
-                                <AnswerElement
-                                    key={index}
-                                    index={index}
-                                    answer={answer}
-                                    questionSetter={setCreatedQuestion}
-                                />
-                            ))}
-                        </div>
-                    </fieldset>
-                </>
-            }
-            {questionType === 'text' &&
-                <>
-                    <div className="flex items-center gap-3 mb-4 p-3 bg-secondary/20 rounded-lg">
-                        <Badge variant='default'>
-                            Выбор из вариантов
+            {questionType === 'choice' &&
+                <fieldset className="mb-4">
+                    <legend className="text-md font-medium mb-3 flex items-center gap-2">
+                        Варианты ответов
+                        <Badge variant="outline">
+                            {createdQuestion.answer_options.length}
                         </Badge>
+                    </legend>
+                    
+                    <div className="space-y-3">
+                        {createdQuestion.answer_options.map((answer, index) => (
+                            <AnswerElement
+                                key={index}
+                                index={index}
+                                answer={answer}
+                                questionSetter={setCreatedQuestion}
+                            />
+                        ))}
                     </div>
-                    <fieldset className="mb-4">
-                            <legend className="text-md font-medium mb-3 flex items-center gap-2">
-                                Варианты ответов для первичной проверки
-                                <Badge variant="outline">
-                                    {createdQuestion.answer_options.length}
-                                </Badge>
-                            </legend>
-                            
-                            <div className="space-y-3">
-                                {createdQuestion.answer_options.map((answer, index) => (
-                                    <TextAnswerElement
-                                        key={index}
-                                        index={index}
-                                        answer={answer}
-                                        questionSetter={setCreatedQuestion}
-                                    />
-                                ))}
-                            </div>
-                        </fieldset>
-                </>
+                </fieldset>
+            }
+
+            {questionType === 'text' &&
+                <fieldset className="mb-4">
+                    <legend className="text-md font-medium mb-3 flex items-center gap-2">
+                        Варианты ответов для первичной проверки
+                        <Badge variant="outline">
+                            {createdQuestion.answer_options.length}
+                        </Badge>
+                    </legend>
+                    
+                    <div className="space-y-3">
+                        {createdQuestion.answer_options.map((answer, index) => (
+                            <TextAnswerElement
+                                key={index}
+                                index={index}
+                                answer={answer}
+                                questionSetter={setCreatedQuestion}
+                            />
+                        ))}
+                    </div>
+                </fieldset>
             }
 
             <div className="flex flex-wrap gap-3">
@@ -198,7 +193,7 @@ const AnswerElement = memo((props: {
                 </Label>
             </header>
 
-            <div className="flex w-full pr-10 items-center gap-3">
+            <div className="flex w-full pr-5 items-center gap-3">
                 <Input
                     placeholder="Введите текст ответа"
                     maxLength={115}
@@ -224,7 +219,13 @@ const AnswerElement = memo((props: {
                             })
                         }}
                     />
-                    <Label className="text-sm">Правильный</Label>
+                    <Label 
+                        className="text-sm w-15"
+                    >{props.answer.is_correct 
+                        ?   'Верный'
+                        :   'Ложный'
+                    }
+                    </Label>
                 </div>
             </div>
         </article>

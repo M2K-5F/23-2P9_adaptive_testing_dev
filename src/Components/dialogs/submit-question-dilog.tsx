@@ -15,7 +15,7 @@ import { CheckCircle2, XCircle, MinusCircle, ChevronLeft, ChevronRight, FileText
 import { UnsubmitedAnswer } from '@/types/interfaces';
 import clsx from 'clsx';
 import { useImmer } from 'use-immer';
-import { submitQuestion } from '@/services/api.service';
+import { submitQuestion } from '@/services/question';
 import { toast } from 'sonner';
 
 type EvaluationType = 'correct' | 'partial' | 'incorrect';
@@ -35,7 +35,7 @@ export const SubmitTextQuestionsDialog: FC<{answers: UnsubmitedAnswer[], onSucce
                 score = 1
                 break
             case 'partial':
-                score = 0.5
+                score = 0.55
                 break
             case 'incorrect':
                 score = 0

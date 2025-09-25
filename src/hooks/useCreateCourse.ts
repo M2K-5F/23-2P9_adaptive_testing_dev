@@ -1,4 +1,4 @@
-import { createCourse } from '@/services/api.service'
+import { createCourse } from '@/services/course'
 import { toast } from "sonner"
 import { useId } from "react"
 

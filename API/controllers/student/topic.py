@@ -15,7 +15,7 @@ async def get_followed_teacher_topics(
     user_course_id = Query(),
     topic_service: TopicService = Depends(get_student_topic_service)
 ) -> JSONResponse:
-    return topic_service.get_user_topics_by_followed_course(current_user, user_course_id)
+    return topic_service.get_user_topics_by_user_group(current_user, user_course_id)
 
 
 @topic_router.get("/get", summary='Get topics by any course')

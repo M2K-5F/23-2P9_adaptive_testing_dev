@@ -7,7 +7,6 @@ import { s } from 'node_modules/shadcn/dist/index-8c784f6a';
 import { useClipboard } from '@/hooks/useClipboard';
 import { CourseStats } from '@/types/interfaces';
 import { getCourseStats } from '@/services/api.service';
-import { Separator } from '@radix-ui/react-select';
 import { SubmitTextQuestionsDialog } from '@/Components/dialogs/submit-question-dilog';
 
 
@@ -134,14 +133,14 @@ export const CourseStatisticsPage: FC = () => {
                                                 {topic.topic_title}
                                             </span>
                                             <div className="flex items-center gap-2">
+                                                <Badge variant='outline' className={clsx('max-sm:hidden')} >мин. {topic.score_for_pass} б.</Badge>
                                                 {topic.average_score > 0 &&
-                                                    <Badge 
+                                                    <Badge
                                                         variant="outline" 
                                                         className={clsx(
                                                             "text-primary-foreground bg-red-300",
-                                                            topic.average_score >= 50 && 'bg-orange-300',
-                                                            topic.average_score >= 80 && 'bg-green-300'
-                                                                    
+                                                            topic.topic_progress >= topic.score_for_pass*5/8 && 'bg-orange-300',
+                                                            topic.topic_progress >= topic.score_for_pass && 'bg-green-300'
                                                         )}>
                                                         {topic.average_score}%
                                                     </Badge>

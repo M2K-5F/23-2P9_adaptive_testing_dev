@@ -62,7 +62,7 @@ export function CreatedCoursesSection() {
 }
 
 export function FollowedCourseSection() {
-    const followedCourses = useCourseStore(s => s.followedCoures)
+    const followedGroups = useCourseStore(s => s.followedCoures)
 
     return(
         <AccordionItem value="followed">
@@ -70,12 +70,12 @@ export function FollowedCourseSection() {
                 <h1 className="text-2xl font-bold">Мои курсы</h1>
             </AccordionTrigger>
 
-            {followedCourses.length > 0
+            {followedGroups.length > 0
                 ?   <AccordionContent className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-3">
-                        {followedCourses.map(userCourse =>
+                        {followedGroups.map(userGroup =>
                             <FollowedCourse
-                                key={userCourse.course.id}
-                                userCourse={userCourse}
+                                key={userGroup.course.id}
+                                userGroup={userGroup}
                             />
                         )}
                     </AccordionContent>

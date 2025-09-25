@@ -1,9 +1,8 @@
 import { useState, useEffect, memo, FC } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { CreatedCourse, UserCourse, UserTopic } from "../../types/interfaces"
+import { CreatedCourse, UserGroup, UserTopic } from "../../types/interfaces"
 import { Button, Badge, Progress, Skeleton } from "@/Components"
 import clsx from "clsx"
-import { getTopics } from "@/services/api.service"
 import { useTopicStore } from "@/stores/useTopicStore"
 import { routes } from "@/config/routes.config"
 import { 
@@ -23,38 +22,36 @@ import {
   Unlock
 } from "lucide-react"
 
-export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) => {
+export const FollowedCourse: FC<{userGroup: UserGroup}> = memo(({userGroup}) => {
     const navigate = useNavigate()
     const fetchTopics = useTopicStore(s => s.fetchFollowedTopics)
-    const topics = useTopicStore(s => s.followedTopics[userCourse.id])
+    const topics = useTopicStore(s => s.followedTopics[userGroup.id])
     const [params, setParams] = useSearchParams()
     const expandedCourse = Number(params.get('expanded'))
-    const isExpanded = expandedCourse === userCourse.id
+    const isExpanded = expandedCourse === userGroup.id
     const [isLoading, setIsLoading] = useState(false)
-    
-    const handleExpand = () => {
-        navigate(`/course?course_id=${userCourse.id}&expanded=${isExpanded ? '0' : userCourse.id}`)
-    }
+
 
     useEffect(() => {
         if (isExpanded) {
             setIsLoading(true)
-            fetchTopics(userCourse.id)
+            fetchTopics(userGroup.id)
                 .finally(() => setIsLoading(false))
         }
     }, [isExpanded])
+
 
     return (
         <article className={clsx(
             `border border-border overflow-hidden transition-all duration-300`,
             'rounded-xl shadow-sm mb-4 min-h-41 h-fit bg-card w-full col-span-2',
             isExpanded && 'sm:col-span-3 shadow-md',
-            !userCourse.course.is_active &&  'opacity-70'
+            !userGroup.course.is_active &&  'opacity-70'
         )}>
             <section className="p-5 bg-gradient-to-r from-card to-card/80">
                 <div className="flex justify-between items-start mb-3">
                     <div 
-                        onClick={() => navigate(routes.viewCourse(userCourse.course.id))} 
+                        onClick={() => navigate(routes.viewCourse(userGroup.course.id))} 
                         className="flex cursor-pointer items-start gap-3 flex-1"
                     >
                         <div className="p-2 bg-primary/10 rounded-lg mt-1">
@@ -66,20 +63,20 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                                     text-lg font-semibold cursor-pointer 
                                     hover:text-primary transition-colors'
                             >
-                                {userCourse.course.title}
+                                {userGroup.course.title}
                             </h3>
                             <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                                 <User className="h-3.5 w-3.5" />
-                                Автор: {userCourse.course.created_by.name}
+                                Автор: {userGroup.course.created_by.name}
                             </p>
                         </div>
                     </div>
 
                     <Badge 
-                        variant={userCourse.is_active ? 'default' : 'secondary'}
+                        variant={userGroup.course.is_active ? 'default' : 'secondary'}
                         className="flex items-center gap-1"
                     >
-                        {userCourse.is_active 
+                        {userGroup.course.is_active 
                             ?   <>
                                     <Unlock className="h-3.5 w-3.5" />
                                     Активный
@@ -95,19 +92,19 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                 <div className="flex flex-wrap items-center gap-3 mt-3">
                     <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
                         <BarChart3 className="h-3.5 w-3.5" />
-                        <span>Прогресс: {Math.round(userCourse.course_progress)}%</span>
+                        <span>Прогресс: {Math.round(userGroup.progress)}%</span>
                     </div>
                     
-                    {userCourse.course_progress > 0 && (
+                    {userGroup.progress > 0 && (
                         <div className="flex items-center gap-1 text-sm bg-green-500/20 px-2 py-1 rounded-full text-green-700">
                             <Award className="h-3.5 w-3.5" />
-                            <span>{userCourse.course_progress === 100 ? 'Завершен' : 'Начат'}</span>
+                            <span>{userGroup.progress === 100 ? 'Завершен' : 'Начат'}</span>
                         </div>
                     )}
                 </div>
                 <Progress offsetValue={2}
                     className="mt-3"
-                    value={userCourse.course_progress}
+                    value={userGroup.progress}
                 />
 
                 <Button
@@ -115,7 +112,7 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                     size="sm"
                     onClick={() => {
                         setParams(p => {
-                            p.set('expanded', `${isExpanded ? 0 : userCourse.id}`)
+                            p.set('expanded', `${isExpanded ? 0 : userGroup.id}`)
                             return p
                         })
                     }}
@@ -160,20 +157,20 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                                                     </span>
                                                 </div>
                                                 
-                                                {topic.topic_progress > 0 && (topic.is_completed 
+                                                {topic.progress > 0 && (topic.is_completed 
                                                     ?   <Badge variant='default' className="border-green-500 mt-2 block border p-0 pr-2">
                                                             <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-green-500 mr-2">
                                                                 <Check className="h-3 w-3" />
                                                                 Пройдено
                                                             </Badge>
-                                                            Баллы: {topic.topic_progress.toFixed(1)}/1
+                                                            Баллы: {topic.progress.toFixed(1)}/1
                                                         </Badge>
                                                     :   <Badge variant='default' className="border-red-500 block mt-2 border p-0 pr-2">
                                                             <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-red-500 mr-2">
                                                                 <X className="h-3 w-3" />
                                                                 Не пройдено
                                                             </Badge>
-                                                            Баллы: {topic.topic_progress.toFixed(1)}/1
+                                                            Баллы: {topic.progress.toFixed(1)}/1
                                                         </Badge>
                                                 )}
                                             </div>
@@ -188,10 +185,10 @@ export const FollowedCourse: FC<{userCourse: UserCourse}> = memo(({userCourse}) 
                     <Button 
                         variant='default'
                         className="mt-4 w-full flex items-center gap-2"
-                        onClick={() => navigate(routes.viewCourse(userCourse.course.id))}
+                        onClick={() => navigate(routes.viewCourse(userGroup.course.id))}
                     >
                         <Play className="h-4 w-4" />
-                        {userCourse.course_progress > 0 ? 'Продолжить прохождение' : 'Начать прохождение'}
+                        {userGroup.progress > 0 ? 'Продолжить прохождение' : 'Начать прохождение'}
                     </Button>
                 </section>
             }

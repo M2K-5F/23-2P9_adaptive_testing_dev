@@ -1,5 +1,5 @@
 from typing import Literal
-from db import Role, User, UserRole
+from models import Role, User, UserRole
 from peewee import IntegrityError
 from fastapi import status, HTTPException
 from shemas import Roles, UserOut
@@ -37,7 +37,7 @@ class UserRepository(BaseRepository[User]):
             )
 
         except IntegrityError:
-            raise self.integrity_exc
+            raise self._400_integrity
 
         return currect_user
 

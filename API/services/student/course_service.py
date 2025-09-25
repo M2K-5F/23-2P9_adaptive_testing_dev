@@ -1,131 +1,76 @@
 from repositories.course.course_repository import CourseRepository
-from repositories.course.user_course_repository import UserCourseRepository
+from repositories.group import user_group
+from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
 from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
-from db import database
+from models import database
+from services.common.progress_service import ProgressService
 from shemas import UserOut
 from fastapi.responses import JSONResponse
 
 
 class CourseService:
+    """Service for processing action with courses from student"""
+
     def __init__(
         self,
+        user_group: UserGroupRepository,
         course_repo: CourseRepository,
-        user_course_repo: UserCourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
-        user_question_repository: UserQuestionRepository,
         adaptive_question_repo: AdaptiveQuestionRepository,
-        user_text_answer_repo: UserTextAnswerRepository
+        progress_service: ProgressService
     ):
-        self.course_repo = course_repo
-        self.topic_repo = topic_repository
-        self.user_course_repo = user_course_repo
-        self.user_topic_repo = user_topic_repository
-        self.user_question_repo = user_question_repository
-        self.adaptive_question_repo = adaptive_question_repo
-        self.user_text_answer_repo = user_text_answer_repo
-    
-    
-    @database.atomic()
-    def get_followed_courses(self, user: UserOut) -> JSONResponse:
-        followed_courses = self.user_course_repo.get_active_user_courses_from_user(user)
-        return JSONResponse([uc.recdump for uc in followed_courses])
-
-
-    @database.atomic()
-    def follow_course(self, user: UserOut, course_id: int) -> JSONResponse:
-        current_course = self.course_repo.get_by_id(course_id, True)
-    
-        if not current_course.is_active:
-            raise self.course_repo._404_not_fount
-        
-        user_course, is_created = self.user_course_repo.get_or_create(
-            False, {},
-            user=user.username,
-            course=current_course
-        )
-    
-        if not is_created:
-            if user_course.is_active:
-                raise self.user_course_repo._400_does_not_exist
-        
-            else:
-                user_course = self.user_course_repo.activate_user_course(user_course)
-                return JSONResponse(user_course.dump)
-        
-        topics_by_course = self.topic_repo.get_active_topics_by_course(current_course)
-    
-        for index, topic in enumerate(topics_by_course):
-            self.user_topic_repo.create_user_topic(
-                topic, user.username, user_course,
-                False if index != 0 else True
-            )
-    
-        current_course = self.course_repo.add_student(current_course)        
-    
-        return JSONResponse(user_course.dump)
-
-
-    @database.atomic()
-    def unfollow_course(self, user: UserOut, course_id: int) -> JSONResponse:
-        current_course = self.course_repo.get_by_id(course_id, True)
-    
-        if not current_course.is_active:
-            raise self.course_repo._404_not_fount
-        
-        user_course = self.user_course_repo.get_active_user_course_from_user(
-            user, current_course
-        )
-    
-        user_topics = self.user_topic_repo.get_user_topics_by_user_course(user_course)
-        for ut in user_topics:
-            ut.delete_instance()
-        
-        user_course.delete_instance()
-        current_course = self.course_repo.remove_student(current_course)
-    
-        return JSONResponse(user_course.dump)
+        self._course_repo = course_repo
+        self._user_group = user_group
+        self._topic_repo = topic_repository
+        self._user_topic_repo = user_topic_repository
+        self._adaptive_question_repo = adaptive_question_repo
+        self._progress_service = progress_service
 
 
     @database.atomic()
     def get_course_by_id(self, user: UserOut, course_id: int) -> JSONResponse:
-        current_course = self.course_repo.get_by_id(course_id, True)
+        """Returns Course instance with field 'user_course': user_course if user is followed on this course else False
 
-        try:
-            followed_course = self.user_course_repo.get_active_user_course_from_user(user, current_course)
-            self.adaptive_question_repo.delete_all(user = user.username)
+        Args:
+            user (UserOut): current user
+            course_id (int): unique course id
 
-            return JSONResponse({**current_course.dump, 'user_course': {**followed_course.dump}})
+        Returns:
+            JSONResponse: Course instance with 'user_course' field
+        """
 
-        except:
-            return JSONResponse({**current_course.dump, 'user_course': False})
-    
+        current_course = self._course_repo.get_by_id(course_id, True)
 
-    @database.atomic()
-    def clear_user_course_progress(self, user: UserOut, user_course_id: int) -> JSONResponse:
-        user_course = self.user_course_repo.get_by_id(user_course_id, True)
+        user_group = self._user_group.get_or_none(
+            False,
+            user = user.username,
+            course = current_course
+        )
+        self._adaptive_question_repo.delete_all(user = user.username)
 
-        user_topics = self.user_topic_repo.get_user_topics_by_user_course(user_course)
+        if user_group:
+            return JSONResponse({**current_course.dump, 'user_group': {**user_group.dump}})
 
-        for user_topic in user_topics:
-            self.user_question_repo.delete_all(by_user_topic=user_topic)
-        
-            self.adaptive_question_repo.delete_all(by_user_topic = user_topic)
-
-            self.user_text_answer_repo.delete_all(by_user_topic = user_topic)
-
-            self.user_topic_repo.clear_user_topic_progress(user_topic)
-        
-        user_course = self.user_course_repo.clear_user_course_progress(user_course)
-        return JSONResponse(user_course.dump)
+        return JSONResponse({**current_course.dump, 'user_group': False})
 
 
     @database.atomic()
     def search_courses(self, user: UserOut, search_query: str):
-        searched_courses = self.course_repo.search_courses_by_title(user, search_query)
+        """Returns all Course instances with that title & not created by user
+
+        Args:
+            user (UserOut): current user
+            search_query (str): search string
+
+        Returns:
+            JSONResponse: list of courses where title is search query 
+        """
+
+        searched_courses = self._course_repo.search_courses_by_title(user, search_query)
         
         return JSONResponse([course.dump for course in searched_courses])

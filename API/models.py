@@ -1,8 +1,10 @@
 """database discription"""
+from ast import boolop
 from datetime import datetime
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
+from config import weigth_config
 from shemas import Roles, UserOut
 from utils import get_password_hash
 
@@ -25,6 +27,7 @@ def convert(obj):
 
 class Table(Model):
     id = AutoField()
+    created_at = DateTimeField(default=datetime.now)
     class Meta:
         database = database
 
@@ -69,9 +72,18 @@ class Course(Table):
     created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
     description = CharField(max_length=60)
-    created_at = DateTimeField(default=datetime.now)
     topic_count = IntegerField(default=0)
+    group_count = IntegerField(default=0)
     student_count = IntegerField(default=0)
+
+
+class Group(Table):
+    by_course = ForeignKeyField(Course)
+    title = CharField(max_length=128)
+    max_student_count = IntegerField(default=30)
+    student_count = IntegerField(default=0)
+    created_by = ForeignKeyField(User, field=User.username)
+    is_active = BooleanField(default=True)
 
 
 class Topic(Table):
@@ -82,6 +94,7 @@ class Topic(Table):
     is_active = BooleanField(default=True)
     number_in_course = IntegerField()
     question_count = IntegerField(default=0)
+    score_for_pass = FloatField(default=80)
 
 
 class Question(Table):
@@ -96,23 +109,33 @@ class Answer(Table):
     is_correct = BooleanField()
     by_question = ForeignKeyField(Question, backref="created_answers")
 
+class UserGroup(Table):
+    user = ForeignKeyField(User, field=User.username, backref='user_groups')
+    group = ForeignKeyField(Group, backref='user_groups')
+    course = ForeignKeyField(Course)
+    progress = FloatField(default=0)
+    completed_topic_count = IntegerField(default=0)
 
-class UserCourse(Table):
-    user = ForeignKeyField(User, field=User.username, backref="user_courses")
-    course = ForeignKeyField(Course, backref="user_courses")
-    is_active = BooleanField(default=True)
-    completed_topic_number = IntegerField(default=0)
-    followed_at = DateTimeField(default=datetime.now)
-    course_progress = FloatField(default=0)
+
+class QuestionWeigth(Table):
+    group = ForeignKeyField(Group)
+    question = ForeignKeyField(Question)
+    weigth = FloatField(default=weigth_config.BASE_WEIGTH)
+    step = FloatField(default=weigth_config.STEP)
+    max_weigth = FloatField(default=weigth_config.MAX_WEIGTH)
+    min_weigth = FloatField(default=weigth_config.MIN_WEIGTH)
 
 
 class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_topics")
     topic = ForeignKeyField(Topic)
-    by_user_course = ForeignKeyField(UserCourse)
-    ready_to_pass = BooleanField(default=False)
+    by_user_group = ForeignKeyField(UserGroup)
     is_completed = BooleanField(default=False)
-    topic_progress = FloatField(default=0)
+    is_attempted = BooleanField(default=False)
+    is_available = BooleanField(default=False)
+    is_active = BooleanField(default=True)
+    progress = FloatField(default=0)
+    attempt_count = IntegerField(default=0)
 
 
 class AdaptiveQuestion(Table):
@@ -125,16 +148,16 @@ class AdaptiveQuestion(Table):
 
 class UserQuestion(Table):
     user = ForeignKeyField(User, field=User.username, backref="user_questions")
-    by_user_topic = ForeignKeyField(UserTopic)
+    by_user_topic = ForeignKeyField(UserTopic, backref='user_questions')
     question = ForeignKeyField(Question)
-    question_score = FloatField(default=0)
+    progress = FloatField(default=0)
 
 
 class UserTextAnswer(Table):
     user = ForeignKeyField(User, field=User.username)
     question = ForeignKeyField(Question)
     by_user_topic = ForeignKeyField(UserTopic)
-    for_user_question = ForeignKeyField(UserQuestion)
+    for_user_question = ForeignKeyField(UserQuestion, backref='user_text_answers')
     text = CharField(max_length=60)
     is_correct = BooleanField(default=False)
     is_active = BooleanField(default=True)
@@ -143,27 +166,30 @@ class UserTextAnswer(Table):
 if __name__ == "__main__":
     database.connect()
     database.register_function(lambda x: x.lower(), 'lower')
-    database.create_tables([User, Role, UserRole, Course, Topic, Question, Answer, UserCourse, UserQuestion, UserTopic, AdaptiveQuestion, UserTextAnswer])
+    database.create_tables([
+        User, Role, UserRole, 
+        Course, Topic, Question,
+        Answer, UserQuestion, 
+        UserTopic, AdaptiveQuestion, UserTextAnswer, 
+        Group, UserGroup, QuestionWeigth
+    ])
     database.close()
 
     student_role, _ = Role.get_or_create(status=Roles.STUDENT)
     teacher_role, _ = Role.get_or_create(status=Roles.TEACHER)
-    try:
-        base_teacher, _ = User.get_or_create(
-            username = 'teacher',
-            name = 'teacher',
-            defaults={
-                'telegram_link': 'https://t.me/teacher_tg.com',
-                'password_hash': get_password_hash('12345')
-            })
-        UserRole.get_or_create(
-            user = base_teacher,
-            role = teacher_role
-        )
+    base_teacher, _ = User.get_or_create(
+        username = 'teacher',
+        name = 'teacher',
+        defaults={
+            'telegram_link': 'https://t.me/teacher_tg',
+            'password_hash': get_password_hash('12345')
+        })
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = teacher_role
+    )
 
-        UserRole.get_or_create(
-            user = base_teacher,
-            role = student_role
-        )
-    except:
-        print('passed')
+    UserRole.get_or_create(
+        user = base_teacher,
+        role = student_role
+    )

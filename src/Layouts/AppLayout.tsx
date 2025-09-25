@@ -9,6 +9,7 @@ import clsx from "clsx";
 import { SearchContainer } from "@/Components";
 import { routes } from "@/config/routes.config";
 import { searchCourses } from "@/services/api.service";
+import { House } from "lucide-react";
 
 interface asideSectionsVisibilityStore {
     timer: number
@@ -46,20 +47,13 @@ export const AppLayout: FC = memo(() => {
                 <main className="h-full max-h-full">    
                     <header 
                         className={clsx(
-                            'w-full fixed bg-[var(--aside)] grid-cols-3',
-                            'items-center justify-items-center', 
-                            'content-center grid h-14'
+                            'w-full fixed bg-[var(--aside)]',
+                            'items-center justify-items-start', 
+                            'content-center flex h-14 z-20 px-4'
                         )} 
                     >
-                        <div className="w-full flex gap-2 pl-4">
-                            <AsideSummary />   
-                            <Link 
-                                to="/" 
-                                className="text-sm font-medium text-primary hover:underline flex items-center"
-                            >
-                                ← На главную
-                            </Link> 
-                        </div>
+                        <AsideSummary />
+                        <div className="grow" />
                         <SearchContainer
                             className="max-sm:w-45 max-md:w-75 max-lg:w-100 w-120"
                             searchfn={(query, callbackfn) => {
@@ -68,6 +62,14 @@ export const AppLayout: FC = memo(() => {
                             }}
                             callbackfn={(course) => {navigate(routes.viewCourse(course.id))}}
                         />
+                        <Link 
+                            to="/" 
+                            className="text-sm mx-4 font-medium text-primary hover:underline flex items-center"
+                        >
+                            <House />
+                        </Link>
+                        
+                        <div className="grow" />
                     </header>
                     <div className="max-h-dvh h-dvh scrollbar-hidden overflow-y-scroll pt-14">    
                         <Outlet />
