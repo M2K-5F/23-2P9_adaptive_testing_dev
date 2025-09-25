@@ -19,7 +19,7 @@ import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar } from
 import { CreatedGroup } from "@/types/interfaces"
 import clsx from "clsx"
 import { CreateGroupDialog } from "./create-group-dialog"
-import { QuestionWeightsDialog } from "./question-weigth-dialog"
+import { QuestionWeightsDialog } from "./question-weight-dialog"
 
 interface ViewGroupDialogProps {
 }

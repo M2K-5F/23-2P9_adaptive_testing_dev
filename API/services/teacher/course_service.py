@@ -6,8 +6,6 @@ from repositories.group.group import GroupRepository
 from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
-from repositories.question.user_question_repository import UserQuestionRepository
-from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from models import database
 from fastapi import HTTPException, status

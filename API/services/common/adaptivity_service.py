@@ -2,7 +2,7 @@ import random
 from typing import List
 from fastapi.responses import JSONResponse
 from models import Question, UserQuestion, UserTopic
-from repositories import UserQuestionRepository, AdaptiveQuestionRepository
+from repositories import UserQuestionRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from services.common.progress_service import ProgressService
 from shemas import SubmitQuestion, UserOut
@@ -15,11 +15,9 @@ class AdaptivityServise:
     def __init__(
         self,
         user_question_repo: UserQuestionRepository,
-        adaptive_question_repo: AdaptiveQuestionRepository,
         user_topic_repo: UserTopicRepository,
         progress_service: ProgressService
     ):
-        self._adaptive_question_repo = adaptive_question_repo
         self._user_question_repo = user_question_repo
         self._user_topic_repo = user_topic_repo
         self._progress_service = progress_service

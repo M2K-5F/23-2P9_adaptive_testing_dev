@@ -1,15 +1,13 @@
 import random
 from typing import List, Tuple
 from fastapi import HTTPException
-from config import weigth_config
+from config import weight_config
 from repositories.course.course_repository import CourseRepository
 from repositories.group.user_group import UserGroupRepository
-from repositories.question import question_weigth
-from repositories.question.question_weigth import QuestionWeigthRepository
+from repositories.question.question_weight import QuestionWeightRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
-from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.question.question_repository import QuestionRepository
 from models import Answer, Question, Topic, UserQuestion, database, UserTopic
@@ -28,7 +26,7 @@ class TopicService:
 
     def __init__(
         self,
-        question_weigth: QuestionWeigthRepository,
+        question_weight: QuestionWeightRepository,
         course_repo: CourseRepository,
         topic_repository: TopicRepository,
         user_topic_repository: UserTopicRepository,
@@ -39,7 +37,7 @@ class TopicService:
         adaptivity_service: AdaptivityServise,
         user_group: UserGroupRepository
     ):
-        self._question_weigth = question_weigth
+        self._question_weight = question_weight
         self._course_repo = course_repo
         self._user_group = user_group
         self._topic_repo = topic_repository
@@ -123,7 +121,7 @@ class TopicService:
 
         questions_with_answers = []
         for question in questions:
-            answers: List[Answer] = list(question.created_answers)  #pyright: ignore
+            answers: List[Answer] = list(question.answers)  #pyright: ignore
             questions_with_answers.append({
                 **question.dump,
                 "answer_options": [{
@@ -245,22 +243,22 @@ class TopicService:
             )
         )
 
-        question_weigth = self._question_weigth.get_or_none(
+        question_weight = self._question_weight.get_or_none(
             True,
             question = created_question,
             group = user_topic.by_user_group.group
         )
 
-        weigth: float = question_weigth.weigth  # pyright: ignore[reportAssignmentType]
-        step: float = question_weigth.step  # pyright: ignore[reportAssignmentType]
-        max_w: float = question_weigth.max_weigth  # pyright: ignore[reportAssignmentType]
-        min_w: float = question_weigth.min_weigth  # pyright: ignore[reportAssignmentType]
+        weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
+        step: float = question_weight.step  # pyright: ignore[reportAssignmentType]
+        max_w: float = question_weight.max_weight  # pyright: ignore[reportAssignmentType]
+        min_w: float = question_weight.min_weight  # pyright: ignore[reportAssignmentType]
         score_step = (((question_score - 0.5) * 2 ) * step)
-        updated_weigth = weigth - float(round(score_step, 4))
+        updated_weight = weight - float(round(score_step, 4))
 
-        self._question_weigth.update(
-            question_weigth, 
-            weigth = min(max(min_w, updated_weigth), max_w)
+        self._question_weight.update(
+            question_weight, 
+            weight = min(max(min_w, updated_weight), max_w)
         )
 
         if submit_question.type == 'text':
@@ -274,10 +272,10 @@ class TopicService:
 
             self._user_text_answer_repo.update(
                 user_answer,
-                is_correct = max(
-                    user_answer.is_correct, # pyright: ignore
+                progress = max(
+                    user_answer.progress,  # pyright: ignore
                     bool(question_score)
                 )
             )
 
-        return max(weigth / weigth_config.BASE_WEIGTH, user_topic.topic.score_for_pass)
+        return max(weight / weight_config.BASE_WEIGHT, user_topic.topic.score_for_pass)

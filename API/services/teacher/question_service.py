@@ -3,11 +3,10 @@ from typing import List, Union
 from fastapi import HTTPException
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
-from repositories.question.question_weigth import QuestionWeigthRepository
+from repositories.question.question_weight import QuestionWeightRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from repositories.question.user_question_repository import UserQuestionRepository
-from repositories.question.adaptive_question_repository import AdaptiveQuestionRepository
 from repositories.answer.user_text_answer_repository import UserTextAnswerRepository
 from repositories.answer.answer_repository import AnswerRepository
 from repositories.question.question_repository import QuestionRepository
@@ -27,7 +26,7 @@ class QuestionService:
     def __init__(
         self,
         topic_repository: TopicRepository,
-        question_weigth: QuestionWeigthRepository,
+        question_weight: QuestionWeightRepository,
         user_question_repository: UserQuestionRepository,
         user_text_answer_repo: UserTextAnswerRepository,
         answer_repo: AnswerRepository,
@@ -37,7 +36,7 @@ class QuestionService:
     ):
         self._topic_repo = topic_repository
         self._group = group
-        self._question_weigth = question_weigth
+        self._question_weight = question_weight
         self._user_question_repo = user_question_repository
         self._user_text_answer_repo = user_text_answer_repo
         self._answer_repo = answer_repo
@@ -101,7 +100,7 @@ class QuestionService:
         )
         groups_by_course = self._group.select_where(by_course = current_topic.by_course)
         for group in groups_by_course:
-            self._question_weigth.get_or_create(
+            self._question_weight.get_or_create(
                 True,
                 {},
                 group = group,
@@ -235,8 +234,9 @@ class QuestionService:
                 "Question wasn`t created by you"
             )
 
-        user_answer = self._user_text_answer_repo.update(user_answer, 
-            is_correct = (score != 0),
+        user_answer = self._user_text_answer_repo.update(
+            user_answer, 
+            progress = score,
             is_active = False
         )
 

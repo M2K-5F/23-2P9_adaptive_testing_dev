@@ -8,7 +8,7 @@ import { CourseStatistics, GroupDetail, UserGroupDetail, UserTopicDetail } from 
 import { getCourseStats } from '@/services/api.service';
 import { SubmitTextQuestionsDialog } from '@/Components/dialogs/submit-question-dilog';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { QuestionWeightsDialog } from '@/Components/dialogs/question-weigth-dialog';
+import { QuestionWeightsDialog } from '@/Components/dialogs/question-weight-dialog';
 
 
 const fetchStatisticsCoxtext = createContext<() => void>(() => {})

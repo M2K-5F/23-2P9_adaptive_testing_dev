@@ -58,9 +58,9 @@ export const unarchGroup = (group_id: number) => {
 }
 
 
-export const getGroupWeigths = (group_id: number) => {
+export const getGroupWeights = (group_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.getGroupWeigthsURL,
+        APIUrls.getGroupWeightsURL,
         {
             credentials: 'include',
         },

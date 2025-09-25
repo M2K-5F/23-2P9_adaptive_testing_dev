@@ -21,7 +21,7 @@ import {
   Hash,
   Calendar
 } from 'lucide-react';
-import { getGroupWeigths } from '@/services/group';
+import { getGroupWeights } from '@/services/group';
 import { Loader } from '../other/Loader';
 
 
@@ -33,7 +33,7 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
     const fetchWeights = async (groupId: number) => {
         setLoading(true)
         try {
-            setWeights(await getGroupWeigths(groupId))
+            setWeights(await getGroupWeights(groupId))
         }
         finally {
             setLoading(false)
@@ -73,7 +73,7 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
                             <div className="flex-1 pr-4 overflow-y-scroll scrollbar-hidden">
                                 <div className="space-y-4">
                                     {weights.map((weight) => (
-                                        <QuestionWeigthCard weight={weight} />
+                                        <QuestionWeightCard weight={weight} />
                                     ))}
                                 </div>
                             </div>
@@ -86,7 +86,7 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
 
                                     <div className="text-center">
                                         <div className="font-bold text-lg">
-                                            {(weights.reduce((sum, w) => sum + w.weigth, 0) / weights.length).toFixed(2)}
+                                            {(weights.reduce((sum, w) => sum + w.weight, 0) / weights.length).toFixed(2)}
                                         </div>
                                         <div className="text-muted-foreground">Средний вес</div>
                                     </div>
@@ -113,7 +113,7 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
 }
 
 
-const QuestionWeigthCard: FC<{weight: QuestionWeight}> = ({weight}) => {
+const QuestionWeightCard: FC<{weight: QuestionWeight}> = ({weight}) => {
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('ru-RU', {
         day: 'numeric',
@@ -170,7 +170,7 @@ const QuestionWeigthCard: FC<{weight: QuestionWeight}> = ({weight}) => {
                 
                 <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
-                        {weight.weigth.toFixed(2)}
+                        {weight.weight.toFixed(2)}
                     </div>
                     <div className="text-xs text-muted-foreground">
                         текущий вес
@@ -180,18 +180,18 @@ const QuestionWeigthCard: FC<{weight: QuestionWeight}> = ({weight}) => {
 
             <div className="space-y-2">
                 <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Минимум: {weight.min_weigth}</span>
-                    <span>Максимум: {weight.max_weigth}</span>
+                    <span>Минимум: {weight.min_weight}</span>
+                    <span>Максимум: {weight.max_weight}</span>
                 </div>
                 <Progress 
-                    value={getWeightPercentage(weight.weigth, weight.min_weigth, weight.max_weigth)}
+                    value={getWeightPercentage(weight.weight, weight.min_weight, weight.max_weight)}
                     className="h-2"
                     offsetValue={0}
                 />
                 <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Диапазон веса</span>
-                    <Badge variant={getWeightVariant(weight.weigth, weight.min_weigth, weight.max_weigth)}>
-                        {getWeightPercentage(weight.weigth, weight.min_weigth, weight.max_weigth).toFixed(1)}%
+                    <Badge variant={getWeightVariant(weight.weight, weight.min_weight, weight.max_weight)}>
+                        {getWeightPercentage(weight.weight, weight.min_weight, weight.max_weight).toFixed(1)}%
                     </Badge>
                 </div>
             </div>
@@ -206,13 +206,13 @@ const QuestionWeigthCard: FC<{weight: QuestionWeight}> = ({weight}) => {
                 <div className="flex items-center gap-1">
                     <TrendingUp className="h-3 w-3 text-green-500" />
                     <span className="font-medium">Макс:</span>
-                    <span>{weight.max_weigth}</span>
+                    <span>{weight.max_weight}</span>
                 </div>
                 
                 <div className="flex items-center gap-1">
                     <TrendingDown className="h-3 w-3 text-red-500" />
                     <span className="font-medium">Мин:</span>
-                    <span>{weight.min_weigth}</span>
+                    <span>{weight.min_weight}</span>
                 </div>
                 
                 <div className="flex items-center gap-1">
@@ -226,14 +226,14 @@ const QuestionWeigthCard: FC<{weight: QuestionWeight}> = ({weight}) => {
                 <span className="text-muted-foreground">Сложность вопроса:</span>
                 <div className="flex items-center gap-2">
                     <div className={`h-2 w-2 rounded-full ${
-                        weight.weigth > weight.max_weigth * 0.7 ? 'bg-red-500' :
-                        weight.weigth > weight.max_weigth * 0.45 ? 'bg-yellow-500' :
+                        weight.weight > weight.max_weight * 0.7 ? 'bg-red-500' :
+                        weight.weight > weight.max_weight * 0.45 ? 'bg-yellow-500' :
                         'bg-green-500'
                     }`} />
 
                     <span className="font-medium">
-                        {weight.weigth > weight.max_weigth * 0.7 ? 'Сложный' :
-                        weight.weigth > weight.max_weigth * 0.45 ? 'Средний' :
+                        {weight.weight > weight.max_weight * 0.7 ? 'Сложный' :
+                        weight.weight > weight.max_weight * 0.45 ? 'Средний' :
                         'Легкий'}
                     </span>
                 </div>

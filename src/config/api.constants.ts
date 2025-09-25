@@ -45,7 +45,7 @@ export const APIUrls = {
     getTeacherGroupsURL: `${tURL}/group/get`,
     archGroupURL: `${tURL}/group/arch`,
     unarchGroupURL: `${tURL}/group/unarch`,
-    getGroupWeigthsURL: `${tURL}/group/weigths`,
+    getGroupWeightsURL: `${tURL}/group/weights`,
 
     //Student/Group
     getCourseGroupsURL: `${sURL}/group/get`,

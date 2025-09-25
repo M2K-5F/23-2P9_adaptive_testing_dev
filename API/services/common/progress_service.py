@@ -10,7 +10,6 @@ from repositories import (
     UserTopic, 
     UserQuestionRepository,
     TopicRepository,
-    AdaptiveQuestionRepository,
     UserTextAnswerRepository
 )
 from repositories.group import user_group
@@ -26,14 +25,12 @@ class ProgressService:
         user_topic_repo: UserTopicRepository,
         user_question_repo: UserQuestionRepository,
         topic_repo: TopicRepository,
-        adaptive_question_repo: AdaptiveQuestionRepository,
         text_answer_repo: UserTextAnswerRepository
     ):  
         self._user_topic_repo = user_topic_repo
         self._user_group = user_group
         self._topic_repo = topic_repo
         self._user_question_repo = user_question_repo
-        self._adaptive_question_repo = adaptive_question_repo
         self._user_text_answer_repo = text_answer_repo
 
 
@@ -61,8 +58,6 @@ class ProgressService:
 
         for user_topic in user_topics:
             self._user_question_repo.delete_all(by_user_topic=user_topic)
-        
-            self._adaptive_question_repo.delete_all(by_user_topic = user_topic)
 
             self._user_text_answer_repo.delete_all(by_user_topic = user_topic)
 
@@ -154,8 +149,6 @@ class ProgressService:
 
         for user_topic in user_topics:
             self._user_question_repo.delete_all(by_user_topic=user_topic)
-        
-            self._adaptive_question_repo.delete_all(by_user_topic = user_topic)
 
             self._user_text_answer_repo.delete_all(by_user_topic = user_topic)
             user_topic.delete_instance()

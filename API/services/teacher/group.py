@@ -1,9 +1,9 @@
 from fastapi.responses import JSONResponse
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
-from models import QuestionWeigth, database
+from models import QuestionWeight, database
 from repositories.question.question_repository import QuestionRepository
-from repositories.question.question_weigth import QuestionWeigthRepository
+from repositories.question.question_weight import QuestionWeightRepository
 from shemas import UserOut
 
 
@@ -13,10 +13,10 @@ class GroupService:
         group: GroupRepository,
         course: CourseRepository,
         question: QuestionRepository,
-        question_weigth: QuestionWeigthRepository,
+        question_weight: QuestionWeightRepository,
     ):
         self._group = group
-        self._question_weigth = question_weigth
+        self._question_weight = question_weight
         self._question = question
         self._course = course
 
@@ -42,7 +42,7 @@ class GroupService:
         )
         questions_by_course = self._question.get_questions_by_course(current_course)
         for question in questions_by_course:
-            self._question_weigth.get_or_create(
+            self._question_weight.get_or_create(
                 True,
                 group = group,
                 question = question
@@ -87,12 +87,12 @@ class GroupService:
     
 
     @database.atomic()
-    def get_question_weigths_by_group(self, group_id: int, user: UserOut):
+    def get_question_weights_by_group(self, group_id: int, user: UserOut):
         current_group = self._group.get_or_none(
             True,
             id = group_id,
             created_by = user.username
         )
 
-        weigths = self._question_weigth.select_where(group = current_group)
-        return JSONResponse([w.dump for w in weigths])
+        weights = self._question_weight.select_where(group = current_group)
+        return JSONResponse([w.dump for w in weights])

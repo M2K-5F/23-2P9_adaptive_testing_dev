@@ -239,10 +239,10 @@ export interface QuestionWeight {
     created_at: string;
     group: CreatedGroup
     question: CreatedQuestion
-    weigth: number;
+    weight: number;
     step: number;
-    max_weigth: number;
-    min_weigth: number;
+    max_weight: number;
+    min_weight: number;
 }
 
 export interface CourseStats extends CourseStatistics {}
