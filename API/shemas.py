@@ -70,8 +70,9 @@ SubmitQuestion = Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]
 
 class TopicSubmitAnswers(BaseModel):
     user_topic_id: int
+    topic_attempt_id: int
     questions: List[
-        Union[SubmitChoiceQuestionUnit, SubmitTextQuestionUnit]
+        SubmitQuestion
     ]
 
 

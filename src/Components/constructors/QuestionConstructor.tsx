@@ -22,14 +22,9 @@ export const QuestionConstructor:FC<{createQuestionHandler: () => void, topic_id
             is_correct: false
         }]
     })
-    
-
-    const correctAnswersCount = createdQuestion.answer_options.filter(opt => opt.is_correct).length
 
     useEffect(() => {
-        if (isCreating) {        
-            console.log(createdQuestion);
-                
+        if (isCreating) {
             handler({...createdQuestion, question_type: questionType}, props.topic_id, 
                 () => {
                     toast.success('Вопрос успешно создан!')

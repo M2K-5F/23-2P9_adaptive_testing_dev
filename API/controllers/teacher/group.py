@@ -51,3 +51,12 @@ def unarch_group(
     service: GroupService = Depends(get_teacher_group_service)
 ) -> JSONResponse:
     return service.unarch_group(current_user, group_id)
+
+
+@group_router.get('/weights')
+def get_weights_by_group(
+    current_user = Depends(get_user_from_request),
+    group_id: int = Query(),
+    service: GroupService = Depends(get_teacher_group_service)
+) -> JSONResponse:
+    return service.get_question_weights_by_group(group_id, current_user)

@@ -1,6 +1,6 @@
 import { APIUrls } from "@/config/api.constants"
 import { ApiService } from "./api.service"
-import { CompletedTopic, CreatedTopic, QuestionToPass, UserTopic } from "@/types/interfaces"
+import { CompletedTopic, CreatedTopic, QuestionToPass, TopicToPass, UserTopic } from "@/types/interfaces"
 
 export const createTopic = (topic_title: string, description: string, course_id: number, score_to_pass: number) => {
     return ApiService.requestToServer(
@@ -76,7 +76,7 @@ export const getTopics = (course_id: number): Promise<CreatedTopic[]> => {
 }
 
 
-export const startPassingTopic = (user_topicId: number): Promise<QuestionToPass[]> => {
+export const startPassingTopic = (user_topicId: number): Promise<TopicToPass> => {
     return ApiService.requestToServer(
         APIUrls.startPassingTopicURL,
         {

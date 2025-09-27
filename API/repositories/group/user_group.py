@@ -21,11 +21,9 @@ class UserGroupRepository(BaseRepository[UserGroup]):
         user_groups = self.select_where(course = course)
         counter = 0
         for user_group in user_groups:
-            self.update_by_instance(
+            self.update(
                 user_group, 
-                {
-                    'course_progress': user_group.completed_topic_count / UserGroup.course.topic_count * 100
-                }
+                progress = user_group.completed_topic_count / user_group.course.topic_count
             )
             counter += 1
 
@@ -37,5 +35,6 @@ class UserGroupRepository(BaseRepository[UserGroup]):
             user_group,
             progress = 0,
             completed_topic_count = 0
+            
         )
         return user_group

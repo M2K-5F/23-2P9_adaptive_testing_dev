@@ -60,7 +60,7 @@ export const FollowedTopic: FC<{topic: CreatedTopic, index: number, userTopic: U
                         <div className="flex flex-col justify-center gap-1">
                             {userTopic 
                                 ?   <>
-                                        {userTopic.progress
+                                        {userTopic.is_attempted
                                             ? userTopic.is_completed
                                                 ?   <Badge variant='default' className= "border-green-500 border p-0 pr-2">
                                                         <Badge variant='outline' className="scale-105 gap-1 h-full border-none bg-green-500 mr-1">

@@ -16,7 +16,8 @@ import {
   BarChart3, 
   Calendar,
   User,
-  ChevronRight
+  ChevronRight,
+  UsersRound
 } from "lucide-react"
 
 export const CreatedCourse: FC<{course: CC}> = ({course}) => {
@@ -91,6 +92,11 @@ export const CreatedCourse: FC<{course: CC}> = ({course}) => {
                 <div className="flex items-center gap-1 text-xs bg-secondary/20 px-2 py-1 rounded-full">
                     <Users className="h-3 w-3" />
                     <span>Студентов: {course.student_count || 0}</span>
+                </div>
+
+                <div className="flex items-center gap-1 text-xs bg-secondary/20 px-2 py-1 rounded-full">
+                    <UsersRound className="h-3 w-3" />
+                    <span>Групп: {course.group_count|| 0}</span>
                 </div>
                 
                 <div className="flex items-center gap-1 text-xs bg-secondary/20 px-2 py-1 rounded-full">
