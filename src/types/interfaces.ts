@@ -134,6 +134,7 @@ export interface CreatedQuestion {
 
 export interface CompletedTopic {
     user_topic_id: number
+    topic_attempt_id: number
     questions: (CompletedQuestion | CompletedTextQuestion)[]
 }
 
@@ -154,6 +155,12 @@ export interface CompletedQuestion {
 export interface CompletedOption {
     id: number
     is_correct: boolean
+}
+
+
+export interface TopicToPass {
+    topic_attempt_id: number,
+    questions: QuestionToPass[]
 }
 
 export interface QuestionToPass {

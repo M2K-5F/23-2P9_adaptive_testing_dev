@@ -23,7 +23,7 @@ function Progress({
         data-slot="progress-indicator"
         className={cn(
           "bg-primary h-full w-full flex-1 transition-all", 
-          value && value >= 50
+          value && value >= 40
           ?   value >= 80
               ?   'bg-green-500'
               :   'bg-yellow-500'

@@ -35,7 +35,8 @@ class UserTopicRepository(BaseRepository[UserTopic]):
             user_topic,
             progress = 0,
             is_completed = 0,
-            is_available = False if user_topic.topic.number_in_course else True
+            is_available = False if user_topic.topic.number_in_course else True,
+            is_attempted = False
         )
 
         return user_topic

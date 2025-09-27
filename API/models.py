@@ -1,6 +1,8 @@
 """database discription"""
 from ast import boolop
+from calendar import c
 from datetime import datetime
+from xmlrpc.client import boolean
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
@@ -143,6 +145,7 @@ class UserQuestion(Table):
     question = ForeignKeyField(Question)
     by_user_topic = ForeignKeyField(UserTopic)
     progress = FloatField(default=0)
+    is_active = BooleanField(default=True)
     
 
 class UserChoiceAnswer(Table):
@@ -162,16 +165,28 @@ class UserTextAnswer(Table):
     is_active = BooleanField(default=True)
 
 
+class TopicAttempt(Table):
+    user_topic = ForeignKeyField(UserTopic, backref='attempts')
+    is_active = BooleanField(default=True)
+
+
+class QuestionAttempt(Table):
+    topic_attempt = ForeignKeyField(TopicAttempt, backref='questions')
+    question = ForeignKeyField(Question)
+    is_adaptive = BooleanField()
+    order_index = IntegerField()
+
+
 if __name__ == "__main__":
     database.connect()
     database.register_function(lambda x: x.lower(), 'lower')
-
     database.create_tables([
         User, Role, UserRole, 
         Course, Topic, Question,
         Answer, UserQuestion, 
         UserTopic, UserTextAnswer, 
-        Group, UserGroup, QuestionWeight
+        Group, UserGroup, QuestionWeight,
+        TopicAttempt, QuestionAttempt
     ])
     database.close()
 

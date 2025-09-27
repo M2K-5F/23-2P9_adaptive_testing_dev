@@ -1,5 +1,7 @@
 from functools import lru_cache
 from fastapi import Depends, dependencies
+from repositories.attempt.question import QuestionAttemptRepository
+from repositories.attempt.topic import TopicAttemptRepository
 from repositories.group.group import GroupRepository
 from repositories.group.user_group import UserGroupRepository
 from repositories.question.question_weight import QuestionWeightRepository
@@ -66,6 +68,16 @@ def get_question_weight_repository():
 
 
 @lru_cache(maxsize=None)
+def get_topic_attempt_repository():
+    return TopicAttemptRepository()
+
+
+@lru_cache(maxsize=None)
+def get_question_attempt_repository():
+    return QuestionAttemptRepository()
+
+
+@lru_cache(maxsize=None)
 def get_group_repo():
     return GroupRepository()
 
@@ -73,28 +85,26 @@ def get_group_repo():
 def get_progress_service(
     user_topic_repo = Depends(get_user_topic_repository),
     user_question_repo = Depends(get_user_question_repository),
-    topic_repo = Depends(get_topic_repository),
     text_answer_repo = Depends(get_user_text_answer_repository),
-    user_group = Depends(get_user_group_repository)
+    user_group = Depends(get_user_group_repository),
+    topic = Depends(get_topic_repository)
 ):
     return PS(
+        topic,
         user_group,
         user_topic_repo,
         user_question_repo,
-        topic_repo,
-        text_answer_repo
+        text_answer_repo,
     )
 
 
 def get_adaptivity_service(
     user_question_repo = Depends(get_user_question_repository),
-    user_topic_repo = Depends(get_user_topic_repository),
-    progress_service = Depends(get_progress_service),
+    question_weight = Depends(get_question_weight_repository)
 ):
     return AS(
         user_question_repo,
-        user_topic_repo,
-        progress_service
+        question_weight
     )
 
 
@@ -125,25 +135,23 @@ def get_student_topic_service(
     course_repo = Depends(get_course_repository),
     topic_repo = Depends(get_topic_repository),
     user_topic_repo = Depends(get_user_topic_repository),
-    user_question_repo = Depends(get_user_question_repository),
-    user_text_answer_repo = Depends(get_user_text_answer_repository),
     question_repo = Depends(get_question_repository),
     progress_service = Depends(get_progress_service),
     adaptivity_service = Depends(get_adaptivity_service),
     user_group = Depends(get_user_group_repository),
-    question_weight = Depends(get_question_weight_repository)
+    topic_attempt = Depends(get_topic_attempt_repository),
+    question_attempt = Depends(get_question_attempt_repository)
 ):
     return STS(
-        question_weight,
         course_repo,
         topic_repo,
         user_topic_repo,
-        user_question_repo,
-        user_text_answer_repo,
         question_repo,
         progress_service,
         adaptivity_service,
-        user_group
+        user_group,
+        topic_attempt, 
+        question_attempt
     )
 
 

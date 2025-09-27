@@ -226,14 +226,14 @@ const QuestionWeightCard: FC<{weight: QuestionWeight}> = ({weight}) => {
                 <span className="text-muted-foreground">Сложность вопроса:</span>
                 <div className="flex items-center gap-2">
                     <div className={`h-2 w-2 rounded-full ${
-                        weight.weight > weight.max_weight * 0.7 ? 'bg-red-500' :
-                        weight.weight > weight.max_weight * 0.45 ? 'bg-yellow-500' :
+                        weight.weight > ((weight.max_weight - weight.min_weight) * 0.66 + weight.min_weight) ? 'bg-red-500' :
+                        weight.weight > ((weight.max_weight - weight.min_weight) * 0.33 + weight.min_weight) ? 'bg-yellow-500' :
                         'bg-green-500'
                     }`} />
 
                     <span className="font-medium">
-                        {weight.weight > weight.max_weight * 0.7 ? 'Сложный' :
-                        weight.weight > weight.max_weight * 0.45 ? 'Средний' :
+                        {weight.weight > ((weight.max_weight - weight.min_weight) * 0.66 + weight.min_weight) ? 'Сложный' :
+                        weight.weight > ((weight.max_weight - weight.min_weight) * 0.33 + weight.min_weight) ? 'Средний' :
                         'Легкий'}
                     </span>
                 </div>

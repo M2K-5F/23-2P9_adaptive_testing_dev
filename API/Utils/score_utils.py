@@ -1,6 +1,7 @@
 from typing import Any, List, Callable, TypeVar, Union
 from fastapi import HTTPException, status
-from models import Question, Answer
+from config import weight_config
+from models import Question, Answer, UserTopic
 from peewee import FloatField
 from shemas import SubmitQuestion, SubmitChoiceQuestionUnit, SubmitTextQuestionUnit
 

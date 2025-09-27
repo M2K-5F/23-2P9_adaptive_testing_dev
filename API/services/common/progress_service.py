@@ -1,9 +1,11 @@
+from encodings.punycode import selective_find
+from stat import FILE_ATTRIBUTE_SPARSE_FILE
 from typing import Dict
 
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from dependencies import user
-from models import UserGroup, UserQuestion
+from models import Question, UserGroup, UserQuestion
 import models
 from repositories import (
     UserTopicRepository,
@@ -14,22 +16,22 @@ from repositories import (
 )
 from repositories.group import user_group
 from repositories.group.user_group import UserGroupRepository
-from shemas import UserOut
+from shemas import SubmitQuestion, UserOut
 
 
 class ProgressService:
     """Service for managing accessibility and progress tracking of topics, courses and questions."""
     def __init__(
         self, 
+        topic: TopicRepository,
         user_group: UserGroupRepository,
         user_topic_repo: UserTopicRepository,
         user_question_repo: UserQuestionRepository,
-        topic_repo: TopicRepository,
         text_answer_repo: UserTextAnswerRepository
     ):  
+        self._topic = topic
         self._user_topic_repo = user_topic_repo
         self._user_group = user_group
-        self._topic_repo = topic_repo
         self._user_question_repo = user_question_repo
         self._user_text_answer_repo = text_answer_repo
 
@@ -57,6 +59,7 @@ class ProgressService:
         user_topics = self._user_topic_repo.get_user_topics_by_user_group(user_group)
 
         for user_topic in user_topics:
+            
             self._user_question_repo.delete_all(by_user_topic=user_topic)
 
             self._user_text_answer_repo.delete_all(by_user_topic = user_topic)
@@ -129,7 +132,7 @@ class ProgressService:
                 completed_topic_count = user_group.completed_topic_count + 1,
                 progress = (
                     (user_group.completed_topic_count + 1) / 
-                    len(self._topic_repo.get_active_topics_by_course(user_group.course))  # pyright: ignore
+                    len(self._topic.get_active_topics_by_course(user_group.course))  # pyright: ignore
                 )
             )
 
@@ -210,3 +213,60 @@ class ProgressService:
         )
 
         return user_topic
+    
+    
+    def save_question_results(
+            self, 
+            user_topic: UserTopic,
+            user: UserOut, 
+            created_question: Question, 
+            submit_question: SubmitQuestion, 
+            question_score: float
+    ):
+        """Procedure which process saving question result based on score
+
+        Args:
+            user (UserOut): current user
+            user_topic (UserTopic): user topic for which question is saved
+            created_question (Question): question from database with unique id
+            submit_question (SubmitQuestion): question data from client with topic id
+            question_score (float): score of question to save result
+        """
+
+        self._user_question_repo.update_all(
+            {'is_active': False},
+            by_user_topic = user_topic,
+            question = created_question,
+            is_active = True
+        )
+
+        user_question = self._user_question_repo.get_or_create_user_question(
+            user.username, 
+            submit_question.by_topic, 
+            created_question
+        )
+
+        user_question = self._user_question_repo.update(
+            user_question,
+            progress = max(
+                question_score, 
+                user_question.progress # pyright: ignore
+            )
+        )
+
+        if submit_question.type == 'text':
+            user_answer = self._user_text_answer_repo.create_user_text_answer(
+                user, 
+                created_question, 
+                submit_question.by_topic, 
+                user_question, 
+                submit_question.text
+            )
+
+            self._user_text_answer_repo.update(
+                user_answer,
+                progress = max(
+                    user_answer.progress,  # pyright: ignore
+                    bool(question_score)
+                )
+            )

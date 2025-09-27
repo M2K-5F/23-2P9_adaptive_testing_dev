@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { Check, ChevronRight, Loader2, X } from 'lucide-react'
 import { Button, Card, Progress, Badge, Separator, CardHeader, CardContent, CardFooter, Loader, Input } from '@/Components'
 import { toast } from 'sonner'
-import { CompletedTopic, QuestionToPass } from '@/types/interfaces'
+import { CompletedTopic, QuestionToPass, TopicToPass } from '@/types/interfaces'
 import { useImmer } from 'use-immer'
 import { startPassingTopic, submitTopic } from '@/services/topic'
 import { useTopicStore } from '@/stores/useTopicStore'
@@ -15,7 +15,7 @@ export const TopicPage = () => {
     const title = searchParams.get('title')
     const navigate = useNavigate()
     const location = useLocation()
-    const [questions, setQuestions] = useState<QuestionToPass[]>([])
+    const [topic, setTopic] = useState<TopicToPass>()
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [selectedAnswers, setSelectedAnswers] = useImmer<Record<number, number[]>>({})
     const [questionAnswersTexts, setAnswerTexts] = useImmer<Record<number, string>>({})
@@ -30,7 +30,7 @@ export const TopicPage = () => {
 
         (async () => {
             try {
-                setQuestions( await startPassingTopic(userTopicId))
+                setTopic( await startPassingTopic(userTopicId))
             } catch (error) {
                 toast.error('Ошибка загрузки вопросов')
             } finally {
@@ -72,13 +72,14 @@ export const TopicPage = () => {
     }
 
     const handleSubmit = async () => {
-        if (isSubmitting) return
+        if (isSubmitting || !topic) return
 
         setIsSubmitting(true)
         try {
             const submissionData: CompletedTopic = {
                 user_topic_id: userTopicId,
-                questions: questions.map(q => {
+                topic_attempt_id: topic.topic_attempt_id,
+                questions: topic.questions.map(q => {
                     if (q.question_type !== 'text') {
                         return {
                             id: q.id,
@@ -112,19 +113,20 @@ export const TopicPage = () => {
         }
     }
 
-    const currentQuestion = questions[currentQuestionIndex]
-    const progress = ((currentQuestionIndex + 1) / questions.length) * 100
-    const is_disabled = questions.length > 0 && !(selectedAnswers[currentQuestion?.id]?.length || questionAnswersTexts[currentQuestion.id]?.length)
-    
-
-    if (isLoading) {
+    if (isLoading || !topic) {
         return (
         <div className="flex justify-center items-center h-dvh w-full">
             <Loader variant='success' />
         </div>
         )
     }
+
+
+    const currentQuestion = topic.questions[currentQuestionIndex]
+    const progress = ((currentQuestionIndex + 1) / topic.questions.length) * 100
+    const is_disabled = topic.questions.length > 0 && !(selectedAnswers[currentQuestion?.id]?.length || questionAnswersTexts[currentQuestion.id]?.length)
     
+
     return (
         <div className="p-4 flex justify-center w-full h-dvh items-center ">
             <Card className="max-w-3xl mb-16 grow">
@@ -132,7 +134,7 @@ export const TopicPage = () => {
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold">{title ?? 'Прохождение темы'}</h2>
                         <Badge variant="outline">
-                            Вопрос {currentQuestionIndex + 1} из {questions.length}
+                            Вопрос {currentQuestionIndex + 1} из {topic.questions.length}
                         </Badge>
                     </div>
                 
@@ -203,7 +205,7 @@ export const TopicPage = () => {
                         Назад
                     </Button>
                 
-                    {currentQuestionIndex < questions.length - 1 
+                    {currentQuestionIndex < topic.questions.length - 1 
                         ?   <Button 
                                 onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
                                 disabled={is_disabled}

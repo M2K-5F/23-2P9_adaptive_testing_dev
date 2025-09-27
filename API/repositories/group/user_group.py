@@ -35,5 +35,6 @@ class UserGroupRepository(BaseRepository[UserGroup]):
             user_group,
             progress = 0,
             completed_topic_count = 0
+            
         )
         return user_group

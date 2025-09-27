@@ -13,7 +13,8 @@ class UserQuestionRepository(BaseRepository[UserQuestion]):
             False, {},
             user = username,
             by_user_topic = by_user_topic,
-            question = question
+            question = question,
+            is_active = True
         )
         return user_question
 

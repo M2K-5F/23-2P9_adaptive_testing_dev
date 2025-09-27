@@ -1,8 +1,12 @@
+from datetime import datetime
 import random
-from typing import List
+from typing import List, Tuple
 from fastapi.responses import JSONResponse
-from models import Question, UserQuestion, UserTopic
+from config import weight_config
+from config.adaptivity_config import ADAPTIVE_QUESTIONS_COUNT_PERCENTAGE, LAST_SCORE, LAST_TIME, QUESTION_WEIGHT, TIME_NORMALIZE_DAYS
+from models import Question, QuestionWeight, Topic, User, UserQuestion, UserTopic
 from repositories import UserQuestionRepository
+from repositories.question.question_weight import QuestionWeightRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from services.common.progress_service import ProgressService
 from shemas import SubmitQuestion, UserOut
@@ -15,123 +19,72 @@ class AdaptivityServise:
     def __init__(
         self,
         user_question_repo: UserQuestionRepository,
-        user_topic_repo: UserTopicRepository,
-        progress_service: ProgressService
+        question_weight: QuestionWeightRepository
     ):
         self._user_question_repo = user_question_repo
-        self._user_topic_repo = user_topic_repo
-        self._progress_service = progress_service
+        self._question_weight = question_weight
 
 
-    # def add_adaptive_questions_to_list(
-    #     self, 
-    #     user: UserOut, 
-    #     user_topic: UserTopic, 
-    #     questions_list: List[dict]
-    # ) -> List[dict]:
+    def get_question_factor(self, user_topic: UserTopic, question: Question, score: float):
+        question_weight = self._question_weight.get_or_none(
+            True,
+            question = question,
+            group = user_topic.by_user_group.group
+        )
+
+        weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
+        self.update_question_weight(question_weight, score)
         
-    #     """Returns list with injected adaptive questions to pass
+        return max(weight / weight_config.BASE_WEIGHT, user_topic.topic.score_for_pass)
 
-    #     Args:
-    #         user (UserOut): current user 
-    #         user_topic (UserTopic): user topic for which adaptive questions need to be inject
-    #         questions_list (List[dict]): list of questions where adaptive questions are injected
 
-    #     Returns:
-    #         List[dict]: List of questions and injected adaptive questions to pass
-    #     """
+    def update_question_weight(self, question_weight: QuestionWeight, score: float):
+        weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
+        step: float = question_weight.step  # pyright: ignore[reportAssignmentType]
+        max_w: float = question_weight.max_weight  # pyright: ignore[reportAssignmentType]
+        min_w: float = question_weight.min_weight  # pyright: ignore[reportAssignmentType]
+        score_step = (((score - 0.5) * 2 ) * step)
+        updated_weight = weight - float(round(score_step, 4))
 
-    #     user_questions = self._user_question_repo.get_user_questions_with_low_score(user_topic)
-    #     adaptive_questions: list[UserQuestion] = []
+        self._question_weight.update(
+            question_weight, 
+            weight = min(max(min_w, updated_weight), max_w)
+        )
 
-    #     for _ in range(min(2, len(user_questions))):
-    #         question = random.choice(user_questions)
-    #         user_questions.remove(question)
-    #         adaptive_questions.append(question)
-        
 
-    #     for user_question in adaptive_questions:
-    #         self._adaptive_question_repo.create_adaptive_question(
-    #             user, user_topic, user_question
-    #         )
-    #         questions_list.insert(
-    #             random.randint(0, len(questions_list)-1),
-    #             {
-    #                 **user_question.question.dump,
-    #                 "answer_options": [{
-    #                         "id": answer.id,
-    #                         "text": "" if user_question.question.question_type == 'text' else answer.text
-    #                     } for answer in user_question.question.created_answers]
-    #             }
-    #         )
-        
-    #     return questions_list
+    def calculate_adaptive_question_weight(self, question_weight: QuestionWeight, user: User):
+        weight: float = (question_weight.weight) / weight_config.BASE_WEIGHT # pyright: ignore[reportAssignmentType]
+        last_question = (self._user_question_repo.get_or_none(
+            True,
+            is_active = True,
+            question = question_weight.question,
+            user = user
+        ))
+        last_progress: float = last_question.progress  # pyright: ignore[reportAssignmentType]
+        answer_time: datetime = last_question.created_at  # pyright: ignore[reportAssignmentType]
+        last_time = datetime.now() - answer_time
+        normalized_time = (last_time.days / TIME_NORMALIZE_DAYS)
+        value = (
+            weight * QUESTION_WEIGHT + 
+            (1- last_progress) * LAST_SCORE + 
+            normalized_time * LAST_TIME
+        )
+
+        return value
+
     
+    def get_adaptive_questions(self, user_topic: UserTopic, questions_count: int):
+        question_weights: List[QuestionWeight] = self._question_weight.get_previous_question_weights(user_topic)
 
-    # def save_adaptive_question_results(
-    #     self, user: UserOut, user_topic: UserTopic,
-    #     submit_question: SubmitQuestion
-    # ) -> None:
-        
-    #     """Procedure which process saving result of adaptive question and delete it
+        question_pool: List[Tuple[float, Question]] = []
 
-    #     Args:
-    #         user (UserOut): current user
-    #         user_topic (UserTopic): topic for which the question was be added
-    #         submit_question (SubmitQuestion): question data from client for get origin user topic for which question was added
-    #     """
+        for question_weight in question_weights:
+            value = self.calculate_adaptive_question_weight(
+                question_weight, 
+                user_topic.user  # pyright: ignore
+            )
+            question_pool.append((value, question_weight.question))  # pyright: ignore
 
-    #     user_topic_by_adaptive_question = self._user_topic_repo.get_or_none(True,
-    #         user = user.username,
-    #         topic = submit_question.by_topic
-    #     )
-        
-    #     user_questions_by_user_topic = self._user_question_repo.get_by_user_topic(
-    #         user_topic_by_adaptive_question
-    #     )
-        
-    #     user_topic_score = get_average_score(
-    #         user_questions_by_user_topic, 
-    #         lambda q: q.progress
-    #     )
+        question_pool.sort(key=lambda q: q[0], reverse=True)
 
-    #     self._progress_service.update_user_topic_score(
-    #         user_topic_by_adaptive_question,
-    #         max(
-    #             user_topic_score, 
-    #             user_topic_by_adaptive_question.progress # pyright: ignore
-    #         )
-    #     )
-
-    #     self._adaptive_question_repo.delete(True, 
-    #         question = submit_question.id, 
-    #         for_user_topic = user_topic
-    #     )    
-
-
-    # def get_adaptive_questions_to_list(
-    #     self,
-    #     user_topic: UserTopic,
-    #     questions_list: List[SubmitQuestion],
-    # ) -> List[Question]:
-    #     """Method which get list of adaptive questions
-
-    #     Args:
-    #         user_topic (UserTopic): user topic 
-    #         questions_list (List[Question]): list of created questions from database
-
-    #     Returns:
-    #         List[Question]: list of adaptive questions
-    #     """
-        
-    #     submit_adaptive_questions: List[SubmitQuestion] = list(
-    #         filter(lambda q: q.by_topic != user_topic.topic.id, questions_list)
-    #     )
-    #     to_return = []
-
-    #     for q in submit_adaptive_questions:
-    #         adaptive_question = self._adaptive_question_repo.get_adaptive_question(q.id, user_topic)
-    #         current_question: Question = adaptive_question.question # pyright: ignore
-    #         to_return.append(current_question)
-        
-    #     return to_return
+        return [q[1] for q in question_pool[:int(ADAPTIVE_QUESTIONS_COUNT_PERCENTAGE / 100 * questions_count)]]

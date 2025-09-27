@@ -78,7 +78,7 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Баллы</SelectLabel>
+                                    <SelectLabel>Количество</SelectLabel>
                                     {Array.from([5, 10, 15, 20, 25, 30]).map((score) => {
                                         return <SelectItem value={score.toString()}>{score}</SelectItem>
                                     })
