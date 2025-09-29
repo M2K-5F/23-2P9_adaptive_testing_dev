@@ -28,7 +28,7 @@ export function TopicsPortal() {
             className={clsx('p-4')}
         >
             <header className={clsx(
-                'w-full h-full grid justify-center mb-4 grid-rows-2'
+                'w-full h-full grid justify-center mb-1  grid-rows-2'
             )}>
 
                 <div 

@@ -25,7 +25,7 @@ export const OpenCloseSvg: FC<{className?: string, width?: number, onClick?: Rea
                 width="6.002943" 
                 height="1.990380" 
                 transform="rotate(-139.147 16.033691 16.271484)" 
-                fill="white" 
+                fill="currentColor" 
                 fillOpacity="1.000000"
                 ></rect>
                 
@@ -81,14 +81,14 @@ export const OpenCloseSvg: FC<{className?: string, width?: number, onClick?: Rea
                   22.01 7.01 21.75 6.9C21.48 6.79 21.21 
                   6.71 20.94 6.66C20.66 6.6 20.38 6.57 
                   20.09 6.57L9.89 6.59Z" 
-                  fill="white" 
+                  fill="currentColor" 
                   fillOpacity="1.000000" 
                   fillRule="nonzero"
                   ></path>
                   
                   <path id="rect" 
                   d="M8.49 5.5L10.53 5.5L10.59 24.41L8.54 24.41L8.49 5.5Z" 
-                  fill="white" 
+                  fill="currentColor" 
                   fillOpacity="1.000000" 
                   fillRule="evenodd"
                   ></path>

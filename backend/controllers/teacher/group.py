@@ -11,7 +11,7 @@ group_router = APIRouter(prefix='/group', tags=['Teacher/Group'])
 
 
 @group_router.post('/create')
-def create_group(
+async def create_group(
     current_user = Depends(get_user_from_request),
     service: GroupService = Depends(get_teacher_group_service),
     course_id: int = Query(),
@@ -27,7 +27,7 @@ def create_group(
 
 
 @group_router.get('/get')
-def get_groups(
+async def get_groups(
     current_user = Depends(get_user_from_request),
     service: GroupService = Depends(get_teacher_group_service),
     course_id: int = Query()
@@ -36,7 +36,7 @@ def get_groups(
 
 
 @group_router.put('/arch')
-def arch_group(
+async def arch_group(
     current_user = Depends(get_user_from_request),
     group_id: int = Query(),
     service: GroupService = Depends(get_teacher_group_service)
@@ -45,7 +45,7 @@ def arch_group(
 
 
 @group_router.put('/unarch')
-def unarch_group(
+async def unarch_group(
     current_user = Depends(get_user_from_request),
     group_id: int = Query(),
     service: GroupService = Depends(get_teacher_group_service)
@@ -54,7 +54,7 @@ def unarch_group(
 
 
 @group_router.get('/weights')
-def get_weights_by_group(
+async def get_weights_by_group(
     current_user = Depends(get_user_from_request),
     group_id: int = Query(),
     service: GroupService = Depends(get_teacher_group_service)

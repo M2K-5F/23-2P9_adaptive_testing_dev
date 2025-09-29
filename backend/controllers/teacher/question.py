@@ -10,7 +10,7 @@ question_router = APIRouter(prefix='/question', tags=['Teacher/Question'])
 
 
 @question_router.post('/create', summary='Create question by topic')
-def create_teacher_question(
+async def create_teacher_question(
     current_user = Depends(get_user_from_request),
     topic_id = Query(),
     question: QuestionBase = Body(),
@@ -20,7 +20,7 @@ def create_teacher_question(
 
 
 @question_router.get('/get', summary='Get created by teacher questions at topic')
-def get_questions(
+async def get_questions(
     current_user = Depends(get_user_from_request),
     topic_id = Query(),
     service: TQS = Depends(get_teacher_question_service)
@@ -29,7 +29,7 @@ def get_questions(
 
 
 @question_router.put('/arch')
-def arch_question(
+async def arch_question(
     current_user = Depends(get_user_from_request),
     question_id = Query(),
     service: TQS = Depends(get_teacher_question_service)
@@ -38,7 +38,7 @@ def arch_question(
 
 
 @question_router.put('/unarch')
-def unarch_question(
+async def unarch_question(
     current_user = Depends(get_user_from_request),
     question_id = Query(),
     service: TQS = Depends(get_teacher_question_service)

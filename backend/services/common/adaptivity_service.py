@@ -1,7 +1,6 @@
 from datetime import datetime
 import random
 from typing import List, Tuple
-from fastapi.responses import JSONResponse
 from config import weight_config
 from config.adaptivity_config import ADAPTIVE_QUESTIONS_COUNT_PERCENTAGE, LAST_SCORE, LAST_TIME, QUESTION_WEIGHT, TIME_NORMALIZE_DAYS
 from models import Question, QuestionWeight, Topic, User, UserQuestion, UserTopic
@@ -34,8 +33,8 @@ class AdaptivityServise:
 
         weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
         self.update_question_weight(question_weight, score)
-        
-        return max(weight / weight_config.BASE_WEIGHT, user_topic.topic.score_for_pass)
+        print(max((weight - weight_config.MIN_WEIGHT) / (weight_config.BASE_WEIGHT - weight_config.MIN_WEIGHT), user_topic.topic.score_for_pass))
+        return max((weight - weight_config.MIN_WEIGHT) / (weight_config.BASE_WEIGHT - weight_config.MIN_WEIGHT), user_topic.topic.score_for_pass)
 
 
     def update_question_weight(self, question_weight: QuestionWeight, score: float):

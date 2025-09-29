@@ -1,6 +1,6 @@
 import React, { FC, memo, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useCourseStore } from "@/stores/useCourseStore";
-import { OpenCloseSvg } from "@/components/ui/aside-close";
+import { OpenCloseSvg } from "@/components/ui/aside-button";
 import { useAsideVisibilityStore } from "@/layouts/AppLayout";
 import clsx from "clsx";
 import { AsideDetail } from "./aside-details";

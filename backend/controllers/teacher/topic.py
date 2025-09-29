@@ -8,7 +8,7 @@ from shemas import TopicToCreate, UserOut
 topic_router = APIRouter(prefix="/topic", tags=["Teacher/Topics"])
 
 @topic_router.post('/create')
-def create_teacher_topic(
+async def create_teacher_topic(
     current_user: UserOut = Depends(get_user_from_request),
     created_topic: TopicToCreate = Body(),
     service: TTS = Depends(get_techer_topic_service)
@@ -18,7 +18,7 @@ def create_teacher_topic(
 
 
 @topic_router.put('/arch')
-def arch_topic(
+async def arch_topic(
     current_user = Depends(get_user_from_request),
     topic_id: str = Query(),
     service: TTS = Depends(get_techer_topic_service)
@@ -27,7 +27,7 @@ def arch_topic(
 
 
 @topic_router.put('/unarch')
-def unarch_topic(
+async def unarch_topic(
     current_user = Depends(get_user_from_request),
     topic_id: str = Query(),
     service: TTS = Depends(get_techer_topic_service)

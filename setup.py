@@ -4,7 +4,7 @@ setup(
     name="adaptive_testing",
     version="0.1.0",
     python_requires="==3.8.10",
-    packages=find_packages('./backend'),
+    packages=find_packages(),
     install_requires=[
         "annotated-types==0.7.0",
         "anyio==4.6.2",

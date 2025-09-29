@@ -12,7 +12,7 @@ group_router = APIRouter(prefix='/group', tags=["Student/group"])
 
 
 @group_router.get('/get')
-def get_group_list(
+async def get_group_list(
     current_user: UserOut = Depends(get_user_from_request),
     course_id: int = Query(),
     service: GroupService = Depends(get_student_group_service)

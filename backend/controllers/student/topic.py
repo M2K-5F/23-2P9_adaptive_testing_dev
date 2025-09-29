@@ -19,7 +19,7 @@ async def get_followed_teacher_topics(
 
 
 @topic_router.get("/get", summary='Get topics by any course')
-def get_teacher_topics(
+async def get_teacher_topics(
     current_user: UserOut = Depends(get_user_from_request),
     course_id = Query(),
     topic_service: TopicService = Depends(get_student_topic_service)
