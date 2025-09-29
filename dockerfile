@@ -4,5 +4,5 @@ COPY setup.py .
 RUN pip install -e .
 COPY . .
 EXPOSE 8001
-WORKDIR /app/API
+WORKDIR /app/backend
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
