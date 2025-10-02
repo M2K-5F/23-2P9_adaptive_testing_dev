@@ -1,15 +1,9 @@
 from datetime import datetime
-import random
 from typing import List, Tuple
-from config import weight_config
-from config.adaptivity_config import ADAPTIVE_QUESTIONS_COUNT_PERCENTAGE, LAST_SCORE, LAST_TIME, QUESTION_WEIGHT, TIME_NORMALIZE_DAYS
-from models import Question, QuestionWeight, Topic, User, UserQuestion, UserTopic
+from config.adaptivity_config import TIME_NORMALIZE_DAYS
+from models import AdaptivityProfile, Question, QuestionWeight, User, UserTopic
 from repositories import UserQuestionRepository
 from repositories.question.question_weight import QuestionWeightRepository
-from repositories.topic.user_topic_repository import UserTopicRepository
-from services.common.progress_service import ProgressService
-from shemas import SubmitQuestion, UserOut
-from utils.score_utils import get_average_score
 
 
 class AdaptivityServise:
@@ -33,26 +27,28 @@ class AdaptivityServise:
 
         weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
         self.update_question_weight(question_weight, score)
-        print(max((weight - weight_config.MIN_WEIGHT) / (weight_config.BASE_WEIGHT - weight_config.MIN_WEIGHT), user_topic.topic.score_for_pass))
-        return max((weight - weight_config.MIN_WEIGHT) / (weight_config.BASE_WEIGHT - weight_config.MIN_WEIGHT), user_topic.topic.score_for_pass)
+        weight_profile = question_weight.profile
+
+        return max( weight / weight_profile.base_weight, user_topic.topic.score_for_pass)
 
 
     def update_question_weight(self, question_weight: QuestionWeight, score: float):
-        weight: float = question_weight.weight  # pyright: ignore[reportAssignmentType]
-        step: float = question_weight.step  # pyright: ignore[reportAssignmentType]
-        max_w: float = question_weight.max_weight  # pyright: ignore[reportAssignmentType]
-        min_w: float = question_weight.min_weight  # pyright: ignore[reportAssignmentType]
-        score_step = (((score - 0.5) * 2 ) * step)
-        updated_weight = weight - float(round(score_step, 4))
+        weight_profile = question_weight.profile
+
+        score_step: float = (((score - weight_profile.score_bias) * 2 ) * weight_profile.base_step)  # pyright: ignore[reportAssignmentType]
+        updated_weight: float = question_weight.weight - float(round(score_step, 4))
 
         self._question_weight.update(
             question_weight, 
-            weight = min(max(min_w, updated_weight), max_w)
+            weight = min(max(weight_profile.min_weight, updated_weight), weight_profile.max_weight)
         )
 
 
     def calculate_adaptive_question_weight(self, question_weight: QuestionWeight, user: User):
-        weight: float = (question_weight.weight) / weight_config.BASE_WEIGHT # pyright: ignore[reportAssignmentType]
+        weight_profile = question_weight.profile
+        adaptive_profile: AdaptivityProfile = question_weight.group.profile
+
+        weight: float = (question_weight.weight) / weight_profile.base_weight # pyright: ignore[reportAssignmentType]
         last_question = (self._user_question_repo.get_or_none(
             True,
             is_active = True,
@@ -64,9 +60,9 @@ class AdaptivityServise:
         last_time = datetime.now() - answer_time
         normalized_time = (last_time.days / TIME_NORMALIZE_DAYS)
         value = (
-            weight * QUESTION_WEIGHT + 
-            (1- last_progress) * LAST_SCORE + 
-            normalized_time * LAST_TIME
+            weight * adaptive_profile.question_weight + 
+            (1- last_progress) * adaptive_profile.last_score + 
+            normalized_time * adaptive_profile.time_since_last
         )
 
         return value
@@ -86,4 +82,6 @@ class AdaptivityServise:
 
         question_pool.sort(key=lambda q: q[0], reverse=True)
 
-        return [q[1] for q in question_pool[:int(ADAPTIVE_QUESTIONS_COUNT_PERCENTAGE / 100 * questions_count)]]
+        adaptivity_profile: AdaptivityProfile = user_topic.by_user_group.group.profile
+
+        return [question_pool[i][1] for i in range(min(int(adaptivity_profile.max_adaptive_questions_ratio * questions_count), adaptivity_profile.max_adaptive_questions_count))]  # pyright: ignore

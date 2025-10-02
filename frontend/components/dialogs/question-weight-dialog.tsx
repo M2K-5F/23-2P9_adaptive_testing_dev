@@ -19,7 +19,8 @@ import {
   TrendingDown, 
   Target,
   Hash,
-  Calendar
+  Calendar,
+  BadgeSwissFranc
 } from 'lucide-react';
 import { getGroupWeights } from '@/services/group';
 import { Loader } from '../other/Loader';
@@ -70,7 +71,7 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
 
                 {weights.length > 0 && !isLoading 
                     ?   <>
-                            <div className="flex-1 pr-4 overflow-y-scroll scrollbar-hidden">
+                            <div className="flex-1 overflow-y-scroll scrollbar-hidden">
                                 <div className="space-y-4">
                                     {weights.map((weight) => (
                                         <QuestionWeightCard weight={weight} />
@@ -115,11 +116,11 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
 
 const QuestionWeightCard: FC<{weight: QuestionWeight}> = ({weight}) => {
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-        })
+        return new Date(dateString).toLocaleDateString()
+        // day: 'numeric',
+        // month: 'short',
+        // year: 'numeric'
+        // })
     }
 
     const getWeightPercentage = (weight: number, min: number, max: number) => {
@@ -180,18 +181,18 @@ const QuestionWeightCard: FC<{weight: QuestionWeight}> = ({weight}) => {
 
             <div className="space-y-2">
                 <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Минимум: {weight.min_weight}</span>
-                    <span>Максимум: {weight.max_weight}</span>
+                    <span>Минимум: {weight.profile.min_weight}</span>
+                    <span>Максимум: {weight.profile.max_weight}</span>
                 </div>
                 <Progress 
-                    value={getWeightPercentage(weight.weight, weight.min_weight, weight.max_weight)}
+                    value={getWeightPercentage(weight.weight, weight.profile.min_weight, weight.profile.max_weight)}
                     className="h-2"
                     offsetValue={0}
                 />
                 <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Диапазон веса</span>
-                    <Badge variant={getWeightVariant(weight.weight, weight.min_weight, weight.max_weight)}>
-                        {getWeightPercentage(weight.weight, weight.min_weight, weight.max_weight).toFixed(1)}%
+                    <Badge variant={getWeightVariant(weight.weight, weight.profile.min_weight, weight.profile.max_weight)}>
+                        {getWeightPercentage(weight.weight, weight.profile.min_weight, weight.profile.max_weight).toFixed(1)}%
                     </Badge>
                 </div>
             </div>
@@ -200,40 +201,41 @@ const QuestionWeightCard: FC<{weight: QuestionWeight}> = ({weight}) => {
                 <div className="flex items-center gap-1">
                     <Target className="h-3 w-3 text-blue-500" />
                     <span className="font-medium">Шаг:</span>
-                    <span>{weight.step}</span>
+                    <span>{weight.profile.base_step}</span>
                 </div>
                 
                 <div className="flex items-center gap-1">
                     <TrendingUp className="h-3 w-3 text-green-500" />
                     <span className="font-medium">Макс:</span>
-                    <span>{weight.max_weight}</span>
+                    <span>{weight.profile.max_weight}</span>
                 </div>
                 
                 <div className="flex items-center gap-1">
                     <TrendingDown className="h-3 w-3 text-red-500" />
                     <span className="font-medium">Мин:</span>
-                    <span>{weight.min_weight}</span>
+                    <span>{weight.profile.min_weight}</span>
                 </div>
                 
                 <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3 text-purple-500" />
-                    <span className="font-medium">Создан:</span>
-                    <span>{formatDate(weight.created_at)}</span>
+                    <Calendar className="h-3 mr-1  w-3 text-purple-500" />
+                    Создан:<br />
+                    {formatDate(weight.created_at)}
                 </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-start gap-3 text-xs">
                 <span className="text-muted-foreground">Сложность вопроса:</span>
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center gap-1">
                     <div className={`h-2 w-2 rounded-full ${
-                        weight.weight > ((weight.max_weight - weight.min_weight) * 0.66 + weight.min_weight) ? 'bg-red-500' :
-                        weight.weight > ((weight.max_weight - weight.min_weight) * 0.33 + weight.min_weight) ? 'bg-yellow-500' :
+                        weight.weight > ((weight.profile.max_weight - weight.profile.min_weight) * 0.66 + weight.profile.min_weight) ? 'bg-red-500' :
+                        weight.weight > ((weight.profile.max_weight - weight.profile.min_weight) * 0.33 + weight.profile.min_weight) ? 'bg-yellow-500' :
                         'bg-green-500'
                     }`} />
 
                     <span className="font-medium">
-                        {weight.weight > ((weight.max_weight - weight.min_weight) * 0.66 + weight.min_weight) ? 'Сложный' :
-                        weight.weight > ((weight.max_weight - weight.min_weight) * 0.33 + weight.min_weight) ? 'Средний' :
+                        {weight.weight > ((weight.profile.max_weight - weight.profile.min_weight) * 0.66 + weight.profile.min_weight) ? 'Сложный' :
+                        weight.weight > ((weight.profile.max_weight - weight.profile.min_weight) * 0.33 + weight.profile.min_weight) ? 'Средний' :
                         'Легкий'}
                     </span>
                 </div>

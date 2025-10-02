@@ -1,6 +1,7 @@
 import random
 from typing import List, Union
 from fastapi import HTTPException
+from backend.repositories.profiles.weight import WeightProfileRepository
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
 from repositories.question.question_weight import QuestionWeightRepository
@@ -25,6 +26,7 @@ class QuestionService:
     
     def __init__(
         self,
+        weight_profile: WeightProfileRepository,
         topic_repository: TopicRepository,
         question_weight: QuestionWeightRepository,
         user_question_repository: UserQuestionRepository,
@@ -35,6 +37,7 @@ class QuestionService:
         group: GroupRepository
     ):
         self._topic_repo = topic_repository
+        self._weight_profile = weight_profile
         self._group = group
         self._question_weight = question_weight
         self._user_question_repo = user_question_repository
@@ -63,6 +66,11 @@ class QuestionService:
 
         question_type = question_to_create.question_type
 
+        current_weight_profile = self._weight_profile.get_or_none(
+            True,
+            name = question_to_create.base_weight_profile
+        )
+
         if question_type != 'text':
             correct_answers_count = len(list(filter(lambda q: q.is_correct, question_to_create.answer_options )))
             if correct_answers_count > 1:
@@ -81,7 +89,8 @@ class QuestionService:
         created_question = self._question_repo.get_or_create(
             True, 
             {
-                "question_type": question_type
+                "question_type": question_type,
+                "base_weight_profile": current_weight_profile.name
             },
             text = question_to_create.text,
             by_topic = current_topic
@@ -94,17 +103,23 @@ class QuestionService:
                 is_correct = True if question_to_create.question_type == "text" else answer_option.is_correct,
                 by_question = created_question
             )
+            
         current_topic = self._topic_repo.update(
             current_topic, 
             question_count = current_topic.question_count + 1
         )
+
         groups_by_course = self._group.select_where(by_course = current_topic.by_course)
+
         for group in groups_by_course:
-            self._question_weight.get_or_create(
+            question_weight = self._question_weight.get_or_create(
                 True,
-                {},
+                {
+                    'weight': current_weight_profile.base_weight,
+                    'profile': created_question.base_weight_profile.name,
+                },
                 group = group,
-                question = created_question
+                question = created_question,
             )
         return JSONResponse(created_question.dump)
 

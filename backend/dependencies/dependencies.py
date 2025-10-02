@@ -1,5 +1,7 @@
 from functools import lru_cache
 from fastapi import Depends, dependencies
+from backend.repositories.profiles.adaptivity import AdaptivityProfileRepository
+from backend.repositories.profiles.weight import WeightProfileRepository
 from repositories.attempt.question import QuestionAttemptRepository
 from repositories.attempt.topic import TopicAttemptRepository
 from repositories.group.group import GroupRepository
@@ -80,6 +82,16 @@ def get_question_attempt_repository():
 @lru_cache(maxsize=None)
 def get_group_repo():
     return GroupRepository()
+
+
+@lru_cache(maxsize=None)
+def get_weight_profile_repository():
+    return WeightProfileRepository()
+
+
+@lru_cache(maxsize=None)
+def get_adaptivity_profile_repository():
+    return AdaptivityProfileRepository()
 
 
 def get_progress_service(
@@ -195,9 +207,11 @@ def get_teacher_question_service(
     question_repo = Depends(get_question_repository),
     progress_service = Depends(get_progress_service),
     question_weight = Depends(get_question_weight_repository),
-    group = Depends(get_group_repo)
+    group = Depends(get_group_repo),
+    weight_profile = Depends(get_weight_profile_repository)
 ):
     return TQS(
+        weight_profile,
         topic_repo, 
         question_weight,
         user_question_repo,
@@ -213,9 +227,11 @@ def get_teacher_group_service(
     group = Depends(get_group_repo),
     course = Depends(get_course_repository),
     question = Depends(get_question_repository),
-    question_weight = Depends(get_question_weight_repository)
+    question_weight = Depends(get_question_weight_repository),
+    adaptivity_profile = Depends(get_adaptivity_profile_repository)
 ):
     return TGS(
+        adaptivity_profile,
         group,
         course,
         question,

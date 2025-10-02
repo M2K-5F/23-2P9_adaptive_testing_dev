@@ -1,17 +1,18 @@
 import { APIUrls } from "@/config/api.constants"
 import { ApiService } from "./api.service"
+import { GroupCreate } from "@/types/interfaces"
 
-export const createGroup = (course_id: number, title: string, max_count: number) => {
+export const createGroup = (create_data: GroupCreate) => {
     return ApiService.requestToServer(
         APIUrls.createGroupURL,
         {
             credentials: 'include',
-            method: 'post'
-        },
-        {
-            course_id: course_id,
-            title: title,
-            max_count: max_count
+            method: 'post',
+            body: JSON.stringify(create_data),
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
         }
     )
 }

@@ -108,7 +108,9 @@ export interface AnswerOption {
 
 export interface QuestionCreate {
     text: string
+    question_type: 'text' | 'choice'
     answer_options: AnswerCreate[]
+    base_weight_profile: 'Aggressive' | 'Balanced' | 'Gentle'
 }
 
 
@@ -241,15 +243,32 @@ export interface UserTopicDetail {
 }
 
 
+export interface WeightProfile {
+    id: number
+    created_at: string
+    name: 'Aggressive' | 'Balanced' | 'Gentle'
+    base_weight: number
+    base_step: number
+    min_weight: number
+    max_weight: number
+    score_bias: number
+}
+
 export interface QuestionWeight {
     id: number;
     created_at: string;
     group: CreatedGroup
     question: CreatedQuestion
     weight: number;
-    step: number;
-    max_weight: number;
-    min_weight: number;
+    profile: WeightProfile
+}
+
+
+export interface GroupCreate {
+    course_id: number
+    title: string
+    max_student_count: number
+    profile: 'Aggressive' | 'Balanced' | 'Gentle'
 }
 
 export interface CourseStats extends CourseStatistics {}

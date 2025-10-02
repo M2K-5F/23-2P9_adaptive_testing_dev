@@ -202,25 +202,24 @@ const GroupCard: FC<{group: GroupDetail, isExpanded: boolean, toggleGroup: (grou
                             ?   <ChevronUpIcon className="h-5 w-5 text-muted-foreground" />
                             :   <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
                         }
-                        <div className="flex-1">
-                            <CardTitle className="text-lg flex items-center gap-3">
-                                {group.title}
-                                <Badge variant="secondary">
-                                    {group.student_count}/{group.max_student_count} студентов
-                                </Badge>
-                            </CardTitle>
-                            <CardDescription>
-                                Средний прогресс: {Math.round(group.avg_progress * 100)}%
-                                {!hasStudents && ' • Группа пустая'}
-                            </CardDescription>
+                        <div className='flex flex-wrap justify-start w-full items-center gap-4'>
+                            <div className="flex-1">
+                                <CardTitle className="text-lg flex items-baseline gap-3">
+                                    {group.title}
+                                    <Badge variant="secondary">
+                                        {group.student_count}/{group.max_student_count} студентов
+                                    </Badge>
+                                </CardTitle>
+                                <CardDescription>
+                                    Средний прогресс: {Math.round(group.avg_progress * 100)}%
+                                    {!hasStudents && ' • Группа пустая'}
+                                </CardDescription>
+                            </div>
+                            <div className={clsx('mr-4')} >
+                                <QuestionWeightsDialog groupId={group.id}/>
+                            </div>
                         </div>
                     </div>
-                    <div className={clsx('mr-4')} >
-                        <QuestionWeightsDialog groupId={group.id}/>
-                    </div>
-                    <Badge variant={isExpanded ? "default" : "outline"}>
-                        {isExpanded ? 'Развернуто' : 'Свернуто'}
-                    </Badge>
                 </div>
             </CardHeader>
 

@@ -1,4 +1,5 @@
 """API templates"""
+from ast import literal_eval
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field, field_validator
 from typing import List, Union, Literal
@@ -44,6 +45,8 @@ class QuestionBase(BaseModel):
     text: str 
     question_type: Literal['text', 'choice']
     answer_options: List[AnswerOptionBase]
+    base_weight_profile: Literal['Aggressive', 'Balanced', 'Gentle']
+
 
 
 class SubmitAnswerUnit(BaseModel):
@@ -86,3 +89,10 @@ class TopicToCreate(BaseModel):
     description: str
     course_id: int
     score_for_pass: float
+
+    
+class GroupToCreate(BaseModel):
+    course_id: int
+    title: str = Field(min_length=3, max_length=128)
+    max_student_count: int
+    profile: Literal['Aggressive', 'Balanced', 'Gentle']

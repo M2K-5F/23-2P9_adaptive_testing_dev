@@ -17,20 +17,25 @@ import { FC, memo, useEffect, useId, useState } from "react"
 import { Plus } from "lucide-react"
 import { useImmer } from "use-immer"
 import { useCreateGroup } from "@/hooks/useCreateGroup"
+import { GroupCreate } from "@/types/interfaces"
 
 
 export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = memo(({courseId, callback}) => {
     const createdCourses = useCourseStore(s => s.createdCourses)
     const createHandler = useCreateGroup()
-    const [formData, setData] = useImmer<{title: string, max_count: number}>({title: '', max_count: 20})
+    const [group, setGroup] = useImmer<GroupCreate>({
+        title: '', 
+        max_student_count: 20,
+        course_id: courseId,
+        profile: 'Balanced'
+    })
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isCreating, setIsCreating] = useState<boolean>(false)
     
 
     useEffect(() => {
         isCreating && createHandler(
-            courseId, 
-            formData, 
+            group,
             () => {
                 callback()
                 setIsOpen(false)
@@ -65,14 +70,16 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
                         <Input 
                             id="title" 
                             name="title"  
-                            value={formData.title}
-                            onChange={(e) => {setData(d => {d.title = e.currentTarget.value})}}
+                            value={group.title}
+                            onChange={(e) => {setGroup(d => {d.title = e.currentTarget.value})}}
                         />
                     </div>
                 </div>
-                <div className="flex gap-3">
-                        <Label htmlFor={''}>Максимальное количество студентов:</Label>
-                        <Select onValueChange={(value => {setData(d => {d.max_count = Number(value)})})} value={formData.max_count.toString()}>
+
+                <div className="flex gap-4 flex-col">
+                    <div className=" gap-2 grid">
+                        <Label className="h-fit" htmlFor={''}>Максимальное количество студентов:</Label>
+                        <Select onValueChange={(value => {setGroup(d => {d.max_student_count = Number(value)})})} value={group.max_student_count.toString()}>
                             <SelectTrigger>
                                 <SelectValue placeholder='Количество' />
                             </SelectTrigger>
@@ -87,6 +94,33 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
                             </SelectContent>
                         </Select>
                     </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="profile"  className="">Профиль адаптивности группы:</Label>
+                        <Select
+                            value={group.profile}
+                            onValueChange={(v: 'Aggressive' | 'Balanced' | 'Gentle') => {
+                                setGroup(d => {
+                                    d.profile = v
+                                })
+                            }}
+                        >
+                            <SelectTrigger  id="profile" className='' >
+                                <SelectValue placeholder='Тип вопроса' />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>
+                                        Профиль
+                                    </SelectLabel>
+                                    <SelectItem value="Aggressive">Реактивный</SelectItem>
+                                    <SelectItem value="Balanced">Сбалансированный</SelectItem>
+                                    <SelectItem value="Gentle">Консервативный</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
                 <DialogFooter>
                     <Button onClick={() => setIsOpen(false)} variant={'outline'}>Закрыть</Button>
                     <Button disabled={isCreating} onClick={() => setIsCreating(true)} >Создать</Button>

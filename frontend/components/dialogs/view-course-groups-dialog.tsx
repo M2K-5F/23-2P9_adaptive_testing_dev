@@ -15,7 +15,7 @@ import {
 import { getCreatedGroups,archGroup, unarchGroup } from "@/services/group"
 import { FC, memo, useEffect, useState } from "react"
 import { useUserStore } from "@/stores/useUserStore"
-import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar } from "lucide-react"
+import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar, Loader2 } from "lucide-react"
 import { CreatedGroup } from "@/types/interfaces"
 import clsx from "clsx"
 import { CreateGroupDialog } from "./create-group-dialog"
@@ -34,13 +34,11 @@ export const ViewGroupDialog: FC<{courseId: number, className?: string}> = memo(
     const [searchQuery, setSearchQuery] = useState("")
 
     const archHandler = (groupId: number) => {
-        archGroup(groupId)
-        .then(fetchGroups)
+        return archGroup(groupId).then(fetchGroups)
     }
 
     const unarchHandler = (groupId: number) => {
-        unarchGroup(groupId)
-        .then(fetchGroups)
+        return unarchGroup(groupId).then(fetchGroups)
     }
 
     const fetchGroups = async () => {
@@ -104,7 +102,7 @@ export const ViewGroupDialog: FC<{courseId: number, className?: string}> = memo(
 
                 
                 <div className="flex-1 overflow-y-auto scrollbar-hidden">
-                    {isLoading 
+                    {isLoading && groupList.length < 1
                         ?   <div className="flex justify-center py-8">
                                 <Loader variant="success" />
                             </div>
@@ -176,11 +174,14 @@ export const ViewGroupDialog: FC<{courseId: number, className?: string}> = memo(
 
 interface GroupCardProps {
     group: CreatedGroup
-    onArchive: (groupId: number) => void
-    onUnarchive: (groupId: number) => void
+    onArchive: (groupId: number) => Promise<void>
+    onUnarchive: (groupId: number) => Promise<void>
 }
 
 const GroupCard: FC<GroupCardProps> = ({onArchive, onUnarchive, group}) => {
+    const [loading, setLoading] = useState<boolean>(false)
+
+
     return (
         <Card className={clsx(
             "border-l-4 transition-all hover:shadow-md",
@@ -189,32 +190,46 @@ const GroupCard: FC<GroupCardProps> = ({onArchive, onUnarchive, group}) => {
                 : "border-l-gray-400 opacity-75"
         )}>
             <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between flex-wrap items-start gap-2">
                     <CardTitle className="text-lg flex items-center gap-2">
                         {group.title}
                         <Badge variant={group.is_active ? "default" : "secondary"}>
                             {group.is_active ? "Активна" : "В архиве"}
                         </Badge>
                     </CardTitle>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap justify-center gap-2">
                         <QuestionWeightsDialog groupId={group.id} />
                         {group.is_active 
                             ?   <Button 
                                     variant="outline" 
                                     size="sm"
-                                    onClick={() => onArchive(group.id)}
+                                    onClick={() => {
+                                        setLoading(true)
+                                        onArchive(group.id)
+                                        .finally(() => setLoading(false))
+                                    }}
                                     className="text-orange-600 border-orange-200 hover:bg-orange-50"
                                 >
-                                    <Archive className="w-4 h-4 mr-1" />
+                                    {loading
+                                        ?   <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                        :   <Archive className="w-4 h-4 mr-1" />
+                                    }
                                     В архив
                                 </Button>
                             :   <Button 
                                     variant="outline" 
                                     size="sm"
-                                    onClick={() => onUnarchive(group.id)}
+                                    onClick={() => {
+                                        setLoading(true)
+                                        onUnarchive(group.id)
+                                        .finally(() => setLoading(false))
+                                    }}
                                     className="text-green-600 border-green-200 hover:bg-green-50"
                                 >
-                                    <ArchiveRestore className="w-4 h-4 mr-1" />
+                                    {loading
+                                        ?   <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                        :   <ArchiveRestore className="w-4 h-4 mr-1" />
+                                    }
                                     Восстановить
                                 </Button>
                         }
@@ -223,30 +238,22 @@ const GroupCard: FC<GroupCardProps> = ({onArchive, onUnarchive, group}) => {
             </CardHeader>
             
             <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-blue-500" />
                         <span>
-                            Студентов: <strong>{group.student_count}</strong> / {group.max_student_count}
+                            Студентов: <br /><strong>{group.student_count}</strong> / {group.max_student_count}
                         </span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div 
-                                className="bg-blue-500 h-2 rounded-full" 
-                                style={{ 
-                                    width: `${(group.student_count / group.max_student_count) * 100}%` 
-                                }}
-                            />
-                        </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-purple-500" />
-                        <span>Создатель: <strong>{group.created_by.name}</strong></span>
+                        <span>Создатель: <br /><strong>{group.created_by.name}</strong></span>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-green-500" />
-                        <span>Курс: <strong>{group.by_course.title}</strong></span>
+                        <span>Курс: <br /> <strong>{group.by_course.title}</strong></span>
                     </div>
                 </div>
 

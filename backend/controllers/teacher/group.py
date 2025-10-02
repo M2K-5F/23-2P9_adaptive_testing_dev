@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from dependencies.user import get_user_from_request
 from dependencies.dependencies import get_teacher_group_service, get_teacher_question_service, TQS
 from services.teacher.group import GroupService
-from shemas import UserOut, Roles, QuestionBase
+from shemas import GroupToCreate, UserOut, Roles, QuestionBase
 
 
 group_router = APIRouter(prefix='/group', tags=['Teacher/Group'])
@@ -13,16 +13,12 @@ group_router = APIRouter(prefix='/group', tags=['Teacher/Group'])
 @group_router.post('/create')
 async def create_group(
     current_user = Depends(get_user_from_request),
+    data: GroupToCreate = Body(),
     service: GroupService = Depends(get_teacher_group_service),
-    course_id: int = Query(),
-    title: str = Query(),
-    max_count: int = Query()
 ) -> JSONResponse:
     return service.create_group(
-        course_id,
+        data,
         current_user, 
-        title,
-        max_count
     )
 
 
