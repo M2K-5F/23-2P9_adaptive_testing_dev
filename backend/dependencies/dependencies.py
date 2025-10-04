@@ -7,17 +7,22 @@ from repositories.attempt.topic import TopicAttemptRepository
 from repositories.group.group import GroupRepository
 from repositories.group.user_group import UserGroupRepository
 from repositories.question.question_weight import QuestionWeightRepository
-from services import (
-    US, SCS, STS, TCS, TQS, TTS, PS, AS
-)
 from repositories import (
     UserRepository, CourseRepository,
     TopicRepository, UserTopicRepository, UserQuestionRepository,
     UserTextAnswerRepository,
     AnswerRepository, QuestionRepository
 )
-from services.teacher.group import GroupService as TGS
-from services.student.group import GroupService as SGS
+from services.teacher.group import GroupService as TeacherGroupService
+from services.student.group import GroupService as StudentGroupService
+from services.common.adaptivity_service import AdaptivityServise
+from services.common.progress_service import ProgressService
+from services.common.user_service import UserService
+from services.student.course_service import CourseService as StudentCourseService
+from services.student.topic_service import TopicService as StudentTopicService
+from services.teacher.course_service import CourseService as TeacherCourseService
+from services.teacher.question_service import QuestionService as TeacherQuestionService1
+from services.teacher.topic_service import TopicService as TeacherTopicService
 
 
 @lru_cache(maxsize=None)
@@ -60,37 +65,37 @@ def get_user_text_answer_repository() -> UserTextAnswerRepository:
 
 
 @lru_cache(maxsize=None)
-def get_user_group_repository():
+def get_user_group_repository() -> UserGroupRepository:
     return UserGroupRepository()
 
 
 @lru_cache(maxsize=None)
-def get_question_weight_repository():
+def get_question_weight_repository() -> QuestionWeightRepository:
     return QuestionWeightRepository()
 
 
 @lru_cache(maxsize=None)
-def get_topic_attempt_repository():
+def get_topic_attempt_repository() -> TopicAttemptRepository:
     return TopicAttemptRepository()
 
 
 @lru_cache(maxsize=None)
-def get_question_attempt_repository():
+def get_question_attempt_repository() -> QuestionAttemptRepository:
     return QuestionAttemptRepository()
 
 
 @lru_cache(maxsize=None)
-def get_group_repo():
+def get_group_repo() -> GroupRepository:
     return GroupRepository()
 
 
 @lru_cache(maxsize=None)
-def get_weight_profile_repository():
+def get_weight_profile_repository() -> WeightProfileRepository:
     return WeightProfileRepository()
 
 
 @lru_cache(maxsize=None)
-def get_adaptivity_profile_repository():
+def get_adaptivity_profile_repository() -> AdaptivityProfileRepository:
     return AdaptivityProfileRepository()
 
 
@@ -101,7 +106,7 @@ def get_progress_service(
     user_group = Depends(get_user_group_repository),
     topic = Depends(get_topic_repository)
 ):
-    return PS(
+    return ProgressService(
         topic,
         user_group,
         user_topic_repo,
@@ -114,7 +119,7 @@ def get_adaptivity_service(
     user_question_repo = Depends(get_user_question_repository),
     question_weight = Depends(get_question_weight_repository)
 ):
-    return AS(
+    return AdaptivityServise(
         user_question_repo,
         question_weight
     )
@@ -122,8 +127,8 @@ def get_adaptivity_service(
 
 def get_user_service(
     user_repo = Depends(get_user_repository)
-) -> US:
-    return US(
+):
+    return UserService(
         user_repo
     )
 
@@ -133,8 +138,8 @@ def get_student_course_service(
     user_topic_repo = Depends(get_user_topic_repository),
     progress_service = Depends(get_progress_service),
     user_group = Depends(get_user_group_repository)
-) -> SCS:
-    return SCS(
+):
+    return StudentCourseService(
         user_group,
         course_repo,
         topic_repo,
@@ -154,7 +159,7 @@ def get_student_topic_service(
     topic_attempt = Depends(get_topic_attempt_repository),
     question_attempt = Depends(get_question_attempt_repository)
 ):
-    return STS(
+    return StudentTopicService(
         course_repo,
         topic_repo,
         user_topic_repo,
@@ -173,7 +178,7 @@ def get_techer_topic_service(
     user_topic_repo = Depends(get_user_topic_repository),
     user_group = Depends(get_user_group_repository)
 ):
-    return TTS(
+    return TeacherTopicService(
         user_group,
         course_repo,
         topic_repo,
@@ -189,7 +194,7 @@ def get_techer_course_service(
     user_group = Depends(get_user_group_repository),
     group = Depends(get_group_repo)
 ):
-    return TCS(
+    return TeacherCourseService(
         group,
         user_group,
         course_repo,
@@ -210,7 +215,7 @@ def get_teacher_question_service(
     group = Depends(get_group_repo),
     weight_profile = Depends(get_weight_profile_repository)
 ):
-    return TQS(
+    return TeacherQuestionService1(
         weight_profile,
         topic_repo, 
         question_weight,
@@ -230,7 +235,7 @@ def get_teacher_group_service(
     question_weight = Depends(get_question_weight_repository),
     adaptivity_profile = Depends(get_adaptivity_profile_repository)
 ):
-    return TGS(
+    return TeacherGroupService(
         adaptivity_profile,
         group,
         course,
@@ -247,7 +252,7 @@ def get_student_group_service(
     user_topic = Depends(get_user_topic_repository),
     progress_service = Depends(get_progress_service),
 ):
-    return SGS(
+    return StudentGroupService(
         group, 
         course,
         user_group,

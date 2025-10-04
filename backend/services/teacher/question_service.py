@@ -48,7 +48,7 @@ class QuestionService:
 
     
     @database.atomic()
-    def create_question(self, user: UserOut, topic_id: int, question_to_create: QuestionBase):
+    def create_question(self, user: UserOut, question_to_create: QuestionBase):
         """Create a new question in specified topic
 
         Args:
@@ -62,7 +62,7 @@ class QuestionService:
         Returns:
             JSONResponse: created question instance with answers
         """
-        current_topic = self._topic_repo.get_by_id(topic_id, True)
+        current_topic = self._topic_repo.get_by_id(question_to_create.topic_id, True)
 
         question_type = question_to_create.question_type
 

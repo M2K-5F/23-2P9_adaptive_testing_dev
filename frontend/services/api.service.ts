@@ -23,7 +23,7 @@ class ApiServiceClass {
             Object.entries(queries).map(query => queryString += `${query[0]}=${query[1]}&`)
         }
 
-        return fetch(`${URL}?${queryString}`, init)
+        return fetch(`${URL}?${queryString}`, {...init, credentials: 'include'})
         .catch(() => {
             useUserStore.setState( state => ({...state, status: "serverunavailable"}))
             throw Error('503')
@@ -55,7 +55,6 @@ export const logoutUser = async () => {
         APIUrls.logOutURL,
         {
             method: 'post',
-            credentials: 'include',
         }
     )
 }
@@ -66,7 +65,6 @@ export const loginUser = (login: string, password: string, is_remember: boolean)
         APIUrls.logInURL,
         {
             method: 'POST',
-            credentials: "include",
             headers: {
                 'accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -96,7 +94,6 @@ export const searchCourses = (searchQuery: string) => {
     return ApiService.requestToServer(
         APIUrls.searchCourseURL,
         {
-            credentials: 'include'
         },
         {
             "q": searchQuery
@@ -107,12 +104,6 @@ export const searchCourses = (searchQuery: string) => {
 
 export const getCourseStats = (courseId: number): Promise<CourseStats> => {
     return ApiService.requestToServer(
-        APIUrls.getCourseStatsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            "course_id": courseId
-        }
+        APIUrls.getCourseStatsURL(courseId)
     )
 }

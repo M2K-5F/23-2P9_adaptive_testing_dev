@@ -14,49 +14,49 @@ export const APIUrls = {
     // Teacher/Course
     createCourseURL: `${tURL}/course/create`,
     getCreatedCoursesURL: `${tURL}/course/get`,
-    archCourseURL: `${tURL}/course/arch`,
-    unarchCourseURL: `${tURL}/course/unarch`,
-    getCourseStatsURL: `${tURL}/course/stats`,
+    archCourseURL: (course_id: number) => `${tURL}/course/${course_id}/arch`,
+    unarchCourseURL: (course_id: number) => `${tURL}/course/${course_id}/unarch`,
+    getCourseStatsURL: (course_id: number) => `${tURL}/course/${course_id}/stats`,
 
     // Student/Course
-    getCourseURL: `${sURL}/course/get_by_id`,
+    getCourseURL: (course_id: number) => `${sURL}/course/${course_id}/get_by_id`,
 
     // Teacher/Topic
     createTopicURL: `${tURL}/topic/create`,
-    archTopicURL: `${tURL}/topic/arch`,
-    unarchTopicURL: `${tURL}/topic/unarch`,
+    archTopicURL: (topic_id: number) => `${tURL}/topic/${topic_id}/arch`,
+    unarchTopicURL: (topic_id: number) => `${tURL}/topic/${topic_id}/unarch`,
 
-    //Student/Topic
-    getTopicsURL: `${sURL}/topic/get`,
-    getFollowedTopicsURL: `${sURL}/topic/get_followed`,
-    startPassingTopicURL: `${sURL}/topic/start`,
+    // Student/Topic
+    getTopicsURL: (course_id: number) => `${sURL}/topic/${course_id}/get`,
+    getFollowedTopicsURL: (user_group_id: number) => `${sURL}/topic/${user_group_id}/get_followed`,
+    startPassingTopicURL: (topic_id: number) => `${sURL}/topic/${topic_id}/start`,
     submitTopicURL: `${sURL}/topic/submit_topic`,
 
-    //Teacher/Questions
+    // Teacher/Questions
     createQuestionURL: `${tURL}/question/create`,
-    getQuestionsURL: `${tURL}/question/get`,
-    archQuestionURL: `${tURL}/question/arch`,
-    unarchQuestionURL: `${tURL}/question/unarch`,
-    submitQuestionURL: `${tURL}/question/submit`,
+    getQuestionsURL: (topic_id: number) => `${tURL}/question/${topic_id}/get`,
+    archQuestionURL: (question_id: number) => `${tURL}/question/${question_id}/arch`,
+    unarchQuestionURL: (question_id: number) => `${tURL}/question/${question_id}/unarch`,
+    submitQuestionURL: (user_answer_id: number) => `${tURL}/question/${user_answer_id}/submit`,
 
     searchCourseURL: `${searchUrl}/course`,
 
-    //Teacher/Group
+    // Teacher/Group
     createGroupURL: `${tURL}/group/create`,
-    getTeacherGroupsURL: `${tURL}/group/get`,
-    archGroupURL: `${tURL}/group/arch`,
-    unarchGroupURL: `${tURL}/group/unarch`,
-    getGroupWeightsURL: `${tURL}/group/weights`,
+    getTeacherGroupsURL: (course_id: number) => `${tURL}/group/${course_id}/get`,
+    archGroupURL: (group_id: number) => `${tURL}/group/${group_id}/arch`,
+    unarchGroupURL: (group_id: number) => `${tURL}/group/${group_id}/unarch`,
+    getGroupWeightsURL: (group_id: number) => `${tURL}/group/${group_id}/weights`,
 
-    //Student/Group
-    getCourseGroupsURL: `${sURL}/group/get`,
+    // Student/Group
+    getCourseGroupsURL: (course_id: number) => `${sURL}/group/${course_id}/get`,
     getFollowedGroupsURL: `${sURL}/group/get_followed`,
-    followGroupURL: `${sURL}/group/follow`,
-    unfollowGroupURL: `${sURL}/group/unfollow`,
-    clearGroupPregressURL: `${sURL}/group/clear`
+    followGroupURL: (group_id: number) => `${sURL}/group/${group_id}/follow`,
+    unfollowGroupURL: (group_id: number) => `${sURL}/group/${group_id}/unfollow`,
+    clearGroupProgressURL: (user_group_id: number) => `${sURL}/group/${user_group_id}/clear`
 } as const
 
 export type apiUrl = {
     [K in keyof typeof APIUrls]:
-        typeof APIUrls[K] extends (pollID: number) => any ? ReturnType<typeof APIUrls[K]> : typeof APIUrls[K]
+        typeof APIUrls[K] extends (...args: any[]) => any ? ReturnType<typeof APIUrls[K]> : typeof APIUrls[K]
 }[keyof typeof APIUrls]

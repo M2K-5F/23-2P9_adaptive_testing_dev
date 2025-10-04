@@ -43,6 +43,7 @@ class AnswerOptionBase(BaseModel):
 
 class QuestionBase(BaseModel):
     text: str 
+    topic_id: int
     question_type: Literal['text', 'choice']
     answer_options: List[AnswerOptionBase]
     base_weight_profile: Literal['Aggressive', 'Balanced', 'Gentle']
