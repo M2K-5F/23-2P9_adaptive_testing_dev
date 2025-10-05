@@ -7,7 +7,10 @@ export const createCourse = (title: string, description: string) => {
         APIUrls.createCourseURL,
         {
             method: 'post',
-            body: JSON.stringify({title: title, description: description})
+            body: JSON.stringify({title: title, description: description}),
+            headers: {
+                "Content-type": "application/json"
+            },
         },
     )
 }

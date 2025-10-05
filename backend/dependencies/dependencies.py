@@ -1,5 +1,5 @@
 from functools import lru_cache
-from fastapi import Depends, dependencies
+from fastapi import Depends
 from backend.repositories.profiles.adaptivity import AdaptivityProfileRepository
 from backend.repositories.profiles.weight import WeightProfileRepository
 from repositories.attempt.question import QuestionAttemptRepository

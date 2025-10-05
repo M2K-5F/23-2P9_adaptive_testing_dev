@@ -1,15 +1,16 @@
+from dataclasses import field
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Path, status, Query, Body, Request
 from fastapi.responses import JSONResponse
-from pydantic import Json
+from pydantic import BaseModel, Field, Json
 from services.common.progress_service import ProgressService
 from services.student.group import GroupService
 from dependencies.dependencies import get_progress_service, get_student_group_service
 
 from dependencies.user import get_user_from_request
-from shemas import UserOut
+from shemas import GroupFollowRequest, UserOut
 
 group_router = APIRouter(prefix='/group', tags=["Student/group"])
-
 
 @group_router.get('/{course_id}/get')
 async def get_group_list(
@@ -32,9 +33,10 @@ async def get_user_groups(
 async def follow_group(
     current_user = Depends(get_user_from_request),
     group_id: int = Path(),
+    data: GroupFollowRequest = Body(),
     service: GroupService = Depends(get_student_group_service)
 ) -> JSONResponse:
-    return service.follow_group(current_user, group_id)
+    return service.follow_group(current_user, group_id, data)
 
 
 @group_router.put('/{group_id}/unfollow')

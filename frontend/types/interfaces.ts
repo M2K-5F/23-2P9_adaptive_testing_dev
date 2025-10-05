@@ -55,7 +55,22 @@ export interface CreatedGroup {
     title: string
     student_count: number
     max_student_count: number
+    type: 'private' | 'public'
+    passkey: string
+    profile: AdaptivityProfile
     is_active: boolean
+}
+
+
+export interface AdaptivityProfile {
+    id: number,
+    created_at: string,
+    name: 'Aggressive' | 'Balanced' | 'Gentle',
+    question_weight: number,
+    last_score: number,
+    time_since_last: number,
+    max_adaptive_questions_count: number,
+    max_adaptive_questions_ratio: number
 }
 
 
@@ -267,8 +282,11 @@ export interface QuestionWeight {
 export interface GroupCreate {
     course_id: number
     title: string
-    max_student_count: number
+    type: 'private' | 'public'
+    max_student_count: string
     profile: 'Aggressive' | 'Balanced' | 'Gentle'
+    passkey: string
 }
+
 
 export interface CourseStats extends CourseStatistics {}

@@ -15,11 +15,12 @@ import {
 import { getCreatedGroups,archGroup, unarchGroup } from "@/services/group"
 import { FC, memo, useEffect, useState } from "react"
 import { useUserStore } from "@/stores/useUserStore"
-import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar, Loader2 } from "lucide-react"
+import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar, Loader2, LockKeyhole, LockKeyholeOpen, Radar } from "lucide-react"
 import { CreatedGroup } from "@/types/interfaces"
 import clsx from "clsx"
 import { CreateGroupDialog } from "./create-group-dialog"
 import { QuestionWeightsDialog } from "./question-weight-dialog"
+import { g } from "node_modules/shadcn/dist/index-8c784f6a"
 
 interface ViewGroupDialogProps {
 }
@@ -190,7 +191,7 @@ const GroupCard: FC<GroupCardProps> = ({onArchive, onUnarchive, group}) => {
                 : "border-l-gray-400 opacity-75"
         )}>
             <CardHeader className="pb-3">
-                <div className="flex justify-between flex-wrap items-start gap-2">
+                <div className="flex justify-between flex-col items-start gap-4">
                     <CardTitle className="text-lg flex items-center gap-2">
                         {group.title}
                         <Badge variant={group.is_active ? "default" : "secondary"}>
@@ -238,23 +239,45 @@ const GroupCard: FC<GroupCardProps> = ({onArchive, onUnarchive, group}) => {
             </CardHeader>
             
             <CardContent className="pt-0">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className="flex flex-wrap justify-around gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-blue-500" />
+                        <Users className="shrink-0 w-4 h-4 text-blue-500" />
                         <span>
                             Студентов: <br /><strong>{group.student_count}</strong> / {group.max_student_count}
                         </span>
                     </div>
+                    <div className="flex items-center gap-2">
+                        {group.type === 'private'
+                            ?   <LockKeyhole className="w-4 h-4 text-orange-500"/>
+                            :   <LockKeyholeOpen className="w-4 h-4 text-green-500"/>
+                        }
+                        <span>Тип: <br /> <strong>{group.type === 'private' ? 'Приватная' : 'Публичная'}</strong></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Radar className="shrink-0 w-4 h-4 text-amber-500"/>
+                        <span>Профиль: <br /> 
+                            <strong>
+                                {group.profile.name === 'Aggressive'
+                                    ?  'Реактивный'
+                                    :   group.profile.name === 'Balanced'
+                                        ?   'Сбалансированный'
+                                        :   'Консервативный'
+                                }
+                            </strong>
+                        </span>
+                    </div>
 
                     <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-purple-500" />
+                        <User className="shrink-0 w-4 h-4 text-purple-500" />
                         <span>Создатель: <br /><strong>{group.created_by.name}</strong></span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-green-500" />
+                        <Calendar className="shrink-0 w-4 h-4 text-green-500" />
                         <span>Курс: <br /> <strong>{group.by_course.title}</strong></span>
                     </div>
+                    
+                    
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-gray-100">

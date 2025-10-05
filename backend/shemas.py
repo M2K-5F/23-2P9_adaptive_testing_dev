@@ -2,7 +2,7 @@
 from ast import literal_eval
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field, field_validator
-from typing import List, Union, Literal
+from typing import List, Optional, Union, Literal
 
 
 class Roles(str, Enum):
@@ -95,5 +95,20 @@ class TopicToCreate(BaseModel):
 class GroupToCreate(BaseModel):
     course_id: int
     title: str = Field(min_length=3, max_length=128)
-    max_student_count: int
+    max_student_count: Literal['5', '10', '15', '20', '25','30']
     profile: Literal['Aggressive', 'Balanced', 'Gentle']
+
+
+class PublicGroupToCreate(GroupToCreate):
+    type: Literal['public']
+
+class PrivateGroupToCreate(GroupToCreate):
+    type: Literal['private']
+    passkey: str = Field(min_length=3, max_length=16)
+
+
+GroupCreate = Union[PublicGroupToCreate, PrivateGroupToCreate]
+
+class GroupFollowRequest(BaseModel):
+    passkey: Optional[str] = Field(min_length=3, max_length=16)
+    

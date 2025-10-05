@@ -12,7 +12,7 @@ course_router = APIRouter(prefix='/course', tags=['Teacher/Course'])
 
 class CourseCreate(BaseModel):
     title: str = Field(min_length=3, max_length=64)
-    description: str = Field(min_length=3, max_digits=128)
+    description: str = Field(min_length=3, max_length=128)
 
 
 @course_router.post('/create', summary='Create course by teacher')

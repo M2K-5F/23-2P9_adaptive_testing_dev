@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
+from backend.utils.crypt_utils import get_password_hash, verify_password
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
 from models import Course, database
@@ -7,7 +8,7 @@ from repositories.group.user_group import UserGroupRepository
 from repositories.topic.topic_repository import TopicRepository
 from repositories.topic.user_topic_repository import UserTopicRepository
 from services.common.progress_service import ProgressService
-from shemas import UserOut
+from shemas import GroupFollowRequest, UserOut
 
 
 class GroupService:
@@ -59,6 +60,7 @@ class GroupService:
         self,
         user: UserOut,
         group_id: int,
+        data: GroupFollowRequest
     ):
         current_group = self._group.get_by_id(group_id, True)
         if current_group.student_count >= current_group.max_student_count:
@@ -67,6 +69,13 @@ class GroupService:
                 'maximum students in group'
             )
         current_course: Course = current_group.by_course  #pyright: ignore[reportAssignmentType]
+
+        if current_group.type == 'private' and data.passkey:
+            if verify_password(data.passkey, current_group.passkey):
+                pass
+            else:
+                raise HTTPException(400, "uncorrect passkey")
+
 
         user_group = self._user_group.get_or_create(
             True,

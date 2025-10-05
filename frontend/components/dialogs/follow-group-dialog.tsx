@@ -14,10 +14,11 @@ import {
 } from "@/components"
 import { getCreatedGroups,archGroup, unarchGroup, getFollowedGroups, getGroupsByCourse, followGroup } from "@/services/group"
 import { FC, memo, useEffect, useState } from "react"
-import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar, LogOut } from "lucide-react"
+import { UsersRound, Archive, ArchiveRestore, Plus, Users, User, Calendar, LogOut, LockKeyhole, LockKeyholeOpen, Trophy, Radar } from "lucide-react"
 import { CreatedGroup, FetchedGroup, UserGroup } from "@/types/interfaces"
 import clsx from "clsx"
 import { CreateGroupDialog } from "./create-group-dialog"
+import { toast } from "sonner"
 
 
 export const FollowGroupDialog: FC<{courseId: number, user_group: false|UserGroup, followCallback: () => void}> = memo(({
@@ -30,24 +31,18 @@ export const FollowGroupDialog: FC<{courseId: number, user_group: false|UserGrou
     const [groupList, setGroups] = useState<FetchedGroup[]>([])
     const [searchQuery, setSearchQuery] = useState("")
 
-    const followHandler = async (group_id: number) => {
-        setLoading(true)
-        try {
-            followGroup(group_id)
-            .then(() => {
-                followCallback()
-                setIsOpen(false)
-            })
-        } catch {
-
-        }
+    const followHandler = (callback: () => Promise<void>) => {
+        callback()
+        .then(() => {
+            followCallback()
+            setIsOpen(false)
+        })
     }
 
     const fetchGroups = async () => {
         setLoading(true)
         try {
             setGroups(await getGroupsByCourse(courseId))
-        } catch (error) {
         } finally {
             setLoading(false)
         }
@@ -162,7 +157,7 @@ export const FollowGroupDialog: FC<{courseId: number, user_group: false|UserGrou
 
 interface GroupCardProps {
     group: CreatedGroup
-    followHandler: (group_id: number) => {}
+    followHandler: (callback: () => Promise<void>) => void
 }
 
 const GroupCard: FC<GroupCardProps> = ({group, followHandler}) => {
@@ -174,51 +169,78 @@ const GroupCard: FC<GroupCardProps> = ({group, followHandler}) => {
                 : "border-l-gray-400 opacity-75"
         )}>
             <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between flex-col items-start gap-4">
                     <CardTitle className="text-lg flex items-center gap-2">
                         {group.title}
                         <Badge variant={group.is_active ? "default" : "secondary"}>
                             {group.is_active ? "Активна" : "В архиве"}
                         </Badge>
                     </CardTitle>
-                    <Button
-                        variant={'default'}
-                        onClick={() => followHandler(group.id)}
-                        size="sm"
-                        className="flex items-center gap-1 bg-green-300"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Подписаться
-                    </Button>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {group.type === 'public'
+                            ?   <Button
+                                    variant={'default'}
+                                    onClick={() => 
+                                        followHandler(() => {
+                                            return followGroup(group.id)
+                                                .catch((err) => {
+                                                    toast('Не удалось подписаться на группу')
+                                                    throw err
+                                                })
+                                        })
+                                    }
+                                    size="sm"
+                                    className="flex items-center gap-1 bg-green-300"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Подписаться
+                                </Button>
+                            :   <PrivateGroupFollowDialog group={group} followHandler={followHandler}/>
+                        }
+                    </div>
                 </div>
             </CardHeader>
             
             <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="flex flex-wrap justify-around gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-blue-500" />
+                        <Users className="shrink-0 w-4 h-4 text-blue-500" />
                         <span>
-                            Студентов: <strong>{group.student_count}</strong> / {group.max_student_count}
+                            Студентов: <br /><strong>{group.student_count}</strong> / {group.max_student_count}
                         </span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div 
-                                className="bg-blue-500 h-2 rounded-full" 
-                                style={{ 
-                                    width: `${(group.student_count / group.max_student_count) * 100}%` 
-                                }}
-                            />
-                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {group.type === 'private'
+                            ?   <LockKeyhole className="w-4 h-4 text-orange-500"/>
+                            :   <LockKeyholeOpen className="w-4 h-4 text-green-500"/>
+                        }
+                        <span>Тип: <br /> <strong>{group.type === 'private' ? 'Приватная' : 'Публичная'}</strong></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Radar className="shrink-0 w-4 h-4 text-amber-500"/>
+                        <span>Профиль: <br /> 
+                            <strong>
+                                {group.profile.name === 'Aggressive'
+                                    ?  'Реактивный'
+                                    :   group.profile.name === 'Balanced'
+                                        ?   'Сбалансированный'
+                                        :   'Консервативный'
+                                }
+                            </strong>
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-purple-500" />
-                        <span>Создатель: <strong>{group.created_by.name}</strong></span>
+                        <User className="shrink-0 w-4 h-4 text-purple-500" />
+                        <span>Создатель: <br /><strong>{group.created_by.name}</strong></span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-green-500" />
-                        <span>Курс: <strong>{group.by_course.title}</strong></span>
+                        <Calendar className="shrink-0 w-4 h-4 text-green-500" />
+                        <span>Курс: <br /> <strong>{group.by_course.title}</strong></span>
                     </div>
+                    
+                    
                 </div>
 
                 <div className="mt-3 pt-3 border-t border-gray-100">
@@ -232,5 +254,66 @@ const GroupCard: FC<GroupCardProps> = ({group, followHandler}) => {
                 </div>
             </CardContent>
         </Card>
+    )
+}
+
+
+export const PrivateGroupFollowDialog: FC<{
+    group: CreatedGroup, 
+    followHandler: (callback: () => Promise<void>) => void
+}> = ({group, followHandler}) => {
+    const [passkey, setPasskey] = useState<string>('')
+    const [open, setOpen] = useState(false)
+
+
+    return(
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button
+                    variant={'default'}
+                    size="sm"
+                    className="flex items-center gap-1 bg-green-300"
+                >
+                    <Plus className="h-4 w-4" />
+                    Подписаться
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
+                        Подписка на группу
+                    </DialogTitle>
+                    <DialogDescription>
+                        Для подписки на группу {group.title} требуется кодовое слово
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                    <div className="grid gap-3">
+                        <Label htmlFor='passkey' >Кодовое слово:</Label>
+                        <Input id='passkey' name="passkey" value={passkey} onChange={e => setPasskey(e.currentTarget.value)} />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={() => setOpen(false)} variant={'outline'}>Закрыть</Button>
+                    <Button 
+                        onClick={() => {
+                            if (passkey.length < 3) {
+                                toast('Кодовое слово не может быть короче 3 символов')
+                                return
+                            }
+
+                            followHandler(() => {
+                                return followGroup(group.id, passkey)
+                                    .then(() => setOpen(false))
+                                    .catch((err) => {
+                                        toast('Неверное кодовое слово')
+                                        throw err
+                                    })
+                            })
+                        }}
+                    >Подписаться</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }

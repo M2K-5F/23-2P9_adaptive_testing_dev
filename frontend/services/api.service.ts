@@ -23,7 +23,13 @@ class ApiServiceClass {
             Object.entries(queries).map(query => queryString += `${query[0]}=${query[1]}&`)
         }
 
-        return fetch(`${URL}?${queryString}`, {...init, credentials: 'include'})
+        return fetch(`${URL}?${queryString}`, {...init,
+            credentials: 'include',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        })
         .catch(() => {
             useUserStore.setState( state => ({...state, status: "serverunavailable"}))
             throw Error('503')

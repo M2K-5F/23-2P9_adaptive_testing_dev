@@ -69,44 +69,46 @@ export const QuestionWeightsDialog: FC<{groupId: number}> = ({groupId}) => {
 
                 
 
-                {weights.length > 0 && !isLoading 
-                    ?   <>
-                            <div className="flex-1 overflow-y-scroll scrollbar-hidden">
-                                <div className="space-y-4">
-                                    {weights.map((weight) => (
-                                        <QuestionWeightCard weight={weight} />
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="border-t pt-4 mt-4">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                    <div className="text-center">
-                                        <div className="font-bold text-lg">{weights.length}</div>
-                                        <div className="text-muted-foreground">Всего вопросов</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="font-bold text-lg">
-                                            {(weights.reduce((sum, w) => sum + w.weight, 0) / weights.length).toFixed(2)}
-                                        </div>
-                                        <div className="text-muted-foreground">Средний вес</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="font-bold text-lg">
-                                            {weights.filter(w => w.question.is_active).length}
-                                        </div>
-                                        <div className="text-muted-foreground">Активных</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="font-bold text-lg">{weights[0].group.student_count}</div>
-                                        <div className="text-muted-foreground">Студентов в группе</div>
+                {isLoading
+                    ?   <Loader variant='success'/>
+                    :   weights.length > 0
+                        ?   <>
+                                <div className="flex-1 overflow-y-scroll scrollbar-hidden">
+                                    <div className="space-y-4">
+                                        {weights.map((weight) => (
+                                            <QuestionWeightCard weight={weight} />
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
-                        </>
-                    :   <Loader variant='success' />
+                                <div className="border-t pt-4 mt-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                        <div className="text-center">
+                                            <div className="font-bold text-lg">{weights.length}</div>
+                                            <div className="text-muted-foreground">Всего вопросов</div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <div className="font-bold text-lg">
+                                                {(weights.reduce((sum, w) => sum + w.weight, 0) / weights.length).toFixed(2)}
+                                            </div>
+                                            <div className="text-muted-foreground">Средний вес</div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <div className="font-bold text-lg">
+                                                {weights.filter(w => w.question.is_active).length}
+                                            </div>
+                                            <div className="text-muted-foreground">Активных</div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <div className="font-bold text-lg">{weights[0].group.student_count}</div>
+                                            <div className="text-muted-foreground">Студентов в группе</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        :   <span className='w-full text-center my-2' >В этой группе нет вопросов</span> 
                 }
             </DialogContent>
         </Dialog>

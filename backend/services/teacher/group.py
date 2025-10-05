@@ -1,11 +1,12 @@
 from fastapi.responses import JSONResponse
 from backend.repositories.profiles.adaptivity import AdaptivityProfileRepository
+from backend.utils.crypt_utils import get_password_hash
 from repositories.course.course_repository import CourseRepository
 from repositories.group.group import GroupRepository
 from models import QuestionWeight, database
 from repositories.question.question_repository import QuestionRepository
 from repositories.question.question_weight import QuestionWeightRepository
-from shemas import GroupToCreate, UserOut
+from shemas import GroupCreate, GroupToCreate, PrivateGroupToCreate, PublicGroupToCreate, UserOut
 
 
 class GroupService:
@@ -27,7 +28,7 @@ class GroupService:
     @database.atomic()
     def create_group(
         self,
-        group_to_create: GroupToCreate,
+        group_to_create: GroupCreate,
         user: UserOut,
     ):
         current_course = self._course.get_by_id(group_to_create.course_id, True)
@@ -36,16 +37,33 @@ class GroupService:
             name = group_to_create.profile
         )
 
-        group =  self._group.get_or_create(
-            True,
-            defaults={
-                "max_student_count": group_to_create.max_student_count,
-                "profile": current_profile.name
-            },
-            created_by = user.username,
-            by_course = current_course,
-            title = group_to_create.title
-        )
+        if isinstance(group_to_create, PublicGroupToCreate):
+            group =  self._group.get_or_create(
+                True,
+                defaults={
+                    "max_student_count": int(group_to_create.max_student_count),
+                    "profile": current_profile.name,
+                    "type": 'public',
+                },
+                created_by = user.username,
+                by_course = current_course,
+                title = group_to_create.title
+            )
+
+        elif isinstance(group_to_create, PrivateGroupToCreate):
+            group =  self._group.get_or_create(
+                True,
+                defaults={
+                    "passkey": get_password_hash(group_to_create.passkey),
+                    "type": 'private',
+                    "max_student_count": int(group_to_create.max_student_count),
+                    "profile": current_profile.name,
+                },
+                created_by = user.username,
+                by_course = current_course,
+                title = group_to_create.title
+            )
+
         questions_by_course = self._question.get_questions_by_course(current_course)
         for question in questions_by_course:
             self._question_weight.get_or_create(

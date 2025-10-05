@@ -1,5 +1,6 @@
 """database discription"""
 from datetime import datetime
+from email.policy import default
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
@@ -101,6 +102,8 @@ class Group(Table):
     created_by = ForeignKeyField(User, field=User.username)
     profile = ForeignKeyField(AdaptivityProfile, field=AdaptivityProfile.name)
     is_active = BooleanField(default=True)
+    type = CharField(default='public')
+    passkey = CharField(max_length=16, default='')
 
 
 class Topic(Table):

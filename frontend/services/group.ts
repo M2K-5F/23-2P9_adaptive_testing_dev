@@ -66,11 +66,12 @@ export const getFollowedGroups = () => {
 }
 
 
-export const followGroup = (group_id: number) => {
+export const followGroup = (group_id: number, passkey: string = 'passkey') => {
     return ApiService.requestToServer(
         APIUrls.followGroupURL(group_id),
         {
-            method: 'put'
+            method: 'put',
+            body:  JSON.stringify({passkey: passkey})
         }
     )
 }

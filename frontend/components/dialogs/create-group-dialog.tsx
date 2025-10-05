@@ -14,7 +14,7 @@ import {
     SelectItem
 } from "@/components"
 import { FC, memo, useEffect, useId, useState } from "react"
-import { Plus } from "lucide-react"
+import { NotebookPen, Plus } from "lucide-react"
 import { useImmer } from "use-immer"
 import { useCreateGroup } from "@/hooks/useCreateGroup"
 import { GroupCreate } from "@/types/interfaces"
@@ -25,9 +25,11 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
     const createHandler = useCreateGroup()
     const [group, setGroup] = useImmer<GroupCreate>({
         title: '', 
-        max_student_count: 20,
+        max_student_count: '20',
         course_id: courseId,
-        profile: 'Balanced'
+        type: 'public',
+        profile: 'Balanced',
+        passkey: ''
     })
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isCreating, setIsCreating] = useState<boolean>(false)
@@ -76,18 +78,18 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
                     </div>
                 </div>
 
-                <div className="flex gap-4 flex-col">
-                    <div className=" gap-2 grid">
+                <div className="grid grid-cols-2">
+                    <div className="grid gap-2">
                         <Label className="h-fit" htmlFor={''}>Максимальное количество студентов:</Label>
-                        <Select onValueChange={(value => {setGroup(d => {d.max_student_count = Number(value)})})} value={group.max_student_count.toString()}>
+                        <Select onValueChange={(value => {setGroup(d => {d.max_student_count = value})})} value={group.max_student_count.toString()}>
                             <SelectTrigger>
                                 <SelectValue placeholder='Количество' />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Количество</SelectLabel>
-                                    {Array.from([5, 10, 15, 20, 25, 30]).map((score) => {
-                                        return <SelectItem value={score.toString()}>{score}</SelectItem>
+                                    {Array.from(['5', '10', '15', '20', '25', '30']).map((score) => {
+                                        return <SelectItem value={score}>{score}</SelectItem>
                                     })
                                     }
                                 </SelectGroup>
@@ -119,6 +121,47 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
                             </SelectContent>
                         </Select>
                     </div>
+                </div>
+
+                <div className="grid grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="type"  className="">Тип группы:</Label>
+                        <Select
+                            value={group.type}
+                            onValueChange={(v: 'private' | 'public') => {
+                                setGroup(d => {
+                                    d.type = v
+                                })
+                            }}
+                        >
+                            <SelectTrigger  id="type" className='' >
+                                <SelectValue placeholder='Тип группы' />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>
+                                        Тип
+                                    </SelectLabel>
+                                    <SelectItem value="private">Приватная</SelectItem>
+                                    <SelectItem value="public">Публичная</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    {group.type === 'private' &&
+                        <div className="grid gap-2">
+                            <Label htmlFor="pasaskey">Кодовое слово:</Label>
+                            <Input 
+                                maxLength={16} 
+                                id="passkey" 
+                                value={group.passkey} 
+                                onChange={(e) => 
+                                    setGroup(d => {
+                                        d.passkey = e.currentTarget.value
+                                    })
+                                }/>
+                        </div>
+                    }
                 </div>
 
                 <DialogFooter>

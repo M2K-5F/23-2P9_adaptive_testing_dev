@@ -33,6 +33,7 @@ export const useCreateCourse = () => async ([titleId, descriptionId]: ReturnType
                     ?   'Курс с таким названием уже существует' 
                     :   'Ошибка при создании курса'
             )
+            exceptionCallback()
         }
         
     }

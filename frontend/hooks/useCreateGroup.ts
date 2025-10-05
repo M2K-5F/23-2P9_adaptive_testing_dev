@@ -10,9 +10,8 @@ export const useCreateGroup = () => async (data: GroupCreate, callback: () => vo
     if (data.title.length < 3) {
         descriptionString = "Название должно содержать минимум 3 символа"
     }
-
-    if (data.max_student_count < 5 || data.max_student_count > 30) {
-        descriptionString = "Некорректное количество студентов"
+    if (data.type === 'private' && (3 > data.passkey.length || data.passkey.length > 16 ) ) {
+        descriptionString = 'Ключевое слово должно содержать от 3 до 16 символов'
     }
 
     if (descriptionString) {
@@ -29,7 +28,7 @@ export const useCreateGroup = () => async (data: GroupCreate, callback: () => vo
             (error as Error).message === "400" 
                 ?   toast('Ошибка при создании группы:', {description: 'Тема с таким названием уже существует'})
                 :   toast.error('Ошибка при создании темы:', {description: 'Неизвестная ошибка'})
-            
+            exceptionCallback()
         }
         
     }
