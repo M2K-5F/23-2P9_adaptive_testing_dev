@@ -147,6 +147,7 @@ export interface CreatedQuestion {
     question_type: 'single' | 'multiple' | 'text'
     is_active: boolean
     answer_options: AnswerOption[]
+    base_weight_profile: WeightProfile
 }
 
 export interface CompletedTopic {
@@ -286,6 +287,17 @@ export interface GroupCreate {
     max_student_count: string
     profile: 'Aggressive' | 'Balanced' | 'Gentle'
     passkey: string
+}
+
+
+export interface WeightProfile {
+    base_weight: number
+    base_step: number
+    min_weight: number
+    max_weight: number
+    name: 'Balanced' | 'Aggressive' | 'Gentle'
+    id: number
+    created_at: string
 }
 
 

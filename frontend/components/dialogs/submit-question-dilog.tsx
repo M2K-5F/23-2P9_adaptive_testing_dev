@@ -115,20 +115,20 @@ export const SubmitTextQuestionsDialog: FC<{answers: UnsubmitedAnswer[], onSucce
                     </div>
                 </Card>
 
-                <div className="flex flex-row-reverse justify-around gap-3">
+                <div className="grid grid-cols-12 items-center max-sm:grid-rows-2 gap-3">
                     <Button
                         size="lg"
-                        onClick={() => handleEvaluation('correct')}
-                        className="gap-2 bg-green-300"
+                        onClick={() => handleEvaluation('incorrect')}
+                        className="gap-2 bg-red-300 max-sm:col-span-6 col-span-4"
                     >
-                        <CheckCircle2 className="h-5 w-5" />
-                        Правильно
+                        <XCircle className="h-5 w-5" />
+                        Неправильно
                     </Button>
-
+                    
                     <Button
                         size="lg"
                         onClick={() => handleEvaluation('partial')}
-                        className="gap-2 bg-orange-300"
+                        className="gap-2 bg-orange-300 max-sm:col-start-4 max-sm:col-span-6 max-sm:row-start-2 col-span-4"
                     >
                         <MinusCircle className="h-5 w-5" />
                         Частично
@@ -136,11 +136,11 @@ export const SubmitTextQuestionsDialog: FC<{answers: UnsubmitedAnswer[], onSucce
 
                     <Button
                         size="lg"
-                        onClick={() => handleEvaluation('incorrect')}
-                        className="gap-2 bg-red-300"
+                        onClick={() => handleEvaluation('correct')}
+                        className="gap-2 bg-green-300 max-sm:col-span-6 col-span-4"
                     >
-                        <XCircle className="h-5 w-5" />
-                        Неправильно
+                        <CheckCircle2 className="h-5 w-5" />
+                        Правильно
                     </Button>
                 </div>
 

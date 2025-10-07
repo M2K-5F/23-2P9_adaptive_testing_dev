@@ -78,7 +78,7 @@ export const CreateGroupDialog: FC<{courseId: number, callback: () => void}> = m
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2">
+                <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-2">
                     <div className="grid gap-2">
                         <Label className="h-fit" htmlFor={''}>Максимальное количество студентов:</Label>
                         <Select onValueChange={(value => {setGroup(d => {d.max_student_count = value})})} value={group.max_student_count.toString()}>

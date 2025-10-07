@@ -72,7 +72,7 @@ export const CreateQuestionDialog: FC<{
                     value={question.text}
                 />
 
-                <div className={clsx('grid grid-cols-2')} >
+                <div className={clsx('grid grid-cols-2 max-sm:grid-cols-1')} >
                     <div className="grid gap-2">
                         <Label>Тип вопроса:</Label>
                         <Select
