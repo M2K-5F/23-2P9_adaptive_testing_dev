@@ -65,7 +65,7 @@ class UserRole(Table):
         Role, backref="user_role", on_update="CASCADE", on_delete="CASCADE"
     )
 
-  
+
 class AdaptivityProfile(Table):
     name = CharField()
     question_weight = FloatField()

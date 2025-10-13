@@ -23,10 +23,10 @@ class AuthOut(UserOut):
 
 async def validate_auth_user(
     user: AuthUser = Body(),
-    repo: UserService = Depends(get_user_service)
+    service: UserService = Depends(get_user_service)
 ) -> AuthOut:
-    current_user = repo.get_user_by_username(user.username)
-    password_hash = repo.get_password_hash_by_username(user.username)
+    current_user = service.get_user_by_username(user.username)
+    password_hash = service.get_password_hash_by_username(user.username)
 
     if not current_user or not verify_password(user.password, password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

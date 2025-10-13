@@ -1,3 +1,4 @@
+from backend.config.path_config import API_PREFIX
 from .auth.user import auth_router
 from .search.course import search_router
 from .student.course import course_router as s_course_router
@@ -25,7 +26,7 @@ student_router.include_router(s_group_router)
 student_router.include_router(s_topic_router)
 
 
-main_router = APIRouter(prefix='/api')
+main_router = APIRouter(prefix=API_PREFIX)
 main_router.include_router(auth_router)
 main_router.include_router(search_router)
 main_router.include_router(student_router)

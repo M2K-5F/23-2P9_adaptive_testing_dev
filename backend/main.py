@@ -11,9 +11,6 @@ from middlewares.serve import add_middleware as add_serve_middleware
 from pathlib import Path
 
 
-# IS_DIST_EXIST = Path('../dist').is_dir()
-
-
 app = FastAPI()
 
 add_refresh_cookie_middleware(app)
@@ -22,10 +19,6 @@ add_auth_middelware(app)
 add_cors_middleware(app)
 
 app.include_router(main_router)
-
-
-# if IS_DIST_EXIST:
-#     app.mount("/assets", StaticFiles(directory="../dist/assets"), name="assets")
 
 
 if __name__ == "__main__":
