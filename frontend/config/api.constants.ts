@@ -1,4 +1,4 @@
-export const baseURL = `http://localhost/api` as const;
+export const baseURL = `http://localhost:8000/api` as const;
 // export const baseURL = `http://109.161.15.144/api`
 export const tURL = `${baseURL}/t` as const;
 export const sURL = `${baseURL}/s` as const;

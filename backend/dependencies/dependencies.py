@@ -189,12 +189,18 @@ def get_techer_topic_service(
 def get_techer_course_service(
     course_repo = Depends(get_course_repository),
     topic_repo = Depends(get_topic_repository),
+    question = Depends(get_question_repository),
+    user_question = Depends(get_user_question_repository),
+    question_weight = Depends(get_question_weight_repository),
     user_topic_repo = Depends(get_user_topic_repository),
     user_text_answer_repo = Depends(get_user_text_answer_repository),
     user_group = Depends(get_user_group_repository),
     group = Depends(get_group_repo)
 ):
     return TeacherCourseService(
+        user_question,
+        question,
+        question_weight,
         group,
         user_group,
         course_repo,

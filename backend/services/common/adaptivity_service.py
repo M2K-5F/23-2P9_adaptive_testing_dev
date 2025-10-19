@@ -40,7 +40,7 @@ class AdaptivityServise:
 
         self._question_weight.update(
             question_weight, 
-            weight = min(max(weight_profile.min_weight, updated_weight), weight_profile.max_weight)
+            weight = round(min(max(weight_profile.min_weight, updated_weight), weight_profile.max_weight),3)
         )
 
 

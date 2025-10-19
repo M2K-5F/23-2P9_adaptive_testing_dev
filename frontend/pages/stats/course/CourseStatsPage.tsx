@@ -1,331 +1,416 @@
-import React, { useState, useEffect, FC, Fragment, createContext, use } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Select, Badge, Progress, Skeleton, SelectItem, SelectContent, SelectTrigger, SelectValue, Loader, Button, DropdownMenuSeparator } from '@/components';
-import { useSearchParams } from 'react-router-dom';
-import clsx from 'clsx';
-import { useCourseStore } from '@/stores/useCourseStore';
-import { useClipboard } from '@/hooks/useClipboard';
-import { CourseStatistics, GroupDetail, UserGroupDetail, UserTopicDetail } from '@/types/interfaces';
-import { getCourseStats } from '@/services/api.service';
-import { SubmitTextQuestionsDialog } from '@/components/dialogs/submit-question-dilog';
+import React, { useState, useEffect, FC } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { QuestionWeightsDialog } from '@/components/dialogs/question-weight-dialog';
+import { useCourseStore } from '@/stores/useCourseStore';
+import { CourseStatistics, GroupDetail, UserGroupDetail, UserTopicDetail } from '@/types/interfaces';
+import { getCourseStats} from '@/services/api.service';
 
-
-const fetchStatisticsCoxtext = createContext<() => void>(() => {})
-
-
-export const CourseStatisticsPage: FC = () => {
-    const [searchParams, setSearchParams] = useSearchParams()
-    const course_id = Number(searchParams.get('stats_course_id'))
-    const [statistics, setStatistics] = useState<CourseStatistics | null>(null)
-    const [loading, setLoading] = useState(false)
-    const createdCourses = useCourseStore(s => s.createdCourses)
-    const [error, setError] = useState<string | null>(null)
-    const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
-
-    const fetchStatistics = async () => {
-            setLoading(true)
-            setError(null)
-            try {   
-                course_id && setStatistics(await getCourseStats(course_id))
-            } catch {
-                setError('Ошибка загрузки статистики')
-            } finally {
-                setLoading(false)
-            }
-    }
-
-    const toggleGroup = (groupTitle: string) => {
-        setExpandedGroups(prev => {
-            const newSet = new Set(prev)
-            if (newSet.has(groupTitle)) {
-                newSet.delete(groupTitle)
-            } else {
-                newSet.add(groupTitle)
-            }
-            return newSet
-        })
-    }
-
-    const toggleAllGroups = () => {
-        if (!statistics) return
-        
-        if (expandedGroups.size === statistics.group_details.length) {
-            setExpandedGroups(new Set())
-        } else {
-            const allGroupTitles = new Set(statistics.group_details.map(group => group.title))
-            setExpandedGroups(allGroupTitles)
-        }
-    }
-
-    const isGroupExpanded = (groupTitle: string) => expandedGroups.has(groupTitle)
-
+export const AdvancedCourseStatistics: FC = () => {
+    const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+    const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+    const [expandedStudents, setExpandedStudents] = useState<Set<number>>(new Set());
+    const [statistics, setStatistics] = useState<CourseStatistics | null>(null);
+    const [loading, setLoading] = useState(false);
+    const createdCourses = useCourseStore(s => s.createdCourses);
 
     useEffect(() => {
-        fetchStatistics()
-    }, [course_id])
+        const fetchStatistics = async () => {
+            if (selectedCourseId) {
+                setLoading(true);
+                try {
+                    const stats = await getCourseStats(parseInt(selectedCourseId));
+                    setStatistics(stats);
+                } catch (error) {
+                    console.error('Error fetching statistics:', error);
+                } finally {
+                    setLoading(false);
+                }
+                setSelectedGroupId('');
+                setExpandedStudents(new Set());
+            } else {
+                setStatistics(null);
+            }
+        };
 
+        fetchStatistics();
+    }, [selectedCourseId]);
 
-    if (loading) return <Loader variant='success' />
+    const selectedGroup = statistics?.group_details.find(g => g.id.toString() === selectedGroupId);
+
+    const toggleStudentExpansion = (studentId: number) => {
+        setExpandedStudents(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(studentId)) {
+                newSet.delete(studentId);
+            } else {
+                newSet.add(studentId);
+            }
+            return newSet;
+        });
+    };
+
+    if (loading) {
+        return <div className="flex justify-center p-8">Загрузка...</div>;
+    }
 
     return (
-        <fetchStatisticsCoxtext.Provider value={fetchStatistics} >
-            <div className="container mx-auto p-6 space-y-6">
-                <div className="flex gap-2 items-center justify-between">
-                    <h1 className="text-3xl max-sm:text-lg font-bold">Статистика курсов</h1>
-                    
-                    <Select onValueChange={(value) => setSearchParams(p => {
-                        p.set('stats_course_id', `${value}`)
-                        return p
-                    })} value={course_id.toString()}>
-                        <SelectTrigger className="w-fit">
-                            <SelectValue placeholder="Выберите курс" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {createdCourses.map((course) => (
-                                <SelectItem key={course.id} value={course.id.toString()}>
-                                    {course.title}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+        <div className="container mx-auto p-6 space-y-6">
+            {/* Селекторы */}
+            <div className="flex flex-col gap-4">
+                <h1 className="text-3xl font-bold">Детальная аналитика курсов</h1>
+                
+                <div className="flex gap-4 flex-wrap">
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="text-sm font-medium mb-2 block">Курс</label>
+                        <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Выберите курс" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {createdCourses.map((course) => (
+                                    <SelectItem key={course.id} value={course.id.toString()}>
+                                        {course.title}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                {error && (
-                    <Card className="border-destructive">
-                        <CardContent className="py-6">
-                            <div className="text-destructive text-center">{error}</div>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {statistics && (
-                    <>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>{statistics.course_title}</CardTitle>
-                                <CardDescription>Общая статистика по курсу</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold">{statistics.meta.total_students}</div>
-                                        <div className="text-muted-foreground">Всего студентов</div>
-                                    </div>
-                                    
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold">{Math.round(statistics.meta.avg_progress * 100)}%</div>
-                                        <div className="text-muted-foreground">Средний прогресс</div>
-                                    </div>
-
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold">{statistics.meta.completed_user_groups}</div>
-                                        <div className="text-muted-foreground">Завершивших групп</div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {statistics.group_details.length > 0 && 
-                            <div className="flex justify-end">
-                                <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={toggleAllGroups}
-                                    className="flex items-center gap-2"
-                                >
-                                    {expandedGroups.size === statistics.group_details.length 
-                                        ?   <>
-                                                <ChevronUpIcon className="h-4 w-4" />
-                                                Свернуть все группы
-                                            </>
-                                        :   <>
-                                                <ChevronDownIcon className="h-4 w-4" />
-                                                Развернуть все группы
-                                            </>
-                                    }
-                                </Button>
-                            </div>
-                        }
-
-                        <div className="space-y-4">
-                            {statistics.group_details.map((group) => {
-                                const isExpanded = isGroupExpanded(group.title)
-
-                                return (
-                                    <GroupCard 
-                                        key={group.title}
-                                        group={group}
-                                        isExpanded={isExpanded}
-                                        toggleGroup={toggleGroup}
-                                    />
-                                )
-                            })}
-                        </div>
-
-                        {statistics.group_details.length === 0 && 
-                            <Card>
-                                <CardContent className="py-8 text-center">
-                                    <p className="text-muted-foreground">В курсе пока нет групп</p>
-                                    <p className="text-sm text-muted-foreground">Создайте группы для организации студентов</p>
-                                </CardContent>
-                            </Card>
-                        }
-                    </>
-                )}
-
-                {!course_id && !loading && !error && (
-                    <Card>
-                        <CardContent className="py-6">
-                            <div className="text-center text-muted-foreground">
-                                Выберите курс для просмотра статистики
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
-        </fetchStatisticsCoxtext.Provider>
-    )
-}
-
-
-const GroupCard: FC<{group: GroupDetail, isExpanded: boolean, toggleGroup: (groupTitle: string) => void}> = ({group, isExpanded, toggleGroup}) => {
-    const hasStudents = group.user_group_details.length > 0
-    
-    return(
-        <Card key={group.title} className="overflow-hidden">
-            <CardHeader className="cursor-pointer transition-colors p-4" 
-                onClick={() => toggleGroup(group.title)}>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                        {isExpanded 
-                            ?   <ChevronUpIcon className="h-5 w-5 text-muted-foreground" />
-                            :   <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
-                        }
-                        <div className='flex flex-wrap justify-start w-full items-center gap-4'>
-                            <div className="flex-1">
-                                <CardTitle className="text-lg flex items-baseline gap-3">
-                                    {group.title}
-                                    <Badge variant="secondary">
-                                        {group.student_count}/{group.max_student_count} студентов
-                                    </Badge>
-                                </CardTitle>
-                                <CardDescription>
-                                    Средний прогресс: {Math.round(group.avg_progress * 100)}%
-                                    {!hasStudents && ' • Группа пустая'}
-                                </CardDescription>
-                            </div>
-                            <div className={clsx('mr-4')} >
-                                <QuestionWeightsDialog groupId={group.id}/>
-                            </div>
-                        </div>
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="text-sm font-medium mb-2 block">Группа</label>
+                        <Select 
+                            value={selectedGroupId} 
+                            onValueChange={setSelectedGroupId}
+                            disabled={!selectedCourseId}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder={selectedCourseId ? "Выберите группу" : "Сначала выберите курс"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {statistics?.group_details.map((group) => (
+                                    <SelectItem key={group.id} value={group.id.toString()}>
+                                        {group.title}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
-            </CardHeader>
+            </div>
 
-            {isExpanded && 
-                <CardContent className="p-4 border-t">
-                    {hasStudents 
-                        ?   <div className="space-y-4">
-                                {group.user_group_details.map((student) => (
-                                    <UserGroupCard student={student} key={student.user.id} />
+            {/* Таблица групп курса */}
+            {statistics && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Группы курса "{statistics.course_title}"</CardTitle>
+                        <CardDescription>
+                            Средний прогресс: {Math.round(statistics.meta.avg_progress * 100)}% • 
+                            Студентов: {statistics.meta.total_students} • 
+                            Завершивших групп: {statistics.meta.completed_user_groups}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table className="border border-collapse">
+                            <TableHeader>
+                                <TableRow className="border-b">
+                                    <TableHead className="border-r font-medium">Группа</TableHead>
+                                    <TableHead className="border-r">Размер</TableHead>
+                                    <TableHead className="border-r">Прогресс</TableHead>
+                                    <TableHead className="border-r">Эффективность</TableHead>
+                                    <TableHead className="border-r">Статус</TableHead>
+                                    <TableHead>Действия</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {statistics.group_details.map((group) => (
+                                    <TableRow key={group.id} className="border-b hover:bg-muted/50">
+                                        <TableCell className="border-r font-medium">{group.title}</TableCell>
+                                        <TableCell className="border-r">
+                                            <Badge variant="outline">
+                                                {group.student_count}/{group.max_student_count}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="border-r">
+                                            <div className="flex items-center gap-2">
+                                                <Progress value={group.avg_progress * 100} className="w-20" offsetValue={2} />
+                                                <span>{Math.round(group.avg_progress * 100)}%</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="border-r">
+                                            <Badge variant={
+                                                group.avg_progress > 0.7 ? "success" :
+                                                group.avg_progress > 0.4 ? "warning" : "destructive"
+                                            }>
+                                                {group.avg_progress > 0.7 ? "Высокая" :
+                                                 group.avg_progress > 0.4 ? "Средняя" : "Низкая"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="border-r">
+                                            <Badge variant={group.student_count > 0 ? "default" : "secondary"}>
+                                                {group.student_count > 0 ? "Активна" : "Пустая"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm"
+                                                onClick={() => setSelectedGroupId(group.id.toString())}
+                                            >
+                                                Анализировать
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                            </div>
-                        :   <div className="text-center py-8 text-muted-foreground">
-                                <p>В этой группе еще нет студентов</p>
-                                <p className="text-sm">Пригласите студентов присоединиться к группе</p>
-                            </div>
-                    }
-                </CardContent>
-            }
-        </Card>
-    )
-}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Детальная аналитика группы */}
+            {selectedGroup && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Аналитика группы "{selectedGroup.title}"</CardTitle>
+                        <CardDescription>
+                            Прогресс: {Math.round(selectedGroup.avg_progress * 100)}% • 
+                            Студентов: {selectedGroup.student_count} •
+                            Заполненность: {Math.round((selectedGroup.student_count / selectedGroup.max_student_count) * 100)}%
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {/* Адаптивные параметры */}
+                        <AdaptiveParameters group={selectedGroup} />
+                        
+                        {/* Таблица студентов с детализацией по темам */}
+                        <Table className="border border-collapse">
+                            <TableHeader>
+                                <TableRow className="border-b">
+                                    <TableHead className="border-r font-medium">Студент</TableHead>
+                                    <TableHead className="border-r">Прогресс</TableHead>
+                                    <TableHead className="border-r">Темы</TableHead>
+                                    <TableHead className="border-r">Активность</TableHead>
+                                    <TableHead className="border-r">Рейтинг</TableHead>
+                                    <TableHead className="border-r">Контакты</TableHead>
+                                    <TableHead>Детали</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {selectedGroup.user_group_details.map((student) => (
+                                    <React.Fragment key={student.user.id}>
+                                        <TableRow className="border-b hover:bg-muted/50">
+                                            <TableCell className="border-r font-medium">{student.user.name}</TableCell>
+                                            <TableCell className="border-r">
+                                                <div className="flex items-center gap-2">
+                                                    <Progress value={student.progress * 100} className="w-20" offsetValue={2} />
+                                                    <span>{Math.round(student.progress * 100)}%</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="border-r">
+                                                <Badge variant="outline">
+                                                    {student.completed_topics}/{student.total_topics}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="border-r">
+                                                <Badge variant={
+                                                    student.progress > 0.8 ? "success" :
+                                                    student.progress > 0.5 ? "warning" : "destructive"
+                                                }>
+                                                    {student.progress > 0.8 ? "Высокая" :
+                                                     student.progress > 0.5 ? "Средняя" : "Низкая"}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="border-r">
+                                                <Badge>
+                                                    {student.progress > 0.9 ? "A" :
+                                                     student.progress > 0.7 ? "B" :
+                                                     student.progress > 0.5 ? "C" : "D"}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="border-r">
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm"
+                                                    onClick={() => window.open(student.user.telegram_link, '_blank')}
+                                                >
+                                                    Telegram
+                                                </Button>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm"
+                                                    onClick={() => toggleStudentExpansion(student.user.id)}
+                                                >
+                                                    {expandedStudents.has(student.user.id) ? 
+                                                        <ChevronUpIcon className="h-4 w-4" /> : 
+                                                        <ChevronDownIcon className="h-4 w-4" />
+                                                    }
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                        
+                                        {/* Детальная информация по темам студента */}
+                                        {expandedStudents.has(student.user.id) && (
+                                            <TableRow className="bg-muted/30">
+                                                <TableCell colSpan={7} className="p-0">
+                                                    <StudentTopicsDetails topics={student.user_topic_details} />
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    );
+};
 
 
-const UserGroupCard: FC<{student: UserGroupDetail}> = ({student}) => {
-    const copy = useClipboard()
+const StudentTopicsDetails: FC<{ topics: UserTopicDetail[] }> = ({ topics }) => {
+    return (
+        <div className="p-4 space-y-4">
+            <h4 className="font-semibold">Детальная информация по темам:</h4>
+            {topics.map((topic, index) => (
+                <Card key={topic.topic_title} className={index > 0 ? "mt-4" : ""}>
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex justify-between items-center">
+                            <span>{topic.topic_title}</span>
+                            <div className="flex gap-2 items-center">
+                                <Badge variant={topic.is_completed ? "success" : "secondary"}>
+                                    {topic.is_completed ? "Завершена" : "В процессе"}
+                                </Badge>
+                                <Badge variant="outline">
+                                    {Math.round(topic.progress * 100)}%
+                                </Badge>
+                                <Badge variant="outline">
+                                    {topic.attempt_count} попыт.
+                                </Badge>
+                            </div>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {/* Таблица вопросов темы */}
+                        <Table className="border border-collapse">
+                            <TableHeader>
+                                <TableRow className="border-b">
+                                    <TableHead className="border-r font-medium w-1/2">Вопрос</TableHead>
+                                    <TableHead className="border-r">Балл</TableHead>
+                                    <TableHead className="border-r">Вес</TableHead>
+                                    <TableHead>Прогресс</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {topic.question_scores?.map((question) => (
+                                    <TableRow key={question.question_id} className="border-b">
+                                        <TableCell className="border-r text-sm">{question.question_text}</TableCell>
+                                        <TableCell className="border-r">
+                                            <Badge variant={question.score >= 0.8 ? "success" : question.score >= 0.5 ? "warning" : "destructive"}>
+                                                {Math.round(question.score * 100)}%
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="border-r">
+                                            <Badge variant="outline">{question.weight}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Progress value={question.score * 100} className="w-16" offsetValue={2} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+};
+
+
+const AdaptiveParameters: FC<{ group: GroupDetail }> = ({ group }) => {
+    const adaptiveProfile = group.adaptive_profile;
+    const weightProfile = group.weight_profile;
+
+    if (!adaptiveProfile && !weightProfile) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg">Адаптивные параметры группы</CardTitle>
+                    <CardDescription>Параметры не настроены</CardDescription>
+                </CardHeader>
+            </Card>
+        );
+    }
 
     return (
-        <Card key={student.user.id} className="p-4">
-            <div className="flex flex-col justify-baseline items-start mb-4">
-                <div className='flex justify-between w-full flex-row'>
-                    <h3 className="font-semibold">{student.user.name}</h3>
-                    <Badge variant={student.progress === 100 ? "default" : "secondary"}>
-                        {Math.round(student.progress * 100)}%
-                    </Badge>
-                </div>
-                <Button 
-                    variant={'link'} 
-                    onClick={() => copy(student.user.telegram_link)} 
-                    className="p-0 text-sm text-muted-foreground"
-                >
-                    @{student.user.telegram_link.split('://')[1]}
-                </Button>
-            </div>
-
-            <Progress offsetValue={2} value={student.progress * 100} />
-
-            <div className="mt-3 text-sm text-muted-foreground">
-                {student.completed_topics} из {student.total_topics} тем завершено
-            </div>
-
-            <div className="mt-4 space-y-2">
-                {student.user_topic_details.map((topic, index) => (
-                    <UserTopicCard index={index} topic={topic} key={topic.topic_title} />
-                ))}
-            </div>
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-lg">Адаптивные параметры группы</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table className="border border-collapse">
+                    <TableHeader>
+                        <TableRow className="border-b">
+                            <TableHead className="border-r font-medium">Параметр</TableHead>
+                            <TableHead className="border-r">Значение</TableHead>
+                            <TableHead className="border-r">Описание</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Профиль адаптивности</TableCell>
+                                <TableCell className="border-r">
+                                    <Badge variant="outline">{adaptiveProfile.name}</Badge>
+                                </TableCell>
+                                <TableCell className="border-r text-sm">Стратегия подбора вопросов</TableCell>
+                            </TableRow>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Влияние веса вопроса</TableCell>
+                                <TableCell className="border-r">{adaptiveProfile.question_weight * 100}%</TableCell>
+                                <TableCell className="border-r text-sm">Влияние сложности вопроса на подбор</TableCell>
+                            </TableRow>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Влияние последнего ответа</TableCell>
+                                <TableCell className="border-r">{adaptiveProfile.last_score * 100}%</TableCell>
+                                <TableCell className="border-r text-sm">Учет предыдущих результатов</TableCell>
+                            </TableRow>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Доля адаптивных вопросов</TableCell>
+                                <TableCell className="border-r">{Math.round(adaptiveProfile.max_adaptive_questions_ratio * 100)}%</TableCell>
+                                <TableCell className="border-r text-sm">Вопросы из предыдущих тем</TableCell>
+                            </TableRow>
+                        </>
+                        <>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Базовый вес вопросов</TableCell>
+                                <TableCell className="border-r">{group.avg_base_weight}</TableCell>
+                                <TableCell className="border-r text-sm">Начальный вес новых вопросов</TableCell>
+                            </TableRow>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Средний вес вопросов</TableCell>
+                                <TableCell className="border-r">{group.avg_question_weight}</TableCell>
+                                <TableCell className="border-r text-sm">Текущая сложность вопросов группы</TableCell>
+                            </TableRow>
+                            <TableRow className="border-b">
+                                <TableCell className="border-r font-medium">Смещение оценки</TableCell>
+                                <TableCell className="border-r">{weightProfile.score_bias}</TableCell>
+                                <TableCell className="border-r text-sm">Корректировка точки равновесия</TableCell>
+                            </TableRow>
+                        </>
+                    </TableBody>
+                </Table>
+            </CardContent>
         </Card>
-    )
-}
+    );
+};
 
-
-const UserTopicCard: FC<{topic: UserTopicDetail, index: number}> = ({topic, index}) => {
-    const fetchStatistics = use(fetchStatisticsCoxtext)
-
-
-    return(
-        <Fragment key={topic.topic_title}>  
-            {index > 0 && <DropdownMenuSeparator className='my-2' />}
-            <div className="flex items-center justify-between text-sm">
-                <span className={(topic.is_completed ? "text-green-600" : "text-muted-foreground") + ' w-full pr-2 overflow-ellipsis'}>
-                    {topic.topic_title}
-                </span>
-                <div className="flex items-center gap-2">
-                    {topic.attempt_count > 0 &&
-                        <Badge>
-                            {topic.attempt_count} попыток
-                        </Badge>
-                    }
-                    <Badge variant='outline' className='max-sm:hidden'>
-                        мин. {Math.round(topic.score_for_pass * 100)}%
-                    </Badge>
-                    {topic.progress > 0 && (
-                        <Badge
-                            variant="outline" 
-                            className={clsx(
-                                "text-primary-foreground bg-red-300",
-                                topic.progress >= topic.score_for_pass * 0.625 && 'bg-orange-300',
-                                topic.progress >= topic.score_for_pass && 'bg-green-300'
-                            )}>
-                            {Math.round(topic.progress * 100)}%
-                        </Badge>
-                    )}
-                    <span className="text-muted-foreground">
-                        {Math.round(topic.progress * topic.question_count)}/{topic.question_count}
-                    </span>
-                </div>
-            </div>
-            {topic.unsubmited_answers.length > 0 && (
-                <div className="flex justify-end mt-2">
-                    <SubmitTextQuestionsDialog 
-                        answers={topic.unsubmited_answers}
-                        onSuccess={async () => {
-                            fetchStatistics()
-                        }}
-                    />
-                </div>
-            )}
-        </Fragment>
-    )
-}
+export default AdvancedCourseStatistics;

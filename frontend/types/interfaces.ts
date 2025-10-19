@@ -219,46 +219,6 @@ export interface UnsubmitedAnswer {
 }
 
 
-export interface CourseStatistics {
-    course_id: string
-    course_title: string
-    meta: {
-        avg_progress: number
-        total_students: number
-        completed_user_groups: number
-    }
-    group_details: GroupDetail[]
-}
-
-export interface GroupDetail {
-    id: number
-    avg_progress: number
-    title: string
-    max_student_count: number
-    student_count: number
-    user_group_details: UserGroupDetail[]
-}
-
-export interface UserGroupDetail {
-    user: UserShema
-    progress: number
-    completed_topics: number
-    total_topics: number
-    user_topic_details: UserTopicDetail[]
-}
-
-export interface UserTopicDetail {
-    topic_title: string
-    is_completed: boolean
-    score_for_pass: number
-    progress: number
-    attempt_count: number
-    question_count: number
-    ready_to_pass: boolean
-    unsubmited_answers: UnsubmitedAnswer[]
-}
-
-
 export interface WeightProfile {
     id: number
     created_at: string
@@ -300,5 +260,82 @@ export interface WeightProfile {
     created_at: string
 }
 
+
+
+export interface QuestionScore {
+  question_id: number;
+  question_text: string;
+  score: number; // 0-1
+  weight: number;
+}
+// types/course-statistics.ts
+
+export interface QuestionScore {
+    question_id: number;
+    question_text: string;
+    score: number;
+    weight: number;
+    is_adaptive?: boolean;
+}
+
+export interface UserTopicDetail {
+    topic_title: string;
+    is_completed: boolean;
+    score_for_pass: number;
+    progress: number;
+    question_count: number;
+    ready_to_pass: boolean;
+    attempt_count: number;
+    unsubmited_answers: any[];
+    question_scores: QuestionScore[];
+}
+
+export interface UserGroupDetail {
+    user: {
+        id: number;
+        username: string;
+        name: string;
+        telegram_link: string;
+        created_at: string;
+        is_active: boolean;
+    };
+    progress: number;
+    completed_topics: number;
+    total_topics: number;
+    user_topic_details: UserTopicDetail[];
+}
+
+export interface AdaptiveProfile {
+    name: string;
+    question_weight: number;
+    last_score: number;
+    time_since_last: number;
+    max_adaptive_questions_count: number;
+    max_adaptive_questions_ratio: number;
+}
+
+export interface GroupDetail {
+    id: number;
+    title: string;
+    avg_progress: number;
+    max_student_count: number;
+    student_count: number;
+    adaptive_profile: AdaptiveProfile;
+    weight_profile: WeightProfile;
+    avg_base_weight: number
+    avg_question_weight: number;
+    user_group_details: UserGroupDetail[];
+}
+
+export interface CourseStatistics {
+    course_id: string;
+    course_title: string;
+    meta: {
+        avg_progress: number;
+        total_students: number;
+        completed_user_groups: number;
+    };
+    group_details: GroupDetail[];
+}
 
 export interface CourseStats extends CourseStatistics {}
