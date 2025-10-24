@@ -325,6 +325,7 @@ class CourseService:
             user_question = self.user_question.get_or_none(
                 False,
                 user = user_topic.user,
+                is_active = True,
                 question = question,
                 by_user_topic = user_topic
             )

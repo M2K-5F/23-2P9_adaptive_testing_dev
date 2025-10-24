@@ -25,7 +25,7 @@ export const CreateTopicDialog: FC<{text: string, className?: string, variant?: 
     const fetchTopics = useTopicStore(s => s.fetchCreatedTopics)
     const courseId = Number(useSearchParams()[0].get('course_id'))
     const createHandler = useCreateTopic()
-    const [data, setData] = useImmer<{title: string, description: string, score: number}>({title: '', description: '', score: 0.8})
+    const [data, setData] = useImmer<{title: string, description: string, score: string}>({title: '', description: '', score: '0.8'})
     const [isCreating, setIsCreating] = useState<boolean>(false)
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
@@ -90,15 +90,15 @@ export const CreateTopicDialog: FC<{text: string, className?: string, variant?: 
 
                     <div className="flex gap-3">
                         <Label htmlFor={''}>Баллы для прохождения:</Label>
-                        <Select onValueChange={(value => {setData(d => {d.score = Number(value)})})} value={data.score.toString()}>
+                        <Select onValueChange={(value => {setData(d => {d.score = value})})} value={data.score}>
                             <SelectTrigger>
                                 <SelectValue placeholder={'Баллы'} />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Баллы</SelectLabel>
-                                    {Array.from([0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0 ]).map((score) => {
-                                        return <SelectItem value={score.toString()}>{score}</SelectItem>
+                                    {Array.from(['0.5', '0.6', '0.7', '0.8', '0.9', '0.95', '1.0' ]).map((score) => {
+                                        return <SelectItem key={score} value={score}>{score}</SelectItem>
                                     })
                                     
                                     }

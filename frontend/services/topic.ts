@@ -2,7 +2,7 @@ import { APIUrls } from "@/config/api.constants"
 import { ApiService } from "./api.service"
 import { CompletedTopic, CreatedTopic, QuestionToPass, TopicToPass, UserTopic } from "@/types/interfaces"
 
-export const createTopic = (topic_title: string, description: string, course_id: number, score_to_pass: number) => {
+export const createTopic = (topic_title: string, description: string, course_id: number, score_to_pass: string) => {
     return ApiService.requestToServer(
         APIUrls.createTopicURL,
         {

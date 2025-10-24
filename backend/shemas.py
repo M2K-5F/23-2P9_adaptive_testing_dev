@@ -89,7 +89,7 @@ class TopicToCreate(BaseModel):
     title: str
     description: str
     course_id: int
-    score_for_pass: float
+    score_for_pass: Literal['0.5', '0.6', '0.7', '0.8', '0.9', '0.95', '1.0' ]
 
     
 class GroupToCreate(BaseModel):

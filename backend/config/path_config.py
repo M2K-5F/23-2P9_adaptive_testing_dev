@@ -17,6 +17,6 @@ ALLOWED_ORIGINS = [
     'http://109.161.15.144',
     'http://109.161.15.144:80',
     "http://localhost:5173", 
-    'http://localhost:8001', 
+    'http://localhost:8000', 
     'http://localhost:80'
 ]

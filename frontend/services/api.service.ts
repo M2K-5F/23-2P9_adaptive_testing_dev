@@ -26,7 +26,6 @@ class ApiServiceClass {
         return fetch(`${URL}?${queryString}`, {...init,
             credentials: 'include',
             headers: {
-                'accept': 'application/json',
                 'Content-Type': 'application/json'
             },
         })
@@ -61,6 +60,7 @@ export const logoutUser = async () => {
         APIUrls.logOutURL,
         {
             method: 'post',
+            credentials: 'include'
         }
     )
 }

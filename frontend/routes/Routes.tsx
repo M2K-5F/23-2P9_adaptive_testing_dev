@@ -49,7 +49,7 @@ export default function RoutePaths () {
 
           </Route>
           
-              <Route path="*" Component={NotFoundPage} />
+          <Route path="*" Component={NotFoundPage} />
         </Routes>
       </BrowserRouter>
     </>

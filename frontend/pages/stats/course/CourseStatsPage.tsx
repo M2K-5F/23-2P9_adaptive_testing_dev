@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FC } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Loader } from '@/components';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -9,10 +9,13 @@ import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { useCourseStore } from '@/stores/useCourseStore';
 import { CourseStatistics, GroupDetail, UserGroupDetail, UserTopicDetail } from '@/types/interfaces';
 import { getCourseStats} from '@/services/api.service';
+import { SubmitTextQuestionsDialog } from '@/components/dialogs/submit-question-dilog';
+import { useSearchParams } from 'react-router-dom';
 
 export const AdvancedCourseStatistics: FC = () => {
-    const [selectedCourseId, setSelectedCourseId] = useState<string>('');
     const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+    const [searchParams, setSearchParams] = useSearchParams()
+    const courseId = Number(searchParams.get('stats_course_id'))
     const [expandedStudents, setExpandedStudents] = useState<Set<number>>(new Set());
     const [statistics, setStatistics] = useState<CourseStatistics | null>(null);
     const [loading, setLoading] = useState(false);
@@ -20,25 +23,24 @@ export const AdvancedCourseStatistics: FC = () => {
 
     useEffect(() => {
         const fetchStatistics = async () => {
-            if (selectedCourseId) {
+            if (courseId) {
                 setLoading(true);
                 try {
-                    const stats = await getCourseStats(parseInt(selectedCourseId));
-                    setStatistics(stats);
-                } catch (error) {
-                    console.error('Error fetching statistics:', error);
+                    setStatistics(
+                        await getCourseStats(courseId)
+                    )
                 } finally {
-                    setLoading(false);
+                    setLoading(false)
                 }
-                setSelectedGroupId('');
-                setExpandedStudents(new Set());
+                setSelectedGroupId('')
+                setExpandedStudents(new Set())
             } else {
                 setStatistics(null);
             }
         };
 
         fetchStatistics();
-    }, [selectedCourseId]);
+    }, [courseId]);
 
     const selectedGroup = statistics?.group_details.find(g => g.id.toString() === selectedGroupId);
 
@@ -54,8 +56,8 @@ export const AdvancedCourseStatistics: FC = () => {
         });
     };
 
-    if (loading) {
-        return <div className="flex justify-center p-8">Загрузка...</div>;
+    if (loading || !courseId) {
+        return <Loader variant='success' />
     }
 
     return (
@@ -64,10 +66,13 @@ export const AdvancedCourseStatistics: FC = () => {
             <div className="flex flex-col gap-4">
                 <h1 className="text-3xl font-bold">Детальная аналитика курсов</h1>
                 
-                <div className="flex gap-4 flex-wrap">
-                    <div className="flex-1 min-w-[200px]">
-                        <label className="text-sm font-medium mb-2 block">Курс</label>
-                        <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+                <div className="flex  gap-4 flex-wrap justify-start">
+                    <div className="">
+                        <label className="text-sm w-fit font-medium mb-2 block">Курс</label>
+                        <Select value={courseId.toString()} onValueChange={(value) => setSearchParams(p => {
+                            p.set('stats_course_id', `${value}`)
+                            return p
+                        })}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Выберите курс" />
                             </SelectTrigger>
@@ -81,15 +86,14 @@ export const AdvancedCourseStatistics: FC = () => {
                         </Select>
                     </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                        <label className="text-sm font-medium mb-2 block">Группа</label>
+                    <div className="">
+                        <label className="text-sm w-fit font-medium mb-2 block">Группа</label>
                         <Select 
                             value={selectedGroupId} 
                             onValueChange={setSelectedGroupId}
-                            disabled={!selectedCourseId}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder={selectedCourseId ? "Выберите группу" : "Сначала выберите курс"} />
+                                <SelectValue placeholder={"Выберите группу"} />
                             </SelectTrigger>
                             <SelectContent>
                                 {statistics?.group_details.map((group) => (
@@ -285,6 +289,7 @@ const StudentTopicsDetails: FC<{ topics: UserTopicDetail[] }> = ({ topics }) => 
                         <CardTitle className="text-sm flex justify-between items-center">
                             <span>{topic.topic_title}</span>
                             <div className="flex gap-2 items-center">
+                                <SubmitTextQuestionsDialog answers={topic.unsubmited_answers} onSuccess={() => {}} />
                                 <Badge variant={topic.is_completed ? "success" : "secondary"}>
                                     {topic.is_completed ? "Завершена" : "В процессе"}
                                 </Badge>

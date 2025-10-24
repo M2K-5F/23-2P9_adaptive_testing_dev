@@ -56,7 +56,7 @@ export const SubmitTextQuestionsDialog: FC<{answers: UnsubmitedAnswer[], onSucce
         for (const answer of answers) {
             await submitQuestion(answer.id, scores[answer.id].score);
         }
-        
+        setOpen(false)
         toast.success('Результаты ответов сохранены');
         onSuccess();
     } catch (error) {

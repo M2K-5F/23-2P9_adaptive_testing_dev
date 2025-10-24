@@ -21,7 +21,7 @@ export const AuthLayout: FC = () => {
                             <ToggleGroupItem onClick={() => setValue('auth')} value="auth">Авторизация</ToggleGroupItem>
                             <ToggleGroupItem onClick={() => setValue('reg')} value="reg">Регистрация</ToggleGroupItem>
                         </ToggleGroup>
-                        <ThemeSwitcher className="ml-8" />
+                        <ThemeSwitcher className="ml-auto mr-3" />
                     </div>
                     <ValueContext.Provider value={setValue}>
                         <Outlet />
