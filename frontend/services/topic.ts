@@ -2,7 +2,7 @@ import { APIUrls } from "@/config/api.constants"
 import { ApiService } from "./api.service"
 import { CompletedTopic, CreatedTopic, QuestionToPass, TopicToPass, UserTopic } from "@/types/interfaces"
 
-export const createTopic = (topic_title: string, description: string, course_id: number, score_to_pass: number) => {
+export const createTopic = (topic_title: string, description: string, course_id: number, score_to_pass: string) => {
     return ApiService.requestToServer(
         APIUrls.createTopicURL,
         {
@@ -24,13 +24,9 @@ export const createTopic = (topic_title: string, description: string, course_id:
 
 export const archTopic = (topic_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.archTopicURL,
+        APIUrls.archTopicURL(topic_id),
         {
-            credentials: 'include',
             method: 'put',
-        },
-        {
-            "topic_id": topic_id
         }
     )
 }
@@ -38,13 +34,9 @@ export const archTopic = (topic_id: number) => {
 
 export const unarchTopic = (topic_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.unarchTopicURL,
+        APIUrls.unarchTopicURL(topic_id),
         {
-            credentials: 'include',
             method: 'put',
-        },
-        {
-            "topic_id": topic_id
         }
     )
 }
@@ -52,39 +44,23 @@ export const unarchTopic = (topic_id: number) => {
 
 export const getFollowedTopics = (course_id: number): Promise<UserTopic[]> => {
     return ApiService.requestToServer(
-        APIUrls.getFollowedTopicsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            "user_course_id": course_id,
-        }
+        APIUrls.getFollowedTopicsURL(course_id),
     )
 }
 
 
 export const getTopics = (course_id: number): Promise<CreatedTopic[]> => {
     return ApiService.requestToServer(
-        APIUrls.getTopicsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            "course_id": course_id,
-        }
+        APIUrls.getTopicsURL(course_id),
     )
 }
 
 
 export const startPassingTopic = (user_topicId: number): Promise<TopicToPass> => {
     return ApiService.requestToServer(
-        APIUrls.startPassingTopicURL,
+        APIUrls.startPassingTopicURL(user_topicId),
         {
-            credentials: 'include',
             method: 'post'
-        },
-        {
-            'topic_id': user_topicId
         }
     )
 }

@@ -6,6 +6,9 @@ interface store {
 }
 
 export const themeStore = create<store>((set, get) => {
+    if (localStorage.getItem('theme') === null) {
+        localStorage.setItem('theme', 'dark')
+    }
     const theme = localStorage.getItem('theme') as 'light' | 'dark' ?? 'light'
     theme === 'dark' && document.documentElement.classList.add('dark')
 

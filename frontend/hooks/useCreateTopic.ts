@@ -2,7 +2,7 @@ import { toast } from "sonner"
 import { createTopic } from "@/services/topic"
 
 
-export const useCreateTopic = () => async (courseId: number, data: {title: string, description: string, score: number}, callback: () => void, exceptionCallback: () => void) => {
+export const useCreateTopic = () => async (courseId: number, data: {title: string, description: string, score: string}, callback: () => void, exceptionCallback: () => void) => {
     let descriptionString: string | undefined = undefined
 
     if (data.description.length < 3) {

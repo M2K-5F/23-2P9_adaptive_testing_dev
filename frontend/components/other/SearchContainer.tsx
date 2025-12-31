@@ -1,4 +1,9 @@
-import React, { act, ChangeEvent, RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, { 
+    act, ChangeEvent, 
+    RefObject, useEffect, 
+    useLayoutEffect, 
+    useRef, useState 
+} from "react"
 import { useDebounce } from "../../hooks/useDebounce"
 import { CreatedCourse } from "../../types/interfaces"
 import { Input } from "../ui/input"
@@ -99,8 +104,7 @@ export const SearchContainer = <T extends CreatedCourse>(props: props<T> ) => {
         
             {searchedCourses.length > 0 && searchQuery && active && 
                 <div 
-                    className="p-2 mx-5 absolute m-auto bg-[var(--search)] outline-0 rounded-b-md border border-t-0"
-                    style={{width:'calc(100% - 40px)'}}
+                    className="p-2 absolute m-auto bg-[var(--search)] outline-0 rounded-sm border border-t-0"
                 >
                     <h4 className="text-xs text-gray-500 dark:text-gray-400">Найденные курсы:</h4>
                     {searchedCourses.length

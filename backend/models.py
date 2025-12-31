@@ -1,13 +1,12 @@
 """database discription"""
-from ast import boolop
-from calendar import c
 from datetime import datetime
-from xmlrpc.client import boolean
+from email.policy import default
 from peewee import AutoField, SqliteDatabase, CharField, DateTimeField, BooleanField, Model, ForeignKeyField, FloatField, IntegerField
 from playhouse.shortcuts import model_to_dict
 
-from config import weight_config
-from shemas import Roles, UserOut
+from backend.config.adaptivity_config import ADAPTIVITY_PROFILES
+from config.weight_config import WEIGHT_ADJUSTMENT_PROFILES
+from shemas import Roles
 from utils import get_password_hash
 
 database = SqliteDatabase('my_database.db')
@@ -46,7 +45,7 @@ class Table(Model):
         return dict(serialize(data))
 
 
-class User(Table):
+class User(Table):###
     username = CharField(unique=True)
     name = CharField(unique=True)
     telegram_link = CharField()
@@ -54,11 +53,11 @@ class User(Table):
     is_active = BooleanField(default=True)
 
 
-class Role(Table):
+class Role(Table):###
     status=CharField()
 
 
-class UserRole(Table):
+class UserRole(Table):###
     user = ForeignKeyField(
         User, backref="user_role", on_update="CASCADE", on_delete="CASCADE"
     )
@@ -67,7 +66,25 @@ class UserRole(Table):
     )
 
 
-class Course(Table):
+class AdaptivityProfile(Table):
+    name = CharField()
+    question_weight = FloatField()
+    last_score = FloatField()
+    time_since_last = FloatField()
+    max_adaptive_questions_count = IntegerField()
+    max_adaptive_questions_ratio = FloatField()
+
+
+class WeightProfile(Table):
+    name = CharField()
+    base_weight = FloatField()
+    base_step = FloatField()
+    min_weight = FloatField()
+    max_weight = FloatField()
+    score_bias = FloatField()
+
+
+class Course(Table):###
     title = CharField(max_length=64)
     created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
@@ -83,7 +100,10 @@ class Group(Table):
     max_student_count = IntegerField(default=30)
     student_count = IntegerField(default=0)
     created_by = ForeignKeyField(User, field=User.username)
+    profile = ForeignKeyField(AdaptivityProfile, field=AdaptivityProfile.name)
     is_active = BooleanField(default=True)
+    type = CharField(default='public')
+    passkey = CharField(max_length=16, default='')
 
 
 class Topic(Table):
@@ -102,6 +122,7 @@ class Question(Table):
     by_topic = ForeignKeyField(Topic, backref='questions')
     question_type = CharField()
     is_active = BooleanField(default=True)
+    base_weight_profile = ForeignKeyField(WeightProfile, field=WeightProfile.name)
 
 
 class Answer(Table):
@@ -121,17 +142,14 @@ class UserGroup(Table):
 class QuestionWeight(Table):
     group = ForeignKeyField(Group)
     question = ForeignKeyField(Question)
-    weight = FloatField(default=weight_config.BASE_WEIGHT)
-    step = FloatField(default=weight_config.STEP)
-    max_weight = FloatField(default=weight_config.MAX_WEIGHT)
-    min_weight = FloatField(default=weight_config.MIN_WEIGHT)
+    weight = FloatField()
+    profile = ForeignKeyField(WeightProfile, field=WeightProfile.name)
 
 
 class UserTopic(Table):
     user = ForeignKeyField(User, field=User.username)
     topic = ForeignKeyField(Topic)
     by_user_group = ForeignKeyField(UserGroup)
-
     is_completed = BooleanField(default=False)
     is_attempted = BooleanField(default=False)
     is_available = BooleanField(default=False)
@@ -186,7 +204,9 @@ if __name__ == "__main__":
         Answer, UserQuestion, 
         UserTopic, UserTextAnswer, 
         Group, UserGroup, QuestionWeight,
-        TopicAttempt, QuestionAttempt
+        TopicAttempt, QuestionAttempt,
+        AdaptivityProfile, 
+        WeightProfile
     ])
     database.close()
 
@@ -198,7 +218,9 @@ if __name__ == "__main__":
         defaults={
             'telegram_link': 'https://t.me/teacher_tg',
             'password_hash': get_password_hash('12345')
-        })
+        }
+    )
+    
     UserRole.get_or_create(
         user = base_teacher,
         role = teacher_role
@@ -207,4 +229,34 @@ if __name__ == "__main__":
     UserRole.get_or_create(
         user = base_teacher,
         role = student_role
+    )
+
+    AdaptivityProfile.get_or_create(
+        name = 'Aggressive',
+        defaults = ADAPTIVITY_PROFILES['AGGRESSIVE']
+    )
+
+    AdaptivityProfile.get_or_create(
+        name = 'Balanced',
+        defaults = ADAPTIVITY_PROFILES['BALANCED']
+    )
+
+    AdaptivityProfile.get_or_create(
+        name = 'Gentle',
+        defaults = ADAPTIVITY_PROFILES['GENTLE']
+    )
+
+    WeightProfile.get_or_create(
+        name = 'Aggressive',
+        defaults = WEIGHT_ADJUSTMENT_PROFILES['AGGRESSIVE']
+    )
+
+    WeightProfile.get_or_create(
+        name = 'Balanced',
+        defaults = WEIGHT_ADJUSTMENT_PROFILES["BALANCED"]
+    )
+    
+    WeightProfile.get_or_create(
+        name = 'Gentle',
+        defaults = WEIGHT_ADJUSTMENT_PROFILES['GENTLE']
     )

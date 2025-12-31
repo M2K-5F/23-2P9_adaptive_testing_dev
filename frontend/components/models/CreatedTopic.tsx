@@ -1,8 +1,8 @@
-import { useState, useEffect, memo } from "react"
+import { useState, useEffect, memo, FC } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useTopicStore } from "@/stores/useTopicStore"
 import { Button, Badge } from "@/components"
-import { CreatedQuestion, QuestionConstructor } from "@/components"
+import { CreatedQuestion } from "@/components"
 import { CreatedTopic as CT } from "@/types/interfaces"
 import { archTopic, unarchTopic } from "@/services/topic"
 import { getQuestions } from "@/services/question"
@@ -21,6 +21,7 @@ import {
   Loader2,
   KeyRound
 } from "lucide-react"
+import { TopicDetailsDialog } from "../dialogs/topic-details-dialog"
 
 export const CreatedTopic = memo(({ topic, index }: {
     topic: CT, 
@@ -28,29 +29,8 @@ export const CreatedTopic = memo(({ topic, index }: {
 }) => {
     const [params, setParams] = useSearchParams()
     const courseId = Number(params.get('course_id'))
-    const expandedTopic = Number(params.get('expanded'))
-    const isExpanded = expandedTopic === topic.id
     const fetchTopics = useTopicStore(s => s.fetchCreatedTopics)
-    const [questions, setQuestions] = useState<any[]>([])
-    const [isCreating, setIsCreating] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
     
-    const handleExpand = () => {
-        setParams(p => {
-            p.set('expanded', `${isExpanded ? '0': topic.id}`)
-            return p
-        })
-    }
-
-    const fetchQuestions = async () => {
-        setIsLoading(true)
-        try {
-            const questionsData = await getQuestions(topic.id)
-            setQuestions(questionsData)
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
     const handleArchTopic = () => {
         (topic.is_active 
@@ -59,19 +39,12 @@ export const CreatedTopic = memo(({ topic, index }: {
         ).then(() => {fetchTopics(courseId)})
     }
 
-    useEffect(() => {
-        if (!isExpanded) {
-            fetchQuestions()
-        }
-    }, [isExpanded])
 
-    const activeQuestionsCount = questions.filter(q => q.is_active).length
 
     return (
         <article className={clsx(
             `border border-foreground overflow-hidden transition-all duration-300`,
             'rounded-md shadow-sm mb-4 min-h-42 h-fit',
-            isExpanded && 'sm:col-span-2',
             !topic.is_active &&  'opacity-70'
         )}>
             <section className="p-5 bg-card">
@@ -83,7 +56,6 @@ export const CreatedTopic = memo(({ topic, index }: {
                         <div className="flex-1">
                             <h3 
                                 className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors line-clamp-2" 
-                                onClick={handleExpand}
                             >
                                 {topic.title}
                             </h3>
@@ -110,10 +82,7 @@ export const CreatedTopic = memo(({ topic, index }: {
                 <div className="flex flex-wrap items-center gap-3 mt-3">
                     <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
                         <FileText className="h-3.5 w-3.5" />
-                        <span>Вопросов: {questions.length}</span>
-                        {activeQuestionsCount > 0 && (
-                            <span className="text-green-600">({activeQuestionsCount} актив.)</span>
-                        )}
+                        <span>Вопросов: {topic.question_count}</span>
                     </div>
 
                     <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
@@ -139,85 +108,12 @@ export const CreatedTopic = memo(({ topic, index }: {
                     </Badge>
                 </div>
 
-                <Button
-                    variant={"outline"}
-                    size="sm"
-                    onClick={handleExpand}
-                    className="mt-4 flex items-center gap-2 w-full sm:w-auto"
-                >   
-                    <ChevronDown className={clsx("h-4 w-4 transition-all", isExpanded && 'rotate-180')} />
-                    {isExpanded ? 'Свернуть тему' : 'Подробнее'
-                    }
-                </Button>
+                <div className={clsx('mt-4 flex items-center gap-2 w-full sm:w-auto')} >
+                    <TopicDetailsDialog topic={topic} />
+                </div>
             </section>
-
-            {isExpanded && 
-                <section className="py-4 bg-muted/50">
-                    <div className="px-5 mb-4">
-                        <h4 className="text-md font-semibold flex items-center gap-2">
-                            <FileText className="h-5 w-5" />
-                            Вопросы темы
-                        </h4>                        
-                    </div>
-
-                    <div className="space-y-3">
-                        {questions?.length ? 
-                            questions.map(question => 
-                                <CreatedQuestion
-                                    key={question.id} 
-                                    question={question} 
-                                    fetchQuestions={fetchQuestions}
-                                /> 
-                            ) : 
-                            !isLoading && (
-                                <p className="text-sm text-muted-foreground px-5">
-                                    Нет созданных вопросов
-                                </p>
-                            )
-                        }
-                    </div>
-                    {isLoading &&
-                        <div className="flex items-center gap-2 w-40 mx-auto text-sm text-muted-foreground mt-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Загрузка вопросов...
-                        </div>
-                    }
-
-                    {!isCreating 
-                        ?   <div className="px-5 mt-4">
-                                <Button 
-                                    variant='default'
-                                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600"
-                                    onClick={() => setIsCreating(true)}
-                                >
-                                    <Plus className="h-4 w-4" />
-                                    Создать вопрос
-                                </Button>
-                            </div>
-                        :   <>
-                                <QuestionConstructor
-                                    topic_id={topic.id}
-                                    createQuestionHandler={() => {
-                                        setIsCreating(false)
-                                        fetchQuestions()
-                                    }}
-                                />
-                                
-                                <div className="mt-3 px-5">
-                                    <Button
-                                        variant='destructive'
-                                        size="sm"
-                                        className="flex items-center gap-2" 
-                                        onClick={() => setIsCreating(false)}
-                                    >
-                                        <X className="h-4 w-4" />
-                                        Отменить создание
-                                    </Button>
-                                </div>
-                            </>
-                    }
-                </section>
-            }
         </article>
     )
 })
+
+

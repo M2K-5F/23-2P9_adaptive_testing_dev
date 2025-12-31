@@ -9,7 +9,7 @@ from shemas import UserOut
 from fastapi.responses import JSONResponse
 
 
-class CourseService:
+class CourseService:###
     """Service for processing action with courses from student"""
 
     def __init__(

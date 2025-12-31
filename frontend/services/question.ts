@@ -11,10 +11,7 @@ export const createQuestion = (topic_id: number, question: QuestionCreate) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(question),
-        },
-        {   
-            "topic_id": topic_id,
+            body: JSON.stringify({...question, topic_id: topic_id}),
         }
     )
 }
@@ -22,26 +19,16 @@ export const createQuestion = (topic_id: number, question: QuestionCreate) => {
 
 export const getQuestions = (topic_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.getQuestionsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            "topic_id": topic_id
-        }
+        APIUrls.getQuestionsURL(topic_id)
     )
 }
 
 
 export const archQuestion = (question_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.archQuestionURL,
+        APIUrls.archQuestionURL(question_id),
         {
-            credentials: 'include',
             method: "put",
-        },
-        {
-            "question_id": question_id
         }
     )
 }
@@ -49,13 +36,9 @@ export const archQuestion = (question_id: number) => {
 
 export const unarchQuestion = (question_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.unarchQuestionURL,
+        APIUrls.unarchQuestionURL(question_id),
         {
-            credentials: 'include',
             method: "put",
-        },
-        {
-            "question_id": question_id
         }
     )
 }
@@ -63,13 +46,11 @@ export const unarchQuestion = (question_id: number) => {
 
 export const submitQuestion = (user_answer_id: number, score: number) => {
     return ApiService.requestToServer(
-        APIUrls.submitQuestionURL,
+        APIUrls.submitQuestionURL(user_answer_id),
         {
-            credentials: 'include',
             method: 'post'
         },
         {
-            'user_answer_id': user_answer_id,
             "score": score
         }
     )

@@ -55,7 +55,22 @@ export interface CreatedGroup {
     title: string
     student_count: number
     max_student_count: number
+    type: 'private' | 'public'
+    passkey: string
+    profile: AdaptivityProfile
     is_active: boolean
+}
+
+
+export interface AdaptivityProfile {
+    id: number,
+    created_at: string,
+    name: 'Aggressive' | 'Balanced' | 'Gentle',
+    question_weight: number,
+    last_score: number,
+    time_since_last: number,
+    max_adaptive_questions_count: number,
+    max_adaptive_questions_ratio: number
 }
 
 
@@ -108,7 +123,9 @@ export interface AnswerOption {
 
 export interface QuestionCreate {
     text: string
+    question_type: 'text' | 'choice'
     answer_options: AnswerCreate[]
+    base_weight_profile: 'Aggressive' | 'Balanced' | 'Gentle'
 }
 
 
@@ -130,6 +147,7 @@ export interface CreatedQuestion {
     question_type: 'single' | 'multiple' | 'text'
     is_active: boolean
     answer_options: AnswerOption[]
+    base_weight_profile: WeightProfile
 }
 
 export interface CompletedTopic {
@@ -201,45 +219,16 @@ export interface UnsubmitedAnswer {
 }
 
 
-export interface CourseStatistics {
-    course_id: string
-    course_title: string
-    meta: {
-        avg_progress: number
-        total_students: number
-        completed_user_groups: number
-    }
-    group_details: GroupDetail[]
-}
-
-export interface GroupDetail {
+export interface WeightProfile {
     id: number
-    avg_progress: number
-    title: string
-    max_student_count: number
-    student_count: number
-    user_group_details: UserGroupDetail[]
+    created_at: string
+    name: 'Aggressive' | 'Balanced' | 'Gentle'
+    base_weight: number
+    base_step: number
+    min_weight: number
+    max_weight: number
+    score_bias: number
 }
-
-export interface UserGroupDetail {
-    user: UserShema
-    progress: number
-    completed_topics: number
-    total_topics: number
-    user_topic_details: UserTopicDetail[]
-}
-
-export interface UserTopicDetail {
-    topic_title: string
-    is_completed: boolean
-    score_for_pass: number
-    progress: number
-    attempt_count: number
-    question_count: number
-    ready_to_pass: boolean
-    unsubmited_answers: UnsubmitedAnswer[]
-}
-
 
 export interface QuestionWeight {
     id: number;
@@ -247,9 +236,106 @@ export interface QuestionWeight {
     group: CreatedGroup
     question: CreatedQuestion
     weight: number;
-    step: number;
-    max_weight: number;
-    min_weight: number;
+    profile: WeightProfile
+}
+
+
+export interface GroupCreate {
+    course_id: number
+    title: string
+    type: 'private' | 'public'
+    max_student_count: string
+    profile: 'Aggressive' | 'Balanced' | 'Gentle'
+    passkey: string
+}
+
+
+export interface WeightProfile {
+    base_weight: number
+    base_step: number
+    min_weight: number
+    max_weight: number
+    name: 'Balanced' | 'Aggressive' | 'Gentle'
+    id: number
+    created_at: string
+}
+
+
+
+export interface QuestionScore {
+  question_id: number;
+  question_text: string;
+  score: number; // 0-1
+  weight: number;
+}
+// types/course-statistics.ts
+
+export interface QuestionScore {
+    question_id: number;
+    question_text: string;
+    score: number;
+    weight: number;
+    is_adaptive?: boolean;
+}
+
+export interface UserTopicDetail {
+    topic_title: string;
+    is_completed: boolean;
+    score_for_pass: number;
+    progress: number;
+    question_count: number;
+    ready_to_pass: boolean;
+    attempt_count: number;
+    unsubmited_answers: any[];
+    question_scores: QuestionScore[];
+}
+
+export interface UserGroupDetail {
+    user: {
+        id: number;
+        username: string;
+        name: string;
+        telegram_link: string;
+        created_at: string;
+        is_active: boolean;
+    };
+    progress: number;
+    completed_topics: number;
+    total_topics: number;
+    user_topic_details: UserTopicDetail[];
+}
+
+export interface AdaptiveProfile {
+    name: string;
+    question_weight: number;
+    last_score: number;
+    time_since_last: number;
+    max_adaptive_questions_count: number;
+    max_adaptive_questions_ratio: number;
+}
+
+export interface GroupDetail {
+    id: number;
+    title: string;
+    avg_progress: number;
+    max_student_count: number;
+    student_count: number;
+    adaptive_profile: AdaptiveProfile;
+    weight_profile: WeightProfile;
+    avg_base_weight: number
+    avg_question_weight: number;
+    user_group_details: UserGroupDetail[];
+}
+
+export interface CourseStatistics {
+    course_id: string;
+    course_title: string;
+    meta: {
+        avg_progress: number;
+        total_students: number;
+        completed_user_groups: number;
+    };
+    group_details: GroupDetail[];
 }
 
 export interface CourseStats extends CourseStatistics {}

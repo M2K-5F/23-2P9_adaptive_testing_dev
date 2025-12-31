@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from fastapi import Depends, APIRouter, HTTPException, status, Body
 from fastapi.responses import JSONResponse
+from backend.services.common.user_service import UserService
 from shemas import UserCreate, UserOut
 from utils import verify_password, encode_jwt
 from datetime import datetime, timedelta, timezone
 from dependencies.user import get_user_from_request
-from dependencies.dependencies import get_user_service, US
+from dependencies.dependencies import get_user_service
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -22,10 +23,10 @@ class AuthOut(UserOut):
 
 async def validate_auth_user(
     user: AuthUser = Body(),
-    repo: US = Depends(get_user_service)
+    service: UserService = Depends(get_user_service)
 ) -> AuthOut:
-    current_user = repo.get_user_by_username(user.username)
-    password_hash = repo.get_password_hash_by_username(user.username)
+    current_user = service.get_user_by_username(user.username)
+    password_hash = service.get_password_hash_by_username(user.username)
 
     if not current_user or not verify_password(user.password, password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -87,6 +88,6 @@ async def logout() -> JSONResponse:
 @auth_router.post("/register")
 async def register(
     user: UserCreate = Body(),
-    servise: US = Depends(get_user_service)
+    servise: UserService = Depends(get_user_service)
 ) -> JSONResponse:
     return servise.create_user(user.username, user.name, user.telegram_link, user.password, user.role)

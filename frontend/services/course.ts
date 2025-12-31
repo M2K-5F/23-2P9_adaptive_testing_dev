@@ -6,13 +6,12 @@ export const createCourse = (title: string, description: string) => {
     return ApiService.requestToServer(
         APIUrls.createCourseURL,
         {
-            credentials: 'include',
             method: 'post',
+            body: JSON.stringify({title: title, description: description}),
+            headers: {
+                "Content-type": "application/json"
+            },
         },
-        {
-            "course_title": title,
-            "course_description": description
-        }
     )
 }
 
@@ -20,36 +19,25 @@ export const createCourse = (title: string, description: string) => {
 export const getCreatedCourses = () => {
     return ApiService.requestToServer(
         APIUrls.getCreatedCoursesURL,
-        {
-            credentials: 'include',
-        },
     )
 }
 
 
 export const archCourse = (course_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.archCourseURL,
+        APIUrls.archCourseURL(course_id),
         {
-            credentials: 'include',
             method: 'put',
         },
-        {
-            "course_id": course_id
-        }
     )
 }
 
 
 export const unarchCourse = (course_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.unarchCourseURL,
+        APIUrls.unarchCourseURL(course_id),
         {
-            credentials: 'include',
             method: 'put',
-        },
-        {
-            "course_id": course_id
         }
     )
 }
@@ -58,12 +46,9 @@ export const unarchCourse = (course_id: number) => {
 
 export const getCourseById = (courseId: number): Promise<FetchedCourse> => {
     return ApiService.requestToServer(
-        APIUrls.getCourseURL,
+        APIUrls.getCourseURL(courseId),
         {
             credentials: 'include'
         },
-        {
-            'course_id': courseId
-        }
     )
 }

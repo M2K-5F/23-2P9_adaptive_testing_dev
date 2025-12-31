@@ -1,3 +1,4 @@
+from operator import truediv
 from typing import List, Type, Union
 from models import Question, Topic, UserQuestion, UserTopic
 from shemas import UserOut
@@ -20,5 +21,5 @@ class UserQuestionRepository(BaseRepository[UserQuestion]):
 
     
     def get_by_user_topic(self, user_topic: UserTopic):
-        user_questions = self.select_where(by_user_topic = user_topic)
+        user_questions = self.select_where(by_user_topic = user_topic, is_active = True)
         return user_questions

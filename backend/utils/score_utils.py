@@ -42,7 +42,7 @@ def get_choice_question_score(
 ):
     
     submit_answers = submit_question.answer_options
-    created_answers: List[Answer] = list(getattr(created_question, 'created_answers'))
+    created_answers: List[Answer] = list(getattr(created_question, 'answers'))
 
     submit_answers.sort(key=lambda ans: ans.id)
     created_answers.sort(key=lambda a: getattr(a, "id"))

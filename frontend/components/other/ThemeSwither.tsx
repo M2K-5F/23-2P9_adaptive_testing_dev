@@ -7,30 +7,32 @@ export const  ThemeSwitcher: FC<{className?: string}> = memo((props) => {
 
     return(
         <>
-            <div className={"relative h-8 w-16" + props.className} onClick={toggleTheme}>
-                <div className=" rounded-[8rem]">    
-                    <img 
-                        src="/frontend/assets/Day.jpeg"
+            <div className={props.className}>
+                <div className={"relative h-8 w-16"} onClick={toggleTheme}>
+                    <div className=" rounded-[8rem]">
+                        <img
+                            src="/images/Day.jpeg"
+                            className={clsx(
+                                'rounded-[8rem] border-2 w-16 h-8' ,
+                                theme === 'dark' && 'hidden'
+                            )}
+                        />
+                        <img
+                            src="/images/Night.jpg"
+                            className={clsx(
+                                'border-2 rounded-[8rem] w-16 h-8',
+                                theme === 'light' && 'hidden'
+                            )}
+                        />
+                    </div>
+                    <div
+                        style={{transition: 'all .5s ease'}}
                         className={clsx(
-                            'rounded-[8rem] border-2 w-16 h-8' ,
-                            theme === 'dark' && 'hidden'
-                        )} 
-                    />
-                    <img
-                        src="/frontend/assets/Night.jpg"
-                        className={clsx(
-                            'border-2 rounded-[8rem] w-16 h-8',
-                            theme === 'light' && 'hidden'
+                            'absolute w-5 h-5 rounded-[50%] top-1.5 border',
+                            theme === 'dark' ? 'ml-2 bg-gray-300' : 'ml-9 bg-amber-300'
                         )}
                     />
                 </div>
-                <div 
-                    style={{transition: 'all .5s ease'}}
-                    className={clsx(
-                        'absolute w-5 h-5 rounded-[50%] top-1.5 border',
-                        theme === 'dark' ? 'ml-2 bg-gray-300' : 'ml-9 bg-amber-300'
-                    )}  
-                />
             </div>
         </>
     )

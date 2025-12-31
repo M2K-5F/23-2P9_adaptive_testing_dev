@@ -1,7 +1,8 @@
 """API templates"""
+from ast import literal_eval
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field, field_validator
-from typing import List, Union, Literal
+from typing import List, Optional, Union, Literal
 
 
 class Roles(str, Enum):
@@ -42,8 +43,11 @@ class AnswerOptionBase(BaseModel):
 
 class QuestionBase(BaseModel):
     text: str 
+    topic_id: int
     question_type: Literal['text', 'choice']
     answer_options: List[AnswerOptionBase]
+    base_weight_profile: Literal['Aggressive', 'Balanced', 'Gentle']
+
 
 
 class SubmitAnswerUnit(BaseModel):
@@ -85,4 +89,26 @@ class TopicToCreate(BaseModel):
     title: str
     description: str
     course_id: int
-    score_for_pass: float
+    score_for_pass: Literal['0.5', '0.6', '0.7', '0.8', '0.9', '0.95', '1.0' ]
+
+    
+class GroupToCreate(BaseModel):
+    course_id: int
+    title: str = Field(min_length=3, max_length=128)
+    max_student_count: Literal['5', '10', '15', '20', '25','30']
+    profile: Literal['Aggressive', 'Balanced', 'Gentle']
+
+
+class PublicGroupToCreate(GroupToCreate):
+    type: Literal['public']
+
+class PrivateGroupToCreate(GroupToCreate):
+    type: Literal['private']
+    passkey: str = Field(min_length=3, max_length=16)
+
+
+GroupCreate = Union[PublicGroupToCreate, PrivateGroupToCreate]
+
+class GroupFollowRequest(BaseModel):
+    passkey: Optional[str] = Field(min_length=3, max_length=16)
+    

@@ -1,17 +1,18 @@
 import { APIUrls } from "@/config/api.constants"
 import { ApiService } from "./api.service"
+import { GroupCreate } from "@/types/interfaces"
 
-export const createGroup = (course_id: number, title: string, max_count: number) => {
+export const createGroup = (create_data: GroupCreate) => {
     return ApiService.requestToServer(
         APIUrls.createGroupURL,
         {
             credentials: 'include',
-            method: 'post'
-        },
-        {
-            course_id: course_id,
-            title: title,
-            max_count: max_count
+            method: 'post',
+            body: JSON.stringify(create_data),
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
         }
     )
 }
@@ -19,40 +20,26 @@ export const createGroup = (course_id: number, title: string, max_count: number)
 
 export const getCreatedGroups = (course_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.getTeacherGroupsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            course_id: course_id
-        }
+        APIUrls.getTeacherGroupsURL(course_id),
     )
 }
 
 
 export const archGroup = (group_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.archGroupURL,
+        APIUrls.archGroupURL(group_id),
         {
             method: 'put',
-            credentials: 'include',
         },
-        {
-            group_id: group_id
-        }
     )
 }
 
 
 export const unarchGroup = (group_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.unarchGroupURL,
+        APIUrls.unarchGroupURL(group_id),
         {
             method: 'put',
-            credentials: 'include',
-        },
-        {
-            group_id: group_id
         }
     )
 }
@@ -60,26 +47,14 @@ export const unarchGroup = (group_id: number) => {
 
 export const getGroupWeights = (group_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.getGroupWeightsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            group_id: group_id
-        }
+        APIUrls.getGroupWeightsURL(group_id)
     )
 }
 
 
 export const getGroupsByCourse = (course_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.getCourseGroupsURL,
-        {
-            credentials: 'include',
-        },
-        {
-            course_id: course_id
-        }
+        APIUrls.getCourseGroupsURL(course_id),
     )
 }
 
@@ -87,22 +62,16 @@ export const getGroupsByCourse = (course_id: number) => {
 export const getFollowedGroups = () => {
     return ApiService.requestToServer(
         APIUrls.getFollowedGroupsURL,
-        {
-            credentials: 'include',
-        },
     )
 }
 
 
-export const followGroup = (group_id: number) => {
+export const followGroup = (group_id: number, passkey: string = 'passkey') => {
     return ApiService.requestToServer(
-        APIUrls.followGroupURL,
+        APIUrls.followGroupURL(group_id),
         {
-            credentials: 'include',
-            method: 'put'
-        },
-        {
-            group_id: group_id
+            method: 'put',
+            body:  JSON.stringify({passkey: passkey})
         }
     )
 }
@@ -110,13 +79,9 @@ export const followGroup = (group_id: number) => {
 
 export const unfollowGroup = (group_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.unfollowGroupURL,
+        APIUrls.unfollowGroupURL(group_id),
         {
-            credentials: 'include',
             method: 'put'
-        },
-        {
-            group_id: group_id
         }
     )
 }
@@ -124,13 +89,9 @@ export const unfollowGroup = (group_id: number) => {
 
 export const clearGroupProgress = (user_group_id: number) => {
     return ApiService.requestToServer(
-        APIUrls.clearGroupPregressURL,
+        APIUrls.clearGroupProgressURL(user_group_id),
         {
             method: 'delete',
-            credentials: 'include',
-        },
-        {
-            user_group_id: user_group_id
         }
     )
 }

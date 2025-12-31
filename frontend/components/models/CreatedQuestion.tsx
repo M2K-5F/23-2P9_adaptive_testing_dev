@@ -3,8 +3,9 @@ import { Dispatch, FC, SetStateAction, useState } from "react"
 import { archQuestion, unarchQuestion } from "@/services/question"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Archive, ArchiveRestore, ChevronDown, ChevronUp, CheckCircle2, XCircle } from "lucide-react"
+import { Archive, ArchiveRestore, ChevronDown, ChevronUp, CheckCircle2, XCircle, Radar } from "lucide-react"
 import clsx from "clsx"
+import { q } from "node_modules/shadcn/dist/index-8c784f6a"
 
 export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = ({question, fetchQuestions}) => {
     const [expanded, setExpanded] = useState(false)
@@ -35,31 +36,44 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
                         {question.text}
                     </h4>
                     
-                    <div className="flex items-center gap-4 text-sm mt-2">
-                        <span className="bg-secondary px-2 py-1 rounded-md">
+                    <div className="flex flex-wrap items-center gap-2 text-sm mt-2">
+
+                        <Badge 
+                            onClick={handleArchive} 
+                            className={clsx("cursor-pointer flex items-center gap-1 ", question.is_active && 'text-green-500')} 
+                            variant={question.is_active ? "default" : "secondary"}
+                        >
+                            {question.is_active 
+                            ?   <>
+                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                    Активный
+                                </>
+                            :   <>
+                                    <XCircle className="h-3.5 w-3.5" />
+                                    В архиве
+                                </>
+                            }
+                        </Badge>
+                        
+                        <Badge className="">
                             Тип: {question.question_type === 'text'
                                     ?   'Без вариантов'
                                     :   question.question_type === 'single' 
                                         ?   'Один ответ' 
                                         :   'Множественный выбор'
                                 }
-                        </span>
-                        <Badge 
-                            onClick={handleArchive} 
-                            className="cursor-pointer flex items-center gap-1" 
-                            variant={question.is_active ? "default" : "secondary"}
-                        >
-                            {question.is_active ? (
-                                <>
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
-                                    Активный
-                                </>
-                            ) : (
-                                <>
-                                    <XCircle className="h-3.5 w-3.5" />
-                                    В архиве
-                                </>
-                            )}
+                        </Badge>
+
+                        
+
+                        <Badge>
+                            <Radar className="text-fuchsia-500" />
+                            {question.base_weight_profile.name === 'Aggressive'
+                                ?   'Быстрая адаптация'
+                                :   question.base_weight_profile.name === 'Balanced'
+                                    ?   'Сбалансированный'
+                                    :   'Медленная адаптация'
+                            }
                         </Badge>
                     </div>
                 </div>
@@ -110,11 +124,10 @@ export const CreatedQuestion: FC<{question: CQ, fetchQuestions: () => void}> = (
                                 )}
                             >
                                 <span className="flex-1">{option.text}</span>
-                                {option.is_correct ? (
-                                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                                ) : (
-                                    <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                                )}
+                                {option.is_correct 
+                                    ?   <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                                    :   <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                }
                             </li>
                         ))}
                     </ul>

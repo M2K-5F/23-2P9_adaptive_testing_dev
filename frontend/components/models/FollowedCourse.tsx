@@ -45,6 +45,7 @@ export const FollowedCourse: FC<{userGroup: UserGroup}> = memo(({userGroup}) => 
         <article className={clsx(
             `border border-border overflow-hidden transition-all duration-300`,
             'rounded-xl shadow-sm mb-4 min-h-41 h-fit bg-card w-full col-span-2',
+            'hover:shadow-md hover:border-foreground/30',
             isExpanded && 'sm:col-span-3 shadow-md',
             !userGroup.course.is_active &&  'opacity-70'
         )}>
@@ -67,7 +68,7 @@ export const FollowedCourse: FC<{userGroup: UserGroup}> = memo(({userGroup}) => 
                             </h3>
                             <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                                 <User className="h-3.5 w-3.5" />
-                                Автор: {userGroup.course.created_by.name}
+                                Автор: {userGroup.course.created_by as unknown as string}
                             </p>
                         </div>
                     </div>
@@ -88,6 +89,12 @@ export const FollowedCourse: FC<{userGroup: UserGroup}> = memo(({userGroup}) => 
                         }
                     </Badge>
                 </div>
+
+                <p className={clsx(
+                    "text-sm text-wrap text-muted-foreground mb-3 line-clamp-3",
+                )}>
+                    {userGroup.course.description || "Описание курса отсутствует. Вы можете добавить его в редакторе курса."}
+                </p>
 
                 <div className="flex flex-wrap items-center gap-3 mt-3">
                     <div className="flex items-center gap-1 text-sm bg-secondary/20 px-2 py-1 rounded-full">
