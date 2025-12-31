@@ -1,0 +1,22 @@
+rules:
+  # Для строковых полей
+  string:
+    - tag: validate
+      value: "required,min=1"
+    
+  # Для числовых полей  
+  int:
+    - tag: validate
+      value: "required,min=0"
+      
+  # Для email полей (по имени)
+  fields:
+    Email:
+      - tag: validate
+        value: "required,email"
+    Password:
+      - tag: validate
+        value: "required,min=8"
+    Age:
+      - tag: validate
+        value: "min=0,max=150"

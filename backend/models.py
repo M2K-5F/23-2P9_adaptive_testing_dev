@@ -45,7 +45,7 @@ class Table(Model):
         return dict(serialize(data))
 
 
-class User(Table):
+class User(Table):###
     username = CharField(unique=True)
     name = CharField(unique=True)
     telegram_link = CharField()
@@ -53,11 +53,11 @@ class User(Table):
     is_active = BooleanField(default=True)
 
 
-class Role(Table):
+class Role(Table):###
     status=CharField()
 
 
-class UserRole(Table):
+class UserRole(Table):###
     user = ForeignKeyField(
         User, backref="user_role", on_update="CASCADE", on_delete="CASCADE"
     )
@@ -84,7 +84,7 @@ class WeightProfile(Table):
     score_bias = FloatField()
 
 
-class Course(Table):
+class Course(Table):###
     title = CharField(max_length=64)
     created_by = ForeignKeyField(User, field=User.username, backref="created_courses")
     is_active = BooleanField(default=True)
